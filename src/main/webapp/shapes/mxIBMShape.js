@@ -155,8 +155,8 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	// Normalize style color to be visibile if icon area color is too dark.
 	styleColor = this.normalizeFontColor(styleColor, iconAreaColor);
 
-	// Set icon color to black for legend style items.
-	styleColor = (shapeLayout === 'itemStyle') ? ibmConfig.ibmColors.black : styleColor;
+	// Set style color to black for expanded shapes and legend style items.
+        styleColor = (shapeLayout.startsWith('expanded') || shapeLayout === 'itemStyle') ? ibmConfig.ibmColors.black : styleColor;
 
 	return {'lineColor': lineColor,
 		'fillColor': fillColor, 
@@ -241,16 +241,16 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeLayout)
 	
 	if (shapeLayout === "collapsed")
 		// Add collapsed text properties and remove expanded stack and container properties.
-		properties = ibmConfig.ibmSystemProperties.collapsedText + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
+		properties = ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
 	else if (shapeLayout === "expanded")
 		// Add expanded text and container properties and remove expanded stack properties.
-		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
+		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
 	else if (shapeLayout === "expandedStack")
 		// Add expanded text, expanded stack properties, and container properties.
-		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container;
+		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container;
 	else if (shapeLayout.startsWith("group"))
 		// Add expanded text and container properties and remove expanded stack properties.
-		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
+		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
 	else
 		// Remove expanded stack and container properties.
 		properties = ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;

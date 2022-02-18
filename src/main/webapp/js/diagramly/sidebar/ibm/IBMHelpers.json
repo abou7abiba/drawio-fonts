@@ -36,12 +36,12 @@
         "Prescribed Group": {"format": "$ITEM_PG", "$ITEM_DEFAULT_PROPERTIES": null},
 
         "Style Legend": {"format": "$LEGEND_VERTICAL", "$LEGEND_DEFAULT_PROPERTIES": null,
-		"members": ["Active Shape", "Changed Shape", "Added Shape", "Removed Shape", "Multiplicity Shape"]},
-        "Active Shape": {"format": "$ITEM_STYLE", "style": "$ACTIVE_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
-        "Changed Shape": {"format": "$ITEM_STYLE", "style": "$CHANGED_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
-        "Added Shape": {"format": "$ITEM_STYLE", "style": "$ADDED_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
-        "Removed Shape": {"format": "$ITEM_STYLE", "style": "$REMOVED_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
-        "Multiplicity Shape": {"format": "$ITEM_STYLE", "style": "$MULTIPLICITY_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
+		"members": ["Default/Active", "Changed/Passive", "Added/New", "Removed/Disabled", "Multiple Instances"]},
+        "Default/Active": {"format": "$ITEM_STYLE", "style": "$ACTIVE_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
+        "Changed/Passive": {"format": "$ITEM_STYLE", "style": "$CHANGED_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
+        "Added/New": {"format": "$ITEM_STYLE", "style": "$ADDED_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
+        "Removed/Disabled": {"format": "$ITEM_STYLE", "style": "$REMOVED_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
+        "Multiple Instances": {"format": "$ITEM_STYLE", "style": "$MULTIPLICITY_STYLE", "$ITEM_STYLE_DEFAULT_PROPERTIES": null},
 
         "Logical Icon Legend": {"format": "$LEGEND_VERTICAL", "$LEGEND_DEFAULT_PROPERTIES": null,
 		"members": ["Cloud", "VPC", "Subnet", "Virtual Server", "Region", "Zone"]},

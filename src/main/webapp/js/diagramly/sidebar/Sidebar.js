@@ -552,7 +552,7 @@
 								{title: 'IBM Base', id: 'ibmbase', image: IMAGE_PATH + '/sidebar-ibmbase.png'},
 								{title: 'IBM Cloud', id: 'ibmcloud', image: IMAGE_PATH + '/sidebar-ibmcloud.png'},
 								{title: 'IBM Sets', id: 'ibmsets', image: IMAGE_PATH + '/sidebar-ibmsets.png'},
-								//{title: 'IBM', id: 'ibm', image: IMAGE_PATH + '/sidebar-ibm.png'},
+								{title: '[IBM Deprecated]', id: 'ibm', image: IMAGE_PATH + '/sidebar-ibm.png'},
 								{title: 'Kubernetes', id: 'kubernetes', image: IMAGE_PATH + '/sidebar-kubernetes.png'},
 								{title: 'Network', id: 'network', image: IMAGE_PATH + '/sidebar-network.png'},
 								{title: 'Office', id: 'office', image: IMAGE_PATH + '/sidebar-office.png'},
@@ -1229,7 +1229,7 @@
 		this.addIBMBasePalette();
 		this.addIBMCloudPalette();
 		this.addIBMSetsPalette();
-		//this.addIBMPalette();
+		this.addIBMPalette();
 		this.addNetworkPalette();
 		this.addOfficePalette();
 		this.addRackPalette(rack, dir);

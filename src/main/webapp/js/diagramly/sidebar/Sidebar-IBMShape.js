@@ -264,7 +264,11 @@ const ibmIcons = loadIBMIcons();
 		if (shapeFont)
 			coreProperties += "fontColor=" + ibmConfig.ibmColors[shapeFont] + ';';
 
-		coreProperties += ibmConfig.ibmSystemProperties.basic + ibmConfig.ibmFontProperties[ibmLanguage + 'Primary'];
+		let fontProperty = ibmConfig.ibmFonts.fontProperty;
+		let font = ibmConfig.ibmFonts[ibmLanguage];
+		fontProperty = fontProperty.replace(/SEMIBOLD/g, font.semibold);
+		//coreProperties += ibmConfig.ibmSystemProperties.basic + ibmConfig.ibmFontProperties[ibmLanguage + 'Primary'];
+		coreProperties += ibmConfig.ibmSystemProperties.basic + fontProperty;
 
 		if (shapeWeight)
 			coreProperties += "strokeWidth=" + shapeWeight + ';';
@@ -313,7 +317,7 @@ const ibmIcons = loadIBMIcons();
 			shapeHeight = ibmConfig.ibmShapeSizes.unit.shapeHeight;
 			shapeWidth = ibmConfig.ibmShapeSizes.unit.shapeWidth;
 
-			systemProperties += ibmConfig.ibmSystemProperties.unitText;
+			systemProperties += ibmConfig.ibmSystemProperties.unitLabel;
 		}
 		else {  // base
 			if (shapeLayout === 'collapsed') {
@@ -332,7 +336,7 @@ const ibmIcons = loadIBMIcons();
 					shapeWidth = ibmConfig.ibmShapeSizes.collapsed.shapeWidth;
 				}
 
-				systemProperties += ibmConfig.ibmSystemProperties.collapsedText;
+				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel;
 			}
 			else if (shapeLayout.startsWith('expanded')) {
 				//shapeHeight = shapeType.startsWith('group') ? 152 : 48;
@@ -351,9 +355,9 @@ const ibmIcons = loadIBMIcons();
 				}
 
 				if (shapeLayout === 'expanded')
-					systemProperties += ibmConfig.ibmSystemProperties.expandedText;
+					systemProperties += ibmConfig.ibmSystemProperties.expandedLabel;
 				else // expandedStack
-					systemProperties += ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.expandedStack;
+					systemProperties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack;
 
 				if (shapeContainer)
 					systemProperties += ibmConfig.ibmSystemProperties.container;
@@ -378,7 +382,7 @@ const ibmIcons = loadIBMIcons();
 					shapeWidth = ibmConfig.ibmShapeSizes.itemShapeIcon.shapeWidth;
 				}
 
-				systemProperties += ibmConfig.ibmSystemProperties.itemText;
+				systemProperties += ibmConfig.ibmSystemProperties.itemLabel;
 			}
 		}
 
@@ -388,16 +392,40 @@ const ibmIcons = loadIBMIcons();
 		bg.setValue(mxUtils.createXmlDocument().createElement('UserObject'));
 		bg.setAttribute('placeholders', '1');
 		if (shapeType.startsWith('legend')) {
-			bg.setAttribute('label', '<font style=\'font-size: 14px\' face=\'IBM Plex Sans Regular\'>%Legend-Title%</font>');
+			let label = ibmConfig.ibmFonts.legendLabel;
+			let font = ibmConfig.ibmFonts[ibmLanguage];
+			label = label.replace(/REGULAR/g, font.regular);
+
+			bg.setAttribute('label', label);
 			bg.setAttribute('Legend-Title', text);
 		}
 		else if (shapeType.startsWith('unit')) {
-			bg.setAttribute('label', '<font style=\'font-size: 14px\' face=\'IBM Plex Sans Regular\'>%Primary-Label%</font><BR><font style=\'font-size: 12px\' face=\'IBM Plex Sans Regular\'>%Secondary-Text%</font>');
+			let label = ibmConfig.ibmFonts.unitLabel;
+			let font = ibmConfig.ibmFonts[ibmLanguage];
+			label = label.replace(/REGULAR/g, font.regular);
+
+			bg.setAttribute('label', label);
+			bg.setAttribute('Icon-Name', iconName);
+			bg.setAttribute('Primary-Label', text);
+			bg.setAttribute('Secondary-Text', subText);
+		}
+		else if (shapeLayout.startsWith('item')) {
+			let label = ibmConfig.ibmFonts.itemLabel;
+			let font = ibmConfig.ibmFonts[ibmLanguage];
+			label = label.replace(/REGULAR/g, font.regular);
+
+			bg.setAttribute('label', label);
+			bg.setAttribute('Icon-Name', iconName);
 			bg.setAttribute('Primary-Label', text);
 			bg.setAttribute('Secondary-Text', subText);
 		}
 		else {
-			bg.setAttribute('label', '%Primary-Label%<BR><font style=\'font-size: 14px\' face=\'IBM Plex Sans Regular\'>%Secondary-Text%</font>');
+			let label = ibmConfig.ibmFonts.shapeLabel;
+			let font = ibmConfig.ibmFonts[ibmLanguage];
+			label = label.replace(/REGULAR/g, font.regular);
+			label = label.replace(/SEMIBOLD/g, font.semibold);
+
+			bg.setAttribute('label', label);
 			bg.setAttribute('Badge-Text', badgeText);
 			bg.setAttribute('Icon-Name', iconName);
 			bg.setAttribute('Primary-Label', text);
