@@ -169,7 +169,7 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 }
 
 // Retrieve size and color details.
-mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, shapeHeight, shapeWidth)
+mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, shapeWidth, shapeHeight)
 {
 	let details = {};
 
