@@ -174,44 +174,42 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
 	let details = {};
 
 	// Get shape-specific sizes.
-	
-	if (shapeLayout === 'collapsed') {
-		if (shapeType === 'target') 
-			details = ibmConfig.ibmShapeSizes.collapsedTarget;
-		else if (shapeType === 'actor') 
-			details = ibmConfig.ibmShapeSizes.collapsedActor;
-		else
-			details = ibmConfig.ibmShapeSizes.collapsed;
 
-		details['shapeHeight'] = shapeHeight;
-		details['shapeWidth'] = shapeWidth;
-	}
-	else if (shapeLayout.startsWith('expanded')) {
-		if (shapeType === 'target') 
-			details = ibmConfig.ibmShapeSizes.expandedTarget;
-		else if (shapeType.startsWith('group')) 
-			details = ibmConfig.ibmShapeSizes.group;
-		else
-			details = ibmConfig.ibmShapeSizes.expanded;
+        if (shapeLayout === 'collapsed') {
+                if (shapeType === 'target')
+                        details = ibmConfig.ibmShapeSizes.collapsedTarget;
+                else if (shapeType === 'actor')
+                        details = ibmConfig.ibmShapeSizes.collapsedActor;
+                else
+                        details = ibmConfig.ibmShapeSizes.collapsed;
 
-		details['shapeHeight'] = shapeHeight;
-		details['shapeWidth'] = shapeWidth;
-	}
-	else if (shapeLayout.startsWith('item')) {
-		if (shapeLayout === 'itemStyle' || shapeLayout === 'itemColor' || shapeLayout === 'itemBadge')
-			details = ibmConfig.ibmShapeSizes.itemStyleColorBadge;
-		else if (shapeLayout === 'itemIcon' && shapeType === 'target') 
-			details = ibmConfig.ibmShapeSizes.itemTarget;
-		else if (shapeLayout === 'itemIcon' && shapeType === 'actor') 
-			details = ibmConfig.ibmShapeSizes.itemActor;
-		else if (shapeLayout === 'itemShape' || shapeLayout === 'itemIcon')
-			details = ibmConfig.ibmShapeSizes.itemShapeIcon;
+                details['shapeWidth'] = shapeWidth;
+                details['shapeHeight'] = shapeHeight;
+        }
+        else if (shapeLayout.startsWith('expanded')) {
+                if (shapeType === 'target')
+                        details = ibmConfig.ibmShapeSizes.expandedTarget;
+                else if (shapeType.startsWith('group'))
+                        details = ibmConfig.ibmShapeSizes.group;
+                else
+                        details = ibmConfig.ibmShapeSizes.expanded;
 
-		details['shapeHeight'] = details.defaultHeight;
-		details['shapeWidth'] = details.defaultWidth;
-	}
-	else
-		details = ibmConfig.ibmShapeSizes.empty;
+                details['shapeWidth'] = shapeWidth;
+                details['shapeHeight'] = shapeHeight;
+        }
+        else {
+                if (shapeLayout === 'itemStyle' || shapeLayout === 'itemColor' || shapeLayout === 'itemBadge')
+                        details = ibmConfig.ibmShapeSizes.itemStyleColorBadge;
+                else if (shapeLayout === 'itemIcon' && shapeType === 'target')
+                        details = ibmConfig.ibmShapeSizes.itemTarget;
+                else if (shapeLayout === 'itemIcon' && shapeType === 'actor')
+                        details = ibmConfig.ibmShapeSizes.itemActor;
+                else
+                        details = ibmConfig.ibmShapeSizes.itemShapeIcon;
+
+                details['shapeWidth'] = details.defaultWidth;
+                details['shapeHeight'] = details.defaultHeight;
+        }
 
 	// Add shape colors.
 	
