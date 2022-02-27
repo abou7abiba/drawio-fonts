@@ -61,29 +61,7 @@ mxIBMShapeBase.prototype.normalizeLineColor = function(lineColor)
 {
 }
 
-// Normalize font/icon/style color to be visible if lineColor is too dark.
-mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
-{
-	if (lineColor === "none")
-		return fontColor;
-	else if (lineColor === ibmConfig.ibmColors.black)
-		return ibmConfig.ibmColors.white;
-
-	lineColor = lineColor.toUpperCase();
-	let name = ibmConfig.colorNames[lineColor.substring(1)];
-	let segments = name.split(' ');
-
-	for (var index = 0; index < segments.length; index++)
-	{
-		code = parseInt(segments[index]);
-		if (!isNaN(code) && code >= 50)
-			return ibmConfig.ibmColors.white;
-	}
-
-	return fontColor;
-}
-
-// Normalize fill color to match line color.
+// Normalize fill color and line color.
 mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
 {
 	let fillColorHex = this.rgb2hex(fillColor);
@@ -109,6 +87,28 @@ mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
 
                 return ibmConfig.ibmColors["light" + lineColorFamily]; 
         }
+}
+
+// Normalize font/icon/style color to be visible if lineColor is too dark.
+mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
+{
+	if (lineColor === "none")
+		return fontColor;
+	else if (lineColor === ibmConfig.ibmColors.black)
+		return ibmConfig.ibmColors.white;
+
+	lineColor = lineColor.toUpperCase();
+	let name = ibmConfig.colorNames[lineColor.substring(1)];
+	let segments = name.split(' ');
+
+	for (var index = 0; index < segments.length; index++)
+	{
+		code = parseInt(segments[index]);
+		if (!isNaN(code) && code >= 50)
+			return ibmConfig.ibmColors.white;
+	}
+
+	return fontColor;
 }
 
 // Retrieve color settings.
