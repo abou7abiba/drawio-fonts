@@ -198,14 +198,20 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
                 details['shapeHeight'] = shapeHeight;
         }
         else {
-                if (shapeLayout === 'itemStyle' || shapeLayout === 'itemColor' || shapeLayout === 'itemBadge')
-                        details = ibmConfig.ibmShapeSizes.itemStyleColorBadge;
+                if (shapeLayout === 'itemBadge')
+                        details = ibmConfig.ibmShapeSizes.itemBadge;
+		else if (shapeLayout === 'itemColor')
+                        details = ibmConfig.ibmShapeSizes.itemColor;
+		else if (shapeLayout === 'itemStyle')
+                        details = ibmConfig.ibmShapeSizes.itemStyle;
                 else if (shapeLayout === 'itemIcon' && shapeType === 'target')
                         details = ibmConfig.ibmShapeSizes.itemTarget;
                 else if (shapeLayout === 'itemIcon' && shapeType === 'actor')
                         details = ibmConfig.ibmShapeSizes.itemActor;
-                else
-                        details = ibmConfig.ibmShapeSizes.itemShapeIcon;
+                else if (shapeLayout === 'itemIcon')
+                        details = ibmConfig.ibmShapeSizes.itemIcon;
+                else // (shapeLayout === 'itemShape')
+                        details = ibmConfig.ibmShapeSizes.itemShape;
 
                 details['shapeWidth'] = details.defaultWidth;
                 details['shapeHeight'] = details.defaultHeight;
