@@ -300,8 +300,8 @@ const ibmIcons = loadIBMIcons();
 		if (shapeType.startsWith('legend')) {
 			//shapeHeight = 56;
 			//shapeWidth = 136;
-			shapeWidth = ibmConfig.ibmShapeSizes.legend.shapeWidth;
-			shapeHeight = ibmConfig.ibmShapeSizes.legend.shapeHeight;
+			shapeWidth = ibmConfig.ibmShapeSizes.legend.defaultWidth;
+			shapeHeight = ibmConfig.ibmShapeSizes.legend.defaultHeight;
 
 			if (noShapeHeader)
 				systemProperties += ibmConfig.ibmSystemProperties.legendStack + ibmConfig.ibmSystemProperties[shapeType + "StackNoHeader"];
@@ -314,8 +314,8 @@ const ibmIcons = loadIBMIcons();
 		else if (shapeType.startsWith('unit')) {
 			//shapeHeight = 16;
 			//shapeWidth = 192;
-			shapeWidth = ibmConfig.ibmShapeSizes.unit.shapeWidth;
-			shapeHeight = ibmConfig.ibmShapeSizes.unit.shapeHeight;
+			shapeWidth = ibmConfig.ibmShapeSizes.unit.defaultWidth;
+			shapeHeight = ibmConfig.ibmShapeSizes.unit.defaultHeight;
 
 			systemProperties += ibmConfig.ibmSystemProperties.unitLabel;
 		}
@@ -324,16 +324,16 @@ const ibmIcons = loadIBMIcons();
 				//shapeHeight = 48;
 				//shapeWidth = (shapeType === 'target') ? 64 : 48;
 				if (shapeType === 'target') {
-					shapeWidth = ibmConfig.ibmShapeSizes.collapsedTarget.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.collapsedTarget.shapeHeight;
+					shapeWidth = ibmConfig.ibmShapeSizes.collapsedTarget.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.collapsedTarget.defaultHeight;
 				}
 				else if (shapeType === 'actor') {
-					shapeWidth = ibmConfig.ibmShapeSizes.collapsedActor.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.collapsedActor.shapeHeight;
+					shapeWidth = ibmConfig.ibmShapeSizes.collapsedActor.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.collapsedActor.defaultHeight;
 				}
 				else {
-					shapeWidth = ibmConfig.ibmShapeSizes.collapsed.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.collapsed.shapeHeight;
+					shapeWidth = ibmConfig.ibmShapeSizes.collapsed.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.collapsed.defaultHeight;
 				}
 
 				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel;
@@ -342,16 +342,16 @@ const ibmIcons = loadIBMIcons();
 				//shapeHeight = shapeType.startsWith('group') ? 152 : 48;
 				//shapeWidth = 240;
 				if (shapeType === 'target') {
-					shapeWidth = ibmConfig.ibmShapeSizes.expandedTarget.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.expandedTarget.shapeHeight;
+					shapeWidth = ibmConfig.ibmShapeSizes.expandedTarget.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.expandedTarget.defaultHeight;
 				}
 				else if (shapeType.startsWith('group')) {
-					shapeWidth = ibmConfig.ibmShapeSizes.group.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.group.shapeHeight;
+					shapeWidth = ibmConfig.ibmShapeSizes.group.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.group.defaultHeight;
 				}
 				else {
-					shapeWidth = ibmConfig.ibmShapeSizes.expanded.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.expanded.shapeHeight;
+					shapeWidth = ibmConfig.ibmShapeSizes.expanded.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.expanded.defaultHeight;
 				}
 
 				if (shapeLayout === 'expanded')
@@ -362,24 +362,36 @@ const ibmIcons = loadIBMIcons();
 				if (shapeContainer)
 					systemProperties += ibmConfig.ibmSystemProperties.container;
 			}
-			else if (shapeLayout.startsWith('item')) {
+			else { //if (shapeLayout.startsWith('item')) {
 				//shapeHeight = 16;
 				//shapeWidth = 240;
-				if (shapeLayout === 'itemBadge' || shapeLayout === 'itemColor' || shapeLayout === 'itemStyle') {
-					shapeWidth = ibmConfig.ibmShapeSizes.itemStyleColorBadge.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.itemStyleColorBadge.shapeHeight;
+				if (shapeLayout === 'itemBadge') {
+					shapeWidth = ibmConfig.ibmShapeSizes.itemBadge.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.itemBadge.defaultHeight;
 				}
-				else if (shapeType === 'target') {
-					shapeWidth = ibmConfig.ibmShapeSizes.itemTarget.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.itemTarget.shapeHeight;
+				else if (shapeLayout === 'itemColor') {
+					shapeWidth = ibmConfig.ibmShapeSizes.itemColor.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.itemColor.defaultHeight;
 				}
-				else if (shapeType === 'actor') {
-					shapeWidth = ibmConfig.ibmShapeSizes.itemActor.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.itemActor.shapeHeight;
+				else if (shapeLayout === 'itemStyle') {
+					shapeWidth = ibmConfig.ibmShapeSizes.itemStyle.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.itemStyle.defaultHeight;
 				}
-				else {
-					shapeWidth = ibmConfig.ibmShapeSizes.itemShapeIcon.shapeWidth;
-					shapeHeight = ibmConfig.ibmShapeSizes.itemShapeIcon.shapeHeight;
+				else if (shapeLayout === 'itemIcon' && shapeType === 'target') {
+					shapeWidth = ibmConfig.ibmShapeSizes.itemTarget.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.itemTarget.defaultHeight;
+				}
+				else if (shapeLayout === 'itemIcon' && shapeType === 'actor') {
+					shapeWidth = ibmConfig.ibmShapeSizes.itemActor.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.itemActor.defaultHeight;
+				}
+				else if (shapeLayout === 'itemIcon') {
+					shapeWidth = ibmConfig.ibmShapeSizes.itemIcon.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.itemIcon.defaultHeight;
+				}
+				else { // (shapeLayout === 'itemShape')
+					shapeWidth = ibmConfig.ibmShapeSizes.itemShape.defaultWidth;
+					shapeHeight = ibmConfig.ibmShapeSizes.itemShape.defaultHeight;
 				}
 
 				systemProperties += ibmConfig.ibmSystemProperties.itemLabel;
