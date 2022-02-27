@@ -59,6 +59,7 @@ mxIBMShapeBase.prototype.rgb2hex = function(color)
 // Normalize line color.
 mxIBMShapeBase.prototype.normalizeLineColor = function(lineColor)
 {
+	return lineColor;
 }
 
 // Normalize fill color and line color.
@@ -286,6 +287,19 @@ mxIBMShapeBase.prototype.setCellStyles = function(graph, shapeType)
 	for (let key in styles)
 		graph.setCellStyles(key, styles[key], cells);
 };
+
+// Return switch icon if switching between logical to prescribed or prescribed to logical.
+mxIBMShapeBase.prototype.switchIcon = function(previousIcon, previousType, currentType)
+{
+        if (previousType.slice(-1) === 'l' && currentType.slice(-1) === 'p')
+                // Lookup logical icon in ibmIcons and switch to prescribed icon if available.
+                return("undefined");
+        else if (previousType.slice(-1) === 'p' && currentType.slice(-1) === 'l')
+                // Lookup prescribed icon in ibmIcons and switch to logical icon if available.
+                return("undefined");
+        else
+                return previousIcon;
+}
 
 
 
