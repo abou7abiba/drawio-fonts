@@ -252,38 +252,38 @@
     },
 
     "ibmShapeSizes" : { 
-    	"collapsed":       {"defaultWidth": 48, "defaultHeight": 48, "minWidth": 48, "minHeight": 48, "curveRadius": 8, "iconSize": 20, "iconAreaSize": 48, 
+    	"collapsed":       {"defaultWidth": 48, "defaultHeight": 48, "curveRadius": 8, "iconSize": 20, "iconAreaSize": 48, 
                              "sidetickWidth": 8, "sidetickHeight": 4, "sidetickLeftStart": -4, "doubleOffset": 3, "multiplicityOffset": 4},
 
-    	"collapsedTarget": {"defaultWidth": 64, "defaultHeight": 48, "minWidth": 64, "minHeight": 48, "curveRadius": 24, 
-		            "iconSize": 20, "iconLeftMargin": 22, "iconTopMargin": 14, "doubleOffset": 3, "multiplicityOffset": 4}, 
+    	"collapsedTarget": {"defaultWidth": 64, "defaultHeight": 48, "curveRadius": 24, "iconSize": 20, "iconLeftMargin": 22, "iconTopMargin": 14, 
+			    "doubleOffset": 3, "multiplicityOffset": 4}, 
 
-    	"collapsedActor":  {"defaultWidth": 48, "defaultHeight": 48, "minWidth": 48, "minHeight": 48, "curveRadius": 24,   
-		            "iconSize": 20, "iconAreaSize": 48, "doubleOffset": 3, "multiplicityOffset": 4}, 
+    	"collapsedActor":  {"defaultWidth": 48, "defaultHeight": 48, "curveRadius": 24, "iconSize": 20, "iconAreaSize": 48, 
+			    "doubleOffset": 3, "multiplicityOffset": 4}, 
 
-    	"expanded":        {"defaultWidth": 240, "defaultHeight": 48, "minWidth": 96, "minHeight": 48, "curveRadius": 8, "iconSize": 20, "iconAreaSize": 48, 
-                             "labelLeftMargin": 16, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickLeftStart": -4, "doubleOffset": 3, "multiplicityOffset": 4}, 
+    	"expanded":        {"defaultWidth": 240, "defaultHeight": 48, "curveRadius": 8, "iconSize": 20, "iconAreaSize": 48, "labelLeftMargin": 16, 
+			     "sidetickWidth": 8, "sidetickHeight": 4, "sidetickLeftStart": -4, "doubleOffset": 3, "multiplicityOffset": 4}, 
 
-    	"expandedTarget":  {"defaultWidth": 240, "defaultHeight": 48, "minWidth": 96, "minHeight": 48, "curveRadius": 24, 
-                             "iconSize": 20, "iconLeftMargin": 16, "iconTopMargin": 14, "labelLeftMargin": 16, "doubleOffset": 3, "multiplicityOffset": 4}, 
+    	"expandedTarget":  {"defaultWidth": 240, "defaultHeight": 48, "curveRadius": 24, "iconSize": 20, "iconLeftMargin": 16, "iconTopMargin": 14, 
+			     "labelLeftMargin": 16, "doubleOffset": 3, "multiplicityOffset": 4}, 
 
-    	"group":           {"defaultWidth": 240, "defaultHeight": 152, "minWidth": 96, "minHeight": 48, "curveRadius": 8, "iconSize": 20, "iconLeftMargin": 16, "iconTopMargin": 14, 
-                             "labelLeftMargin": 16, "sidebarWidth": 4, "sidebarHeight": 48, "doubleOffset": 3, "multiplicityOffset": 4},
+    	"group":           {"defaultWidth": 240, "defaultHeight": 152, "minWidth": 96, "minHeight": 48, "curveRadius": 8, "iconSize": 20, "iconLeftMargin": 16, 
+		            "iconTopMargin": 14, "labelLeftMargin": 16, "sidebarWidth": 4, "sidebarHeight": 48, "doubleOffset": 3, "multiplicityOffset": 4},
 
-    	"itemIcon":        {"defaultWidth": 16, "defaultHeight": 16, "minWidth": 16, "minHeight": 16, "iconSize": 16},
+    	"itemIcon":        {"defaultWidth": 16, "defaultHeight": 16, "iconSize": 16},
 
-        "itemShape":       {"defaultWidth": 16, "defaultHeight": 16, "minWidth": 16, "minHeight": 16, "curveRadius": 4, "sidebarWidth": 2, "sidebarHeight": 12, 
+        "itemShape":       {"defaultWidth": 16, "defaultHeight": 16, "curveRadius": 4, "sidebarWidth": 2, "sidebarHeight": 12, 
                             "sidetickWidth": 4, "sidetickHeight": 2, "sidetickLeftStart": -2},
 
-        "itemTarget":      {"defaultWidth": 20, "defaultHeight": 16, "minWidth": 20, "minHeight": 16, "curveRadius": 8},
+        "itemTarget":      {"defaultWidth": 20, "defaultHeight": 16, "curveRadius": 8},
 
-    	"itemActor":       {"defaultWidth": 16, "defaultHeight": 16, "minWidth": 16, "minHeight": 16, "curveRadius": 8}, 
+    	"itemActor":       {"defaultWidth": 16, "defaultHeight": 16, "curveRadius": 8}, 
 
-    	"itemBadge":      {"defaultWidth": 32, "defaultHeight": 16, "minWidth": 32, "minHeight": 16},
+    	"itemBadge":      {"defaultWidth": 32, "defaultHeight": 16},
 
-        "itemColor":      {"defaultWidth": 32, "defaultHeight": 16, "minWidth": 32, "minHeight": 16},
+        "itemColor":      {"defaultWidth": 32, "defaultHeight": 16},
 
-        "itemStyle":      {"defaultWidth": 32, "defaultHeight": 16, "minWidth": 32, "minHeight": 16, "doubleOffset": 2, "multiplicityOffset": 2},    	
+        "itemStyle":      {"defaultWidth": 32, "defaultHeight": 16, "doubleOffset": 2, "multiplicityOffset": 2},    	
                              
     	"legend":         {"defaultWidth": 128, "defaultHeight": 32},
 
