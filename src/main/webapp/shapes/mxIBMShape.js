@@ -184,6 +184,8 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
                 else
                         details = ibmConfig.ibmShapeSizes.collapsed;
 
+                details['minWidth'] = shapeWidth;
+                details['minHeight'] = shapeHeight;
                 details['shapeWidth'] = shapeWidth;
                 details['shapeHeight'] = shapeHeight;
         }
@@ -201,9 +203,9 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
         else {
                 if (shapeLayout === 'itemBadge')
                         details = ibmConfig.ibmShapeSizes.itemBadge;
-		else if (shapeLayout === 'itemColor')
+                else if (shapeLayout === 'itemColor')
                         details = ibmConfig.ibmShapeSizes.itemColor;
-		else if (shapeLayout === 'itemStyle')
+                else if (shapeLayout === 'itemStyle')
                         details = ibmConfig.ibmShapeSizes.itemStyle;
                 else if (shapeLayout === 'itemIcon' && shapeType === 'target')
                         details = ibmConfig.ibmShapeSizes.itemTarget;
@@ -214,6 +216,8 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
                 else // (shapeLayout === 'itemShape')
                         details = ibmConfig.ibmShapeSizes.itemShape;
 
+                details['minWidth'] = details.defaultWidth;
+                details['minHeight'] = details.defaultHeight;
                 details['shapeWidth'] = details.defaultWidth;
                 details['shapeHeight'] = details.defaultHeight;
         }

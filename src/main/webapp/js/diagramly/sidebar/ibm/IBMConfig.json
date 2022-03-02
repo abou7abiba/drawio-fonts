@@ -69,10 +69,10 @@
 
         "fontProperty": "fontFamily=SEMIBOLD;fontSize=14;",
         "badgeLabel": "<font style='font-size: 12px' face='REGULAR'>%Badge-Text%</font>",
-        "legendLabel": "<font style='font-size: 12px' face='REGULAR'>%Legend-Title%</font>",
+        "legendLabel": "<font style='font-size: 14px' face='REGULAR'>%Legend-Title%</font>",
         "itemLabel": "<font style='font-size: 12px' face='REGULAR'>%Primary-Label%</font><BR><font style='font-size: 12px' face='REGULAR'>%Secondary-Text%</font>",
         "shapeLabel": "<font style='font-size: 14px' face='SEMIBOLD'>%Primary-Label%</font><BR><font style='font-size: 14px' face='REGULAR'>%Secondary-Text%</font>",
-        "unitLabel": "<font style='font-size: 14px' face='REGULAR'>%Primary-Label%</font><BR><font style='font-size: 14px' face='REGULAR'>%Secondary-Text%</font>"
+        "unitLabel": "<font style='font-size: 12px' face='REGULAR'>%Primary-Label%</font><BR><font style='font-size: 12px' face='REGULAR'>%Secondary-Text%</font>"
     },
 
     "ibmColors": {
@@ -229,7 +229,7 @@
              {"val": "unittp", "dispName": "Technical Presentation"}] }],
 
     "ibmSystemProperties": {
-	"basic": "html=1;metaEdit=1;whiteSpace=wrap;",
+	"basic": "html=1;metaEdit=1;whiteSpace=wrap;image=;",
 
 	"container": "container=1;collapsible=0;expand=0;recursiveResize=0;",
 	"containerNull": "container=null;collapsible=null;expand=null;recursiveResize=null;",
