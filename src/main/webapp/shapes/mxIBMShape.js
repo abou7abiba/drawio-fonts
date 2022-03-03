@@ -59,7 +59,7 @@ mxIBMShapeBase.prototype.init = function (container) {
  * @param {*} event 
  */
 mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
-	console.log('styleChangedEventsHandler', event);
+// console.log('mxIBMShapeBase.prototype.styleChangedEventsHandler', event);
 	var cell = event.properties.change.cell;
 	var pStyle = getStylesObj(event.properties.change.previous);
 	var cStyle = getStylesObj(event.properties.change.style);
@@ -139,7 +139,7 @@ mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 */
 mxIBMShapeBase.prototype.paintVertexShape = function (c, x, y, w, h) {
 	var properties = this.getProperties(this, h, w);
-	console.log('paintVertexShape', properties);
+// console.log('mxIBMShapeBase.prototype.paintVertexShape', properties);
 
 	c.translate(x, y);
 	if (properties.shapeLayout != 'itemBadge') {
@@ -775,8 +775,46 @@ mxIBMShapeUnit.prototype.cst = ibmConfig.ibmUnitConstants;
  
 mxIBMShapeUnit.prototype.customProperties = ibmConfig.ibmUnitProperties;
 
+mxIBMShapeUnit.prototype.paintVertexShape = function (c, x, y, w, h) {
+	var properties = this.getProperties();
+// console.log("mxIBMShapeUnit.prototype.paintVertexShape", properties);
+	var textStr = "";
+	switch(properties.shapeType) {
+		case "unite" : textStr = "E"; break;
+		case "uniti" : textStr = "I"; break;
+		case "unitp" : textStr = "P"; break;
+		case "unittd" : textStr = "TD"; break;
+		case "unitte" : textStr = "TE"; break;
+		case "unitti" : textStr = "TI"; break;
+		case "unittp" : textStr = "TP"; break;
+		case "unitd" : textStr = "D"; break;
+		default : textStr = "D";
+	}
+	c.translate(x, y);
+	// background
+	c.rect(0, 0, w, h);
+	c.setFillColor(properties.fillColor);
+	// c.setStrokeColor(properties.strokeColor);
+	c.setStrokeColor('none');
+	c.fillAndStroke();
+	// text
+	c.text(properties.iconSize / 2, properties.iconSize / 2, w, h, textStr, 'center', 'middle', 0, 0, 0, 0, 0, 0);
+}
 
+mxIBMShapeUnit.prototype.getProperties = function () {
+	var properties = {}
+	properties = ibmConfig.ibmShapeSizes.unit;
+	properties.shapeType = mxUtils.getValue(this.state.style, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
+	properties.fillColor = mxUtils.getValue(this.state.style, this.cst.FILL_COLOR, this.cst.FILL_COLOR_DEFAULT);
+	// properties.strokeColor = mxUtils.getValue(this.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
+	return properties;
+}
 
+mxIBMShapeUnit.prototype.getLabelBounds = function (rect) {
+	var properties = this.getProperties();	
+	var offSet = properties.labelAlign;
+	return new mxRectangle(rect.x + offSet * this.scale, rect.y, rect.width - properties.labelAlign * this.scale, properties.labelHeight * this.scale);
+};
 
 mxCellRenderer.registerShape(mxIBMShapeBase.prototype.cst.SHAPE, mxIBMShapeBase);
 mxCellRenderer.registerShape(mxIBMShapeLegend.prototype.cst.SHAPE, mxIBMShapeLegend);
