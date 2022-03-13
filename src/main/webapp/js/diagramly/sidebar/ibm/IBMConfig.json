@@ -67,7 +67,7 @@
     "ibmFonts": {
 	"en": {"regular": "IBM Plex Sans Regular", "semibold": "IBM Plex Sans SmBld"},
 
-        "fontProperty": "fontFamily=SEMIBOLD;fontSize=14;",
+        "fontProperty": "fontFamily=REGULAR;fontSize=14;",
         "badgeLabel": "<font style='font-size: 12px' face='REGULAR'>%Badge-Text%</font>",
         "legendLabel": "<font style='font-size: 14px' face='REGULAR'>%Legend-Title%</font>",
         "itemLabel": "<font style='font-size: 12px' face='REGULAR'>%Primary-Label%</font><BR><font style='font-size: 12px' face='REGULAR'>%Secondary-Text%</font>",
@@ -231,14 +231,17 @@
     "ibmSystemProperties": {
 	"basic": "html=1;metaEdit=1;whiteSpace=wrap;image=;",
 
+	"defaultFill": "fillColor=default;",
+	"noFill": "fillColor=none;",
+
 	"container": "container=1;collapsible=0;expand=0;recursiveResize=0;",
 	"containerNull": "container=null;collapsible=null;expand=null;recursiveResize=null;",
 
 	"collapsedLabel": "align=center;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=4;",
 	"expandedLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=0;", 
-	"expandedTargetLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=0;spacingRight=16;spacingTop=0;spacingBottom=0;", 
-	"expandedTargetLabelNoIcon": "align=center;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=0;spacingRight=16;spacingTop=0;spacingBottom=0;", 
-	"legendLabel": "align=left;verticalAlign=middle;spacing=0;spacingLeft=0;spacingRight=0;spacingTop=0;spacingBottom=0;",
+	"expandedTargetLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=0;", 
+	"expandedTargetLabelNoIcon": "align=center;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=0;", 
+	"legendLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=0;spacingRight=0;spacingTop=0;spacingBottom=0;",
 	"itemLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=0;spacingRight=0;spacingTop=0;spacingBottom=0;",
 	"unitLabel": "align=left;verticalAlign=middle;spacing=0;spacingLeft=0;spacingRight=0;spacingTop=0;spacingBottom=0;",
 
@@ -251,73 +254,86 @@
 	"legendvStackNoHeader": "horizontalStack=0;stackFill=1;stackSpacing=8;marginLeft=8;marginRight=8;marginTop=8;marginBottom=8;noLabel=1;"
     },
 
-   "ibmShapeSizes" : { 
-    	"collapsed":       {"defaultWidth": 48, "defaultHeight": 48, "minWidth": 48, "minHeight": 48, "curveRadius": 8, "shapeAlign": 0, 
+    "ibmShapeSizes" : { 
+    	"collapsed":       { 
+                            "defaultWidth": 48, "defaultHeight": 48, "minWidth": 48, "minHeight": 48, "curveRadius": 8, "shapeAlign": 0, 
 		            "iconAreaWidth": 48, "iconAreaHeight": 48, "iconSize": 20, "iconAlign": 14, "labelHeight": 16, "labelAlign": 0, 
-	                    "sidebarWidth": 0, "sidebarHeight": 0, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickAlign": -4, 
-                            "doubleAlign": 3, "multiplicityAlign": 4},
+	                    "sidebarWidth": 0, "sidebarHeight": 0, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickLeftStart": -4, 
+                            "doubleOffset": 3, "multiplicityOffset": 4},
 
-    	"collapsedTarget": {"defaultWidth": 64, "defaultHeight": 48, "minWidth": 64, "minHeight": 48, "curveRadius": 24, "shapeAlign": 0,
+    	"collapsedTarget": { 
+                            "defaultWidth": 64, "defaultHeight": 48, "minWidth": 64, "minHeight": 48, "curveRadius": 24, "shapeAlign": 0,
 		            "iconAreaWidth": 64, "iconAreaHeight": 48,"iconSize": 20, "iconAlign": 14, "labelHeight": 16, "labelAlign": 0,
-	                    "sidebarWidth": 0, "sidebarHeight": 0, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickAlign": -4,
-                            "doubleAlign": 3, "multiplicityAlign": 4}, 
+	                    "sidebarWidth": 0, "sidebarHeight": 0, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickLeftStart": -4,
+                            "doubleOffset": 3, "multiplicityOffset": 4}, 
 
-    	"collapsedActor":  {"defaultWidth": 48, "defaultHeight": 48, "minWidth": 48, "minHeight": 48, "curveRadius": 24, "shapeAlign": 0,  
+    	"collapsedActor":  {
+                            "defaultWidth": 48, "defaultHeight": 48, "minWidth": 48, "minHeight": 48, "curveRadius": 24, "shapeAlign": 0,  
 		            "iconAreaWidth": 48, "iconAreaHeight": 48, "iconSize": 20, "iconAlign": 14, "labelHeight": 16, "labelAlign": 0,
-	                    "sidebarWidth": 0, "sidebarHeight": 0, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickAlign": -4,
-                            "doubleAlign": 3, "multiplicityAlign": 4}, 
+	                    "sidebarWidth": 0, "sidebarHeight": 0, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickLeftStart": -4,
+                            "doubleOffset": 3, "multiplicityOffset": 4}, 
 
-    	"expanded":        {"defaultWidth": 240, "defaultHeight": 48, "minWidth": 96, "minHeight": 48, "curveRadius": 8, "shapeAlign": 0, 
+    	"expanded":        {
+                            "defaultWidth": 240, "defaultHeight": 48, "minWidth": 96, "minHeight": 48, "curveRadius": 8, "shapeAlign": 0, 
 		            "iconAreaWidth": 48, "iconAreaHeight": 48, "iconSize": 20, "iconAlign": 14, "labelHeight": 48, "labelAlign": 0, 
-	                    "sidebarWidth": 4, "sidebarHeight": 48, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickAlign": -4,
-                            "doubleAlign": 3, "multiplicityAlign": 4}, 
+	                    "sidebarWidth": 4, "sidebarHeight": 48, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickLeftStart": -4,
+                            "doubleOffset": 3, "multiplicityOffset": 4}, 
 
-    	"expandedTarget":  {"defaultWidth": 240, "defaultHeight": 48, "minWidth": 96, "minHeight": 48, "curveRadius": 24, "shapeAlign": 0, 
+    	"expandedTarget":  {
+                            "defaultWidth": 240, "defaultHeight": 48, "minWidth": 96, "minHeight": 48, "curveRadius": 24, "shapeAlign": 0, 
 		            "iconAreaWidth": 30, "iconAreaHeight": 48, "iconSize": 20, "iconAlign": 14, "labelHeight": 48, "labelAlign": 0, 
-		            "sidebarWidth": 4, "sidebarHeight": 48, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickAlign": -4,
-			    "doubleAlign": 3, "multiplicityAlign": 4}, 
+		            "sidebarWidth": 4, "sidebarHeight": 48, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickLeftStart": -4,
+			    "doubleOffset": 3, "multiplicityOffset": 4}, 
 
-    	"group":           {"defaultWidth": 240, "defaultHeight": 152, "minWidth": 96, "minHeight": 48, "curveRadius": 8, "shapeAlign": 0, 
+    	"group":           {
+                            "defaultWidth": 240, "defaultHeight": 152, "minWidth": 96, "minHeight": 48, "curveRadius": 8, "shapeAlign": 0, 
 		            "iconAreaWidth": 34, "iconAreaHeight": 48, "iconSize": 20, "iconAlign": 14, "labelHeight": 48, "labelAlign": 0, 
-		            "sidebarWidth": 4, "sidebarHeight": 48, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickAlign": -4,
-			    "doubleAlign": 3, "multiplicityAlign": 4},
+		            "sidebarWidth": 4, "sidebarHeight": 48, "sidetickWidth": 8, "sidetickHeight": 4, "sidetickLeftStart": -4,
+			    "doubleOffset": 3, "multiplicityOffset": 4},
 
-    	"itemIcon":        {"defaultWidth": 16, "defaultHeight": 16, "minWidth": 64, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
+    	"itemIcon":       {
+                            "defaultWidth": 16, "defaultHeight": 16, "minWidth": 16, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
 		            "iconAreaWidth": 16, "iconAreaHeight": 16, "iconSize": 16, "iconAlign": 0, "labelHeight": 16, "labelAlign": 24, 
-		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickAlign": -2,
-                            "doubleAlign": 2, "multiplicityAlign": 2},
+		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickLeftStart": -2,
+                            "doubleOffset": 2, "multiplicityOffset": 2},
 
-    	"itemShape":       {"defaultWidth": 16, "defaultHeight": 16, "minWidth": 64, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
+    	"itemShape":      {
+                            "defaultWidth": 16, "defaultHeight": 16, "minWidth": 16, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
 		            "iconAreaWidth": 16, "iconAreaHeight": 16, "iconSize": 16, "iconAlign": 0, "labelHeight": 16, "labelAlign": 24, 
-		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickAlign": -2,
-                            "doubleAlign": 2, "multiplicityAlign": 2},
+		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickLeftStart": -2,
+                            "doubleOffset": 2, "multiplicityOffset": 2},
 
-    	"itemTarget":      {"defaultWidth": 20, "defaultHeight": 16, "minWidth": 64, "minHeight": 16, "curveRadius": 8, "shapeAlign": -2, 
+    	"itemTarget":      {
+                            "defaultWidth": 20, "defaultHeight": 16, "minWidth": 20, "minHeight": 16, "curveRadius": 8, "shapeAlign": -2, 
 		            "iconAreaWidth": 20, "iconAreaHeight": 16, "iconSize": 16, "iconAlign": 0, "labelHeight": 16, "labelAlign": 24, 
-		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickAlign": -2,
-			    "doubleAlign": 2, "multiplicityAlign": 2},
+		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickLeftStart": -2,
+			    "doubleOffset": 2, "multiplicityOffset": 2},
 
-    	"itemActor":       {"defaultWidth": 16, "defaultHeight": 16, "minWidth": 64, "minHeight": 16, "curveRadius": 8, "shapeAlign": 0, 
+    	"itemActor":       {
+                            "defaultWidth": 16, "defaultHeight": 16, "minWidth": 16, "minHeight": 16, "curveRadius": 8, "shapeAlign": 0, 
 		            "iconAreaWidth": 16, "iconAreaHeight": 16,"iconSize": 16, "iconAlign": 0, "labelHeight": 16, "labelAlign": 24, 
-		            "sidebarWidth":12, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickAlign": -2,
-			    "doubleAlign": 2,  "multiplicityAlign": 2}, 
-
-    	"itemBadge":       {"defaultWidth": 32, "defaultHeight": 16, "minWidth": 64, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
+		            "sidebarWidth":12, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickLeftStart": -2,
+			    "doubleOffset": 2,  "multiplicityOffset": 2}, 
+                             
+    	"itemBadge": {
+                            "defaultWidth": 32, "defaultHeight": 16, "minWidth": 32, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
 		            "iconAreaWidth": 32, "iconAreaHeight": 16, "iconSize": 16, "iconAlign": 0, "labelHeight": 16, "labelAlign": 40, 
-		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickAlign": -2,
-			    "doubleAlign": 2, "multiplicityAlign": 2},
+		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickLeftStart": -2,
+			    "doubleOffset": 2, "multiplicityOffset": 2},
 
-    	"itemColor":       {"defaultWidth": 32, "defaultHeight": 16, "minWidth": 64, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
+    	"itemColor": {
+                            "defaultWidth": 32, "defaultHeight": 16, "minWidth": 32, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
 		            "iconAreaWidth": 32, "iconAreaHeight": 16, "iconSize": 16, "iconAlign": 0, "labelHeight": 16, "labelAlign": 40, 
-		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickAlign": -2,
-         		    "doubleAlign": 2, "multiplicityAlign": 2},
+		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickLeftStart": -2,
+			    "doubleOffset": 2, "multiplicityOffset": 2},
 
-    	"itemStyle":       {"defaultWidth": 32, "defaultHeight": 16, "minWidth": 64, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
+    	"itemStyle": {
+                            "defaultWidth": 32, "defaultHeight": 16, "minWidth": 32, "minHeight": 16, "curveRadius": 4, "shapeAlign": 0, 
 		            "iconAreaWidth": 32, "iconAreaHeight": 16, "iconSize": 16, "iconAlign": 0, "labelHeight": 16, "labelAlign": 40, 
-		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickAlign": -2,
-         		    "doubleAlign": 2, "multiplicityAlign": 2},
+		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickLeftStart": -2,
+			    "doubleOffset": 2, "multiplicityOffset": 2},
 
-    	"legend":          {"defaultWidth": 128, "defaultHeight": 32, "minWidth": 128, "minHeight": 32},
+    	"legend":          {"defaultWidth": 128, "defaultHeight": 32, "minWidth": 128, "minHeight": 32 },
 
     	"unit":            {"defaultWidth": 192, "defaultHeight": 16, "minWidth": 192, "minHeight": 16, "labelHeight": 16, "labelAlign": 24, "iconSize": 16, "iconAlign": 0}
     }     
