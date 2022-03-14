@@ -322,7 +322,7 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 	return styles;
 }
 
-// Set cell styles.
+// Set cell styles for events such as a change from collapsed to expanded.
 mxIBMShapeBase.prototype.setCellStyles = function(style, shapeType, shapeLayout, hideIcon)
 {
 	let styles = mxIBMShapeBase.prototype.getCellStyles(shapeType, shapeLayout, hideIcon);
