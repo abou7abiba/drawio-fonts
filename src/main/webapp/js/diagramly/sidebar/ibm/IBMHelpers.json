@@ -63,7 +63,7 @@
       },
 
       "Shapes": {
-        "Deployment Units": {"icon": null, "format": "$UNIT_FORMAT_STACK", "color": "$BACKEND_COLOR", "$SHAPE_DEFAULT_PROPERTIES": null,
+        "Deployment Units": {"icon": null, "format": "$UNIT_FORMAT_STACK", "color": "$SHAPE_BACKEND_COLOR", "$SHAPE_DEFAULT_PROPERTIES": null,
 		"members": ["Data", "Execution", "Installation", "Presentation", "Technical Data", "Technical Execution", "Technical Installation", "Technical Presentation"]},
         "Data": {"format": "$UNIT_D", "$UNIT_DEFAULT_PROPERTIES": null},
         "Execution": {"format": "$UNIT_E", "$UNIT_DEFAULT_PROPERTIES": null},
@@ -74,11 +74,11 @@
         "Technical Installation": {"format": "$UNIT_TI", "$UNIT_DEFAULT_PROPERTIES": null},
         "Technical Presentation": {"format": "$UNIT_TP", "$UNIT_DEFAULT_PROPERTIES": null},
 
-        "IBM Virtual Server": {"icon": "instance--virtual", "format": "$SHAPE_FORMAT_STACK", "color": "$COMPUTE_COLOR", "$SHAPE_DEFAULT_PROPERTIES": null,
+        "IBM Virtual Server": {"icon": "instance--virtual", "format": "$SHAPE_FORMAT_STACK", "color": "$SHAPE_COMPUTE_COLOR", "$SHAPE_DEFAULT_PROPERTIES": null,
 		"members": ["OS", "Profile", "Volume"]},
-	"OS": {"icon": "linux", "text": "ibm-redhat-8-4-minimal-amd64-1", "subtext": null, "format": "$ITEM_ICON", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "Profile": {"icon": "instance--cx", "text": "cx2-2x4, 2 vCPU, 4 GiB, 4 Gbps", "subtext": null, "format": "$ITEM_ICON", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "Volume": {"icon": "boot", "text": "100 GB, 3000 IOPS", "subtext": null, "format": "$ITEM_ICON", "$ITEM_ICON_DEFAULT_PROPERTIES": null}
+	"OS": {"icon": "linux", "text": "ibm-redhat-8-4-minimal-amd64-1", "subtext": null, "format": "$ITEM_ICON", "$ITEM_DETAIL_ICON_DEFAULT_PROPERTIES": null},
+        "Profile": {"icon": "instance--cx", "text": "cx2-2x4, 2 vCPU, 4 GiB, 4 Gbps", "subtext": null, "format": "$ITEM_ICON", "$ITEM_DETAIL_ICON_DEFAULT_PROPERTIES": null},
+        "Volume": {"icon": "boot", "text": "100 GB, 3000 IOPS", "subtext": null, "format": "$ITEM_ICON", "$ITEM_DETAIL_ICON_DEFAULT_PROPERTIES": null}
       }
     }
   },
@@ -102,20 +102,22 @@
     "$PC_FORMAT_EXPANDED": {"type": "compp", "layout": "expanded", "weight": null, "header": true, "container": true},
     "$PG_FORMAT_CONTAINER": {"type": "groupp", "layout": "expanded", "weight": null, "header": true, "container": true},
 
-    "$APPLICATIONS_COLOR": {"line": "purple", "fill": "white", "font": "coolgray"},
-    "$BACKEND_COLOR": {"line": "coolgray", "fill": "white", "font": "coolgray"},
-    "$COMPUTE_COLOR": {"line": "green", "fill": "white", "font": "coolgray"},
-    "$DATA_COLOR": {"line": "blue", "fill": "white", "font": "coolgray"},
-    "$DEVOPS_COLOR": {"line": "magenta", "fill": "white", "font": "coolgray"},
-    "$GROUP_COLOR": {"line": "cyan", "fill": "white", "font": "coolgray"},
-    "$INDUSTRY_COLOR": {"line": "coolgray", "fill": "white", "font": "coolgray"},
-    "$LOCATION_COLOR": {"line": "coolgray", "fill": "white", "font": "coolgray"},
-    "$MANAGEMENT_COLOR": {"line": "teal", "fill": "white", "font": "coolgray"},
-    "$NETWORK_COLOR": {"line": "cyan", "fill": "white", "font": "coolgray"},
-    "$SECURITY_COLOR": {"line": "red", "fill": "white", "font": "coolgray"},
-    "$SERVICES_COLOR": {"line": "green", "fill": "white", "font": "coolgray"},
-    "$STORAGE_COLOR": {"line": "blue", "fill": "white", "font": "coolgray"},
-    "$USER_COLOR": {"line": "black", "fill": "white", "font": "coolgray"},
+    "$APPLICATIONS_COLOR": {"line": "purple", "fill": null, "font": "coolgray"},
+    "$BACKEND_COLOR": {"line": "coolgray", "fill": null, "font": "coolgray"},
+    "$SHAPE_BACKEND_COLOR": {"line": "coolgray", "fill": null, "font": "black"},
+    "$COMPUTE_COLOR": {"line": "green", "fill": null, "font": "coolgray"},
+    "$SHAPE_COMPUTE_COLOR": {"line": "green", "fill": null, "font": "black"},
+    "$DATA_COLOR": {"line": "blue", "fill": null, "font": "coolgray"},
+    "$DEVOPS_COLOR": {"line": "magenta", "fill": null, "font": "coolgray"},
+    "$GROUP_COLOR": {"line": "cyan", "fill": null, "font": "coolgray"},
+    "$INDUSTRY_COLOR": {"line": "coolgray", "fill": null, "font": "coolgray"},
+    "$LOCATION_COLOR": {"line": "coolgray", "fill": null, "font": "coolgray"},
+    "$MANAGEMENT_COLOR": {"line": "teal", "fill": null, "font": "coolgray"},
+    "$NETWORK_COLOR": {"line": "cyan", "fill": null, "font": "coolgray"},
+    "$SECURITY_COLOR": {"line": "red", "fill": null, "font": "coolgray"},
+    "$SERVICES_COLOR": {"line": "green", "fill": null, "font": "coolgray"},
+    "$STORAGE_COLOR": {"line": "blue", "fill": null, "font": "coolgray"},
+    "$USER_COLOR": {"line": "black", "fill": null, "font": "coolgray"},
 
     "$CIRCLE_BADGE": {"form": "circle", "line": "coolgray", "text": null},
     "$DIAMOND_BADGE": {"form": "diamond", "line": "coolgray", "text": null},
@@ -135,7 +137,7 @@
     "$LEGEND_VERTICAL": {"type": "legendv", "layout": null,  "weight": null, "header": true, "container": true},
     "$LEGEND_VERTICAL_NOHEADER": {"type": "legendv", "layout": null,  "weight": null, "header": false, "container": true},
 
-    "$LEGEND_DEFAULT_COLOR": {"line": "coolgray", "fill": "white", "font": "coolgray"},
+    "$LEGEND_DEFAULT_COLOR": {"line": "coolgray", "fill": null, "font": "coolgray"},
     "$LEGEND_DEFAULT_BADGE": {"form": null, "line": null, "text": null},
     "$LEGEND_DEFAULT_STYLE": {"dashed": false, "double": false, "strikethrough": false, "multiplicity": false},
     "$LEGEND_DEFAULT_PROPERTIES": {"text": null, "subtext": null, "color": "$LEGEND_DEFAULT_COLOR", "badge": "$LEGEND_DEFAULT_BADGE", "style": "$LEGEND_DEFAULT_STYLE", "ignore": false},
@@ -144,7 +146,7 @@
     "$SHAPE_FORMAT_STACK": {"type": "nodep", "layout": "expandedStack", "weight": null, "header": true, "container": false},
     "$UNIT_FORMAT_STACK": {"type": "nodel", "layout": "expandedStack", "weight": null, "header": true, "container": false},
 
-    "$ITEM_DEFAULT_COLOR": {"line": "coolgray", "fill": "white", "font": "coolgray"},
+    "$ITEM_DEFAULT_COLOR": {"line": "coolgray", "fill": null, "font": "coolgray"},
     "$ITEM_DEFAULT_BADGE": {"form": null, "line": null, "text": null},
     "$ITEM_DEFAULT_STYLE": {"dashed": false, "double": false, "strikethrough": false, "multiplicity": false},
     "$ITEM_DEFAULT_PROPERTIES": {"text": null, "subtext": null, "icon": "undefined", "color": "$ITEM_DEFAULT_COLOR", "badge": "$ITEM_DEFAULT_BADGE", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
@@ -152,6 +154,10 @@
     "$ITEM_ICON_DEFAULT_PROPERTIES": {"color": "$ITEM_DEFAULT_COLOR", "badge": "$ITEM_DEFAULT_BADGE", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
     "$ITEM_COLOR_DEFAULT_PROPERTIES": {"text": null, "subtext": null, "icon": "undefined", "badge": "$ITEM_DEFAULT_BADGE", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
     "$ITEM_STYLE_DEFAULT_PROPERTIES": {"text": null, "subtext": null, "icon": "undefined", "color": "$ITEM_DEFAULT_COLOR", "badge": "$ITEM_DEFAULT_BADGE", "ignore": true},
+
+    "$ITEM_DETAIL_COLOR": {"line": "black", "fill": null, "font": "black"},
+    "$ITEM_DETAIL_DEFAULT_PROPERTIES": {"color": "$ITEM_DETAIL_COLOR", "badge": "$ITEM_DEFAULT_BADGE", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
+    "$ITEM_DETAIL_ICON_DEFAULT_PROPERTIES": {"color": "$ITEM_DETAIL_COLOR", "badge": "$ITEM_DEFAULT_BADGE", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
 
     "$ITEM_ACTOR": {"type": "actor", "layout": "itemShape", "weight": null, "header": true, "container": false},
     "$ITEM_TS": {"type": "target", "layout": "itemShape", "weight": null, "header": true, "container": false},
@@ -168,7 +174,7 @@
 
     "$UNIT_FORMAT_STACK": {"type": "nodel", "layout": "expandedStack", "weight": null, "header": true, "container": false},
 
-    "$UNIT_DEFAULT_COLOR": {"line": null, "fill": "white", "font": null},
+    "$UNIT_DEFAULT_COLOR": {"line": null, "fill": null, "font": null},
     "$UNIT_DEFAULT_BADGE": {"form": null, "color": null, "text": null},
     "$UNIT_DEFAULT_STYLE": {"dashed": false, "double": false, "strikethrough": false, "multiplicity": false},
     "$UNIT_DEFAULT_PROPERTIES": {"icon": null, "text": null, "subtext": null, "color": "$UNIT_DEFAULT_COLOR", "badge": "$UNIT_DEFAULT_BADGE", "style": "$UNIT_DEFAULT_STYLE", "ignore": true},
