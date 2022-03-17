@@ -118,12 +118,14 @@ mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
 // Normalize icon color to be visible if lineColor is too dark.
 mxIBMShapeBase.prototype.normalizeIconColor = function(iconColor, lineColor)
 {
+	// Same logic as font initially.
         return mxIBMShapeBase.prototype.normalizeFontColor(iconColor, lineColor);
 }
 
 // Normalize style color to be visible if lineColor is too dark.
 mxIBMShapeBase.prototype.normalizeStyleColor = function(styleColor, lineColor)
 {
+	// Same logic as font initially.
         return mxIBMShapeBase.prototype.normalizeFontColor(styleColor, lineColor);
 }
 

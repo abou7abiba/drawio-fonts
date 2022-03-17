@@ -33,10 +33,11 @@
 	 */
 	Sidebar.prototype.signs = ['Animals', 'Food', 'Healthcare', 'Nature', 'People', 'Safety', 'Science', 'Sports', 'Tech', 'Transportation', 'Travel'];
 
-	Sidebar.prototype.ibmbase = ['Icons', 'Shapes'];
-	Sidebar.prototype.ibmcloud = ['Cloud', 'Core', 'Industry'];
-	Sidebar.prototype.ibmsets = ['Helpers', 'Starters'];
-	Sidebar.prototype.ibm = ['Analytics', 'Applications', 'Blockchain', 'Data', 'DevOps', 'Infrastructure', 'Management', 'Miscellaneous', 'Security', 'Social', 'Users', 'VPC', 'Boxes', 'Connectors'];
+	//Sidebar.prototype.ibmbase = ['Icons', 'Shapes'];
+	//Sidebar.prototype.ibmcloud = ['Cloud', 'Core', 'Industry'];
+	//Sidebar.prototype.ibmsets = ['Helpers', 'Starters'];
+	Sidebar.prototype.ibm = ['Icons', 'Shapes', 'Cloud', 'Core', 'Industry', 'Helpers', 'Starters'];
+	Sidebar.prototype.ibm1 = ['Analytics', 'Applications', 'Blockchain', 'Data', 'DevOps', 'Infrastructure', 'Management', 'Miscellaneous', 'Security', 'Social', 'Users', 'VPC', 'Boxes', 'Connectors'];
 
 	Sidebar.prototype.allied_telesis = ['Buildings', 'Computer and Terminals', 'Media Converters', 'Security', 'Storage', 'Switch', 'Wireless'];
 
@@ -125,10 +126,11 @@
 	                                   {id: 'active_directory'},
 	                                   {id: 'bpmn2', prefix: 'bpmn2', libs: ['General', 'Tasks', 'Choreographies', 'Events', 'Gateways']},
 	                                   {id: 'clipart', prefix: null, libs: ['computer', 'finance', 'clipart', 'networking', 'people', 'telco']},
-	                                   {id: 'ibmbase', prefix: 'ibmbase', libs: Sidebar.prototype.ibmbase},
-	                                   {id: 'ibmcloud', prefix: 'ibmcloud', libs: Sidebar.prototype.ibmcloud},
-	                                   {id: 'ibmsets', prefix: 'ibmsets', libs: Sidebar.prototype.ibmsets},
+	                                   //{id: 'ibmbase', prefix: 'ibmbase', libs: Sidebar.prototype.ibmbase},
+	                                   //{id: 'ibmcloud', prefix: 'ibmcloud', libs: Sidebar.prototype.ibmcloud},
+	                                   //{id: 'ibmsets', prefix: 'ibmsets', libs: Sidebar.prototype.ibmsets},
 	                                   {id: 'ibm', prefix: 'ibm', libs: Sidebar.prototype.ibm},
+	                                   {id: 'ibm1', prefix: 'ibm', libs: Sidebar.prototype.ibm1},
 	                                   {id: 'allied_telesis', prefix: 'allied_telesis', libs: Sidebar.prototype.allied_telesis},
 	                                   {id: 'cumulus', libs: ['cumulus']},
 	                                   {id: 'eip', prefix: 'eip', libs: Sidebar.prototype.eip},
@@ -549,10 +551,11 @@
 								{title: 'Citrix', id: 'citrix', image: IMAGE_PATH + '/sidebar-citrix.png'},
 								{title: 'Google Cloud Platform', id: 'gcp2', image: IMAGE_PATH + '/sidebar-gcp2.png'},
 								{title: 'GCP Icons', id: 'gcpicons', image: IMAGE_PATH + '/sidebar-gcpicons.png'},
-								{title: 'IBM Base', id: 'ibmbase', image: IMAGE_PATH + '/sidebar-ibmbase.png'},
-								{title: 'IBM Cloud', id: 'ibmcloud', image: IMAGE_PATH + '/sidebar-ibmcloud.png'},
-								{title: 'IBM Sets', id: 'ibmsets', image: IMAGE_PATH + '/sidebar-ibmsets.png'},
-								{title: '[IBM Deprecated]', id: 'ibm', image: IMAGE_PATH + '/sidebar-ibm.png'},
+								//{title: 'IBM Base', id: 'ibmbase', image: IMAGE_PATH + '/sidebar-ibmbase.png'},
+								//{title: 'IBM Cloud', id: 'ibmcloud', image: IMAGE_PATH + '/sidebar-ibmcloud.png'},
+								//{title: 'IBM Sets', id: 'ibmsets', image: IMAGE_PATH + '/sidebar-ibmsets.png'},
+								{title: 'IBM', id: 'ibm', image: IMAGE_PATH + '/sidebar-ibm.png'},
+								{title: 'IBM Deprecated', id: 'ibm1', image: IMAGE_PATH + '/sidebar-ibm1.png'},
 								{title: 'Kubernetes', id: 'kubernetes', image: IMAGE_PATH + '/sidebar-kubernetes.png'},
 								{title: 'Network', id: 'network', image: IMAGE_PATH + '/sidebar-network.png'},
 								{title: 'Office', id: 'office', image: IMAGE_PATH + '/sidebar-office.png'},
@@ -1226,10 +1229,11 @@
 		this.addCitrixPalette();
 		this.addGCP2Palette();
 		this.addGCPIconsPalette();
-		this.addIBMBasePalette();
-		this.addIBMCloudPalette();
-		this.addIBMSetsPalette();
+		//this.addIBMBasePalette();
+		//this.addIBMCloudPalette();
+		//this.addIBMSetsPalette();
 		this.addIBMPalette();
+		this.addIBM1Palette();
 		this.addNetworkPalette();
 		this.addOfficePalette();
 		this.addRackPalette(rack, dir);
