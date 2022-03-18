@@ -105,6 +105,9 @@ mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 	styleStrikethrough.isChanged = styleStrikethrough.previous != styleStrikethrough.current;	
 	changes.style = this.setStyleStyle(changes.style, styleDashed, styleDouble, styleStrikethrough);
 
+	// get the new color style
+	// changes.style = this.setColorStyle(changes.style, lineColor, fillColor, fontColor, badgeColor);
+
 	// Get the new geometry
 	changes.geometry = cell.getGeometry();
 	var properties = this.getDetails(this, shapeType.current, shapeLayout.current, null, null);
