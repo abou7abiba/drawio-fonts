@@ -60,34 +60,60 @@ mxIBMShapeBase.prototype.init = function (container) {
  */
 mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 // console.log('mxIBMShapeBase.prototype.styleChangedEventsHandler', event);
-	var cell = event.properties.change.cell;
-	var pStyle = getStylesObj(event.properties.change.previous);
-	var cStyle = getStylesObj(event.properties.change.style);
-	var shapeType = mxUtils.getValue(cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
-	var shapeLayout = mxUtils.getValue(cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_LAYOUT_DEFAULT);
-	var hideIcon = mxUtils.getValue(cStyle, this.cst.HIDE_ICON, this.cst.HIDE_ICON_DEFAULT);
+	var cell = event.properties.change.cell;	
+	var pStyleStr = event.properties.change.previous;
+	var cStyleStr = event.properties.change.style;
+	var pStyle = getStylesObj(pStyleStr);
+	var cStyle = getStylesObj(cStyleStr);
 
-	// set the default style of shapeLayout
-	var cellStyles = this.getCellStyles(shapeType, shapeLayout, hideIcon); 
-	for (let key in cellStyles) {
-		cStyle[key] = cellStyles[key];
-	}
+	// Hold all the changes
+	var changes = {};
 
-	var changes = {		
-		geometry: cell.getGeometry(),
-		style: cStyle
+	// get the new layout style
+	var shapeType = {
+		previous : mxUtils.getValue(pStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT),
+		current: mxUtils.getValue(cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT)
 	};
+	var shapeLayout = {
+		previous : mxUtils.getValue(pStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_LAYOUT_DEFAULT),
+		current: mxUtils.getValue(cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_LAYOUT_DEFAULT)
+	};
+	var hideIcon = {
+		previous : mxUtils.getValue(pStyle, this.cst.HIDE_ICON, this.cst.HIDE_ICON_DEFAULT),
+		current: mxUtils.getValue(cStyle, this.cst.HIDE_ICON, this.cst.HIDE_ICON_DEFAULT)
+	};	
+	shapeType.isChanged = shapeType.previous != shapeType.current;
+	shapeLayout.isChanged = shapeLayout.previous != shapeLayout.current;
+	hideIcon.isChanged = hideIcon.previous != hideIcon.current;	
+	changes.style = this.setLayoutStyle(cStyleStr, shapeType, shapeLayout, hideIcon);
 	
-	var properties = this.getDetails(this, shapeType, shapeLayout, null, null);
-	if (!shapeLayout.startsWith('item')) {
-		if (shapeType == 'actor') {
+	// get the new style style
+	var styleDashed = {
+		previous : mxUtils.getValue(pStyle, this.cst.STYLE_DASHED, this.cst.STYLE_DASHED_DEFAULT),
+		current: mxUtils.getValue(cStyle, this.cst.STYLE_DASHED, this.cst.STYLE_DASHED_DEFAULT)
+	};
+	var styleDouble = {
+		previous : mxUtils.getValue(pStyle, this.cst.STYLE_DOUBLE, this.cst.STYLE_DOUBLE_DEFAULT),
+		current: mxUtils.getValue(cStyle, this.cst.STYLE_DOUBLE, this.cst.STYLE_DOUBLE_DEFAULT)
+	};
+	var styleStrikethrough = {
+		previous : mxUtils.getValue(pStyle, this.cst.STYLE_STRIKETHROUGH, this.cst.STYLE_STRIKETHROUGH_DEFAULT),
+		current: mxUtils.getValue(cStyle, this.cst.STYLE_STRIKETHROUGH, this.cst.STYLE_STRIKETHROUGH_DEFAULT)
+	};	
+	styleDashed.isChanged = styleDashed.previous != styleDashed.current;
+	styleDouble.isChanged = styleDouble.previous != styleDouble.current;
+	styleStrikethrough.isChanged = styleStrikethrough.previous != styleStrikethrough.current;	
+	changes.style = this.setStyleStyle(changes.style, styleDashed, styleDouble, styleStrikethrough);
+
+	// Get the new geometry
+	changes.geometry = cell.getGeometry();
+	var properties = this.getDetails(this, shapeType.current, shapeLayout.current, null, null);
+	if (!shapeLayout.current.startsWith('item')) {
+		if (shapeType.current == 'actor') {
 			changes.geometry.width = properties.minWidth;
-			changes.geometry.height = properties.minHeight;
-			changes.style['ibmLayout'] = 'collapsed';
-		} else if (shapeType.startsWith('group')) {
-			changes.style['ibmLayout'] = 'expanded';
-		} else if (shapeType.startsWith('node') || shapeType.startsWith('comp') || shapeType == 'target') {
-			if (shapeLayout == 'collapsed') {
+			changes.geometry.height = properties.minHeight;			
+		} else if (shapeType.current.startsWith('node') || shapeType.current.startsWith('comp') || shapeType.current == 'target') {
+			if (shapeLayout.current == 'collapsed') {
 				changes.geometry.width = properties.minWidth;
 				changes.geometry.height = properties.minHeight;
 			} else {
@@ -96,10 +122,10 @@ mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 			}
 		}
 	}
-	
+
 	graph.model.beginUpdate();
 	try {		
-		graph.model.setStyle(cell, getStylesStr(changes.style));
+		graph.model.setStyle(cell, changes.style);
 		graph.model.setGeometry(cell, changes.geometry);
 	} finally {
 		graph.model.endUpdate();
@@ -306,15 +332,8 @@ mxIBMShapeBase.prototype.drawStencil = function (c, properties) {
 				c.rotate(properties.rotateIcon, false, false, properties.iconAreaWidth / 2, properties.iconAreaHeight / 2);
 			}
 			// set icon color
-			if (properties.shapeType.startsWith('group')) {
-				c.setFillColor(ibmConfig.ibmColors.black);
-				c.setStrokeColor(ibmConfig.ibmColors.black);
-			} else if (properties.shapeLayout == 'itemIcon') {
-				c.setFillColor(ibmConfig.ibmColors.black);
-				c.setStrokeColor(ibmConfig.ibmColors.black);
-			} else {
-				c.setFillColor(properties.fillColor);
-			}
+			c.setFillColor(properties.iconColor)
+			c.setStrokeColor(properties.lineColor);
 			if (properties.shapeType == 'target' && properties.shapeLayout == 'collapsed') {
 				prStencil.drawShape(c, this, properties.defaultWidth / 2 - properties.iconSize / 2, properties.iconAlign, properties.iconSize, properties.iconSize);
 			} else {
@@ -520,9 +539,9 @@ mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
         if (fillColorName === "NONE")
 		return "none";
 	else if (fillColorName === "White")
-                return ibmConfig.ibmColors.white; 
+                return ibmConfig.ibmColors.white;
         else if (fillColorName === "Black" || fillColorName === "Transparent")
-                return ibmConfig.ibmColors.none; 
+                return ibmConfig.ibmColors.none;
 	else {
                 let lineColorSegments = lineColorName.toLowerCase().split(' ');
                 let lineColorFamily = lineColorSegments[0];
@@ -530,8 +549,47 @@ mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
                 if (lineColorSegments[1] === "gray")
                         lineColorFamily = lineColorFamily + "gray";
 
-                return ibmConfig.ibmColors["light" + lineColorFamily]; 
+                return ibmConfig.ibmColors["light" + lineColorFamily];
         }
+}
+
+// Normalize font color to be visible if lineColor is too dark.
+mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
+{
+	if (lineColor === "none")
+		return fontColor;
+	else if (lineColor === ibmConfig.ibmColors.black)
+		return ibmConfig.ibmColors.white;
+
+	lineColor = lineColor.toUpperCase();
+	let name = ibmConfig.colorNames[lineColor.substring(1)];
+	if (!name) {
+		return name;
+	}
+	let segments = name.split(' ');
+
+	for (var index = 0; index < segments.length; index++)
+	{
+		code = parseInt(segments[index]);
+		if (!isNaN(code) && code >= 50)
+			return ibmConfig.ibmColors.white;
+	}
+
+	return fontColor;
+}
+
+// Normalize icon color to be visible if lineColor is too dark.
+mxIBMShapeBase.prototype.normalizeIconColor = function(iconColor, lineColor)
+{
+	// Same as font logic initially.
+	return mxIBMShapeBase.prototype.normalizeFontColor(iconColor, lineColor);
+}
+
+// Normalize style color to be visible if lineColor is too dark.
+mxIBMShapeBase.prototype.normalizeStyleColor = function(styleColor, lineColor)
+{
+	// Same as font logic initially.
+	return mxIBMShapeBase.prototype.normalizeFontColor(styleColor, lineColor);
 }
 
 // Normalize font/icon/style color to be visible if lineColor is too dark.
@@ -583,6 +641,9 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	// Set icon area color to fill color for collapsed shapes.
 	iconAreaColor = (shapeLayout === 'collapsed' && fillColor != this.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
 
+	// Set icon area color to fill color for expanded target shapes.
+	iconAreaColor = (shapeLayout === 'expanded' && shapeType === 'target' && fillColor != this.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
+
 	// Set font color to black if not set otherwise use font color.
 	fontColor = (fontColor === this.cst.FONT_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(fontColor);
 
@@ -599,20 +660,20 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	badgeFontColor = this.normalizeFontColor(badgeFontColor, badgeColor);
 
 	// Normalize icon color to be visible if icon area color is too dark.
-	// iconColor = this.normalizeIconColor(iconColor, iconAreaColor);
+	iconColor = this.normalizeIconColor(iconColor, iconAreaColor);
 
 	// Set icon color to black for legend icon items.
 	iconColor = (shapeLayout === 'itemIcon') ? ibmConfig.ibmColors.coolgray : iconColor;
 
 	// Normalize style color to be visibile if icon area color is too dark.
-	// styleColor = this.normalizeStyleColor(styleColor, iconAreaColor);
+	styleColor = this.normalizeStyleColor(styleColor, iconAreaColor);
 
 	// Set style color to black for expanded shapes and legend style items.
 	styleColor = (shapeLayout.startsWith('expanded') || shapeLayout === 'itemStyle') ? lineColor : styleColor;
 
 	return {'lineColor': lineColor,
-		'fillColor': fillColor, 
-		'fontColor': fontColor, 
+		'fillColor': fillColor,
+		'fontColor': fontColor,
 		'badgeColor': badgeColor,
 		'badgeFontColor': badgeFontColor,
 		'iconColor': iconColor,
@@ -621,6 +682,7 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 }
 
 // Retrieve size and color details.
+// Sizes should in general only be defined in IBMConfig.json.
 mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, shapeWidth, shapeHeight)
 {
         let details = {};
@@ -687,14 +749,25 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
         return details;
 }
 
-// Get properties corresponding to value and convert to styles.
-mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIcon)
+// Get properties corresponding to layout change and convert to styles.
+// Properties are kept minimal by nulling out unused properties when changing layouts.
+// Invalid layout changes revert to original layout.
+// Properties should in general only be defined in IBMConfig.json.
+mxIBMShapeBase.prototype.getLayoutStyles = function(shapeType, shapeLayout, hideIcon)
 {
 	let properties = '';
 	let styles = {};
 
+	let changed = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged;
+	if (!changed)
+		return styles;
+
+	shapeType = shapeType.current;
+	shapeLayout = shapeLayout.current;
+	hideIcon = hideIcon.current;
+
 	// Prevent invalid changes.
-	
+
 	if (shapeType.startsWith('group') && shapeLayout === 'collapsed')
 	{
 		shapeLayout = 'expanded';
@@ -712,44 +785,44 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 	}
 
 	// Get shape-specific properties.
-	
+
 	if (shapeLayout === "collapsed")
-		// Add collapsed text properties, remove expanded stack properties, remove container properties, remove fill.
-		properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + 
+		// Add collapsed label properties, remove expanded stack properties, remove container properties, remove fill.
+		properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull +
 				ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
 	else if (shapeLayout === "expanded")
 	{
 		if (shapeType === 'target')
 		{
-			// Add expanded label properties, remove container properties, remove expanded stack properties, add default fill.
-			if (hideIcon) 
-				properties += ibmConfig.ibmSystemProperties.expandedTargetLabelNoIcon; 
+			// Add expanded label properties, remove container properties, remove expanded stack properties, remove fill.
+			if (hideIcon == 1)
+				properties += ibmConfig.ibmSystemProperties.expandedTargetLabelNoIcon;
 			else
 				properties += ibmConfig.ibmSystemProperties.expandedTargetLabel;
 
-			properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull + 
-					ibmConfig.ibmSystemProperties.defaultFill;
+			properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull +
+					ibmConfig.ibmSystemProperties.noFill;
 		}
 		else
 			// Add expanded label properties, add container properties, remove expanded stack properties, add default fill.
-			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + 
+			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container +
 						ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
 	}
 	else if (shapeLayout === "expandedStack")
 		// Add expanded label properties, expanded stack properties, add container properties, add default fill.
-		properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + 
+		properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack +
 				ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
 	else if (shapeLayout.startsWith('item'))
 		// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
-		properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull + 
+		properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull +
 				ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
 	else
 		// Remove expanded stack properties, remove container properties, remove fill.
-		properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + 
-				ibmConfig.ibmSystemProperties.defaultFill;
+		properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull +
+				ibmConfig.ibmSystemProperties.noFill;
 
 	// Convert properties to a style dictionary.
-	
+
 	properties = properties.slice(0, -1); // Remove trailing semicolon.
 
 	let array = properties.split(';');
@@ -759,42 +832,122 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 		element = array[index].split('=');
 		if (element[1] === 'null')
 			styles[element[0]] = null;
-		else	
+		else
 			styles[element[0]] = element[1];
 	}
 
 	return styles;
 }
 
-// Get and set cell styles for events (layout changes, color changes TBD, rotation changes TBD, etc).
-// Color, rotation, etc (TBD) in events are to help users follow our design spec.
-// data TBD = {shapeType, shapeLayout,
-//             lineColor, fillColor, fontColor, badgeColor,
-//             layoutChanged, lineChanged, fillChanged, fontChanged, badgeChanged,
-//             rotationChanged, hideIcon}
-mxIBMShapeBase.prototype.setCellStyles = function(style, shapeType, shapeLayout, hideIcon)
+// Get and set layout style called by event handler.
+// Input:
+//   style = changed event style
+//   shapeType = {previous shape type, current shape type, isChanged boolean}
+//   shapeLayout = {previous shape layout, current shape layout, isChanged boolean}
+//   hideIcon = {previous hide icon setting, current hide icon setting, isChanged boolean}
+// Output:
+//   style = updated style if changed
+mxIBMShapeBase.prototype.setLayoutStyle = function(style, shapeType, shapeLayout, hideIcon)
 {
-	let styles = mxIBMShapeBase.prototype.getCellStyles(shapeType, shapeLayout, hideIcon);
-
-	for (let key in styles) 
+	let styles = mxIBMShapeBase.prototype.getLayoutStyles(shapeType, shapeLayout, hideIcon);
+	for (let key in styles)
 		style = mxUtils.setStyle(style, key, styles[key]);
 
 	return style;
 };
 
-// 03/14/22 - Following setCellStyles is previous version replaced by above setCellStyles which has been tested and additional parameters will be added to above setCellStyles.
-//mxIBMShapeBase.prototype.setCellStyles = function(graph, shapeType)
-//{
-//	let cells = graph.getSelectionCells();
-//	let styles = this.getCellStyles(shapeType);
-//
-//	for (let key in styles)
-//		graph.setCellStyles(key, styles[key], cells);
-//};
+// Get styles for shape style changes ensuring only one of dashed, double, or strikethrough is set at time,
+// for example if user previously selected dashed and later selects double then dashed is auto-deselected.
+// Properties should in general only be defined in IBMConfig.json.
+mxIBMShapeBase.prototype.getStyleStyles = function(styleDashed, styleDouble, styleStrikethrough)
+{
+	let properties = '';
+	let styles = {};
 
-// Return switch icon if switching between logical to prescribed or prescribed to logical.
+	// Set properties to the desired change for dashed, double, or strikethrough.
+
+	if (styleDashed.isChanged)
+		properties = (styleDashed.current == 1) ? ibmConfig.ibmSystemProperties.styleDashedOn : ibmConfig.ibmSystemProperties.styleDashedOff;
+
+	if (styleDouble.isChanged)
+		properties = (styleDouble.current == 1) ? ibmConfig.ibmSystemProperties.styleDoubleOn : ibmConfig.ibmSystemProperties.styleDoubleOff;
+
+	if (styleStrikethrough.isChanged)
+		properties = (styleStrikethrough.current == 1) ? ibmConfig.ibmSystemProperties.styleStrikethroughOn : ibmConfig.ibmSystemProperties.styleStrikethroughOff;
+
+	// Convert properties to a style dictionary.
+
+	properties = properties.slice(0, -1); // Remove trailing semicolon.
+
+	let array = properties.split(';');
+
+	for (var index = 0; index < array.length; index++)
+	{
+		element = array[index].split('=');
+		if (element[1] === 'null')
+			styles[element[0]] = null;
+		else
+			styles[element[0]] = element[1];
+	}
+
+	return styles;
+}
+
+// Get and set shape style called by event handler.
+// Input:
+//   style = changed event style
+//   styleDashed = {previous dashed setting, current dashed setting, isChanged boolean}
+//   styleDouble = {previous double setting, current double setting, isChanged boolean}
+//   styleStrikethrough = {previous strikethrough setting, current strikethrough setting, isChanged boolean}
+// Output:
+//   style = updated style if changed
+mxIBMShapeBase.prototype.setStyleStyle = function(style, styleDashed, styleDouble, styleStrikethrough)
+{
+	let styles = mxIBMShapeBase.prototype.getStyleStyles(styleDashed, styleDouble, styleStrikethrough);
+
+	for (let key in styles)
+		style = mxUtils.setStyle(style, key, styles[key]);
+
+	return style;
+}
+
+// Get and set color style to ensure proper usage with the IBM Color Palette.
+// Properties should in general only be defined in IBMConfig.json.
+mxIBMShapeBase.prototype.getColorStyles = function(lineColor, fillColor, fontColor, badgeColor)
+{
+	let properties = '';
+	let styles = {};
+
+	// In progress.
+
+	return null;
+}
+
+// Get and set color style called by event handler.
+// Input:
+//   style = changed event style
+//   lineColor = {previous line color, current line color, isChanged boolean}
+//   fillColor = {previous fill color, current fill color, isChanged boolean}
+//   fontColor = {previous font color, current font color, isChanged boolean}
+//   badgeColor = {previous badge color, current badge color, isChanged boolean}
+// Output:
+//   style = updated style if changed
+mxIBMShapeBase.prototype.setColorStyle = function(style, lineColor, fillColor, fontColor, badgeColor)
+{
+	let styles = mxIBMShapeBase.prototype.getColorStyles(lineColor, fillColor, fontColor, badgeColor);
+
+	for (let key in styles)
+		style = mxUtils.setStyle(style, key, styles[key]);
+
+	return style;
+}
+
+// Obtaining any icon from ibm.xml should call switchIcon to determine whether the logical or prescribed icon will be used
+// as defined in IBMIcons.json.
 mxIBMShapeBase.prototype.switchIcon = function(previousIcon, previousType, currentType)
 {
+        return previousIcon;
+	/* In progress.
         if (previousType.slice(-1) === 'l' && currentType.slice(-1) === 'p')
                 // Lookup logical icon in ibmIcons and switch to prescribed icon if available.
                 return("undefined");
@@ -803,6 +956,7 @@ mxIBMShapeBase.prototype.switchIcon = function(previousIcon, previousType, curre
                 return("undefined");
         else
                 return previousIcon;
+	*/
 }
 
 

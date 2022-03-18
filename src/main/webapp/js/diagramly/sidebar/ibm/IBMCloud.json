@@ -445,7 +445,7 @@
       "layout": "collapsed",
       "weight": null,
       "header": true,
-      "container": true
+      "container": false
     },
     "$TS_FORMAT_EXPANDED": {
       "type": "target",
@@ -459,7 +459,7 @@
       "layout": "collapsed",
       "weight": null,
       "header": true,
-      "container": true
+      "container": false
     },
     "$LN_FORMAT_EXPANDED": {
       "type": "nodel",
@@ -473,7 +473,7 @@
       "layout": "collapsed",
       "weight": null,
       "header": true,
-      "container": true
+      "container": false
     },
     "$LC_FORMAT_EXPANDED": {
       "type": "compl",
@@ -508,7 +508,7 @@
       "layout": "collapsed",
       "weight": null,
       "header": true,
-      "container": true
+      "container": false
     },
     "$PN_FORMAT_EXPANDED": {
       "type": "nodep",
@@ -522,7 +522,7 @@
       "layout": "collapsed",
       "weight": null,
       "header": true,
-      "container": true
+      "container": false
     },
     "$PC_FORMAT_EXPANDED": {
       "type": "compp",

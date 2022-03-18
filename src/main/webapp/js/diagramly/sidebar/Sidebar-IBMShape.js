@@ -43,22 +43,14 @@ const ibmIcons = loadIBMIcons();
 		this.GenerateIBMShapePalette([JSON.parse(jsonText)]);
 	}
 
-	Sidebar.prototype.addIBMBasePalette = function() 
-	{ 
-		this.createIBMPalette('ibmbase', 'IBMIcons.json'); 
-		this.createIBMPalette('ibmbase', 'IBMShapes.json');
-	}
-
-	Sidebar.prototype.addIBMCloudPalette = function() 
-	{ 
-		this.createIBMPalette('ibmcloud', 'IBMCloud.json'); 
-		this.createIBMPalette('ibmcloud', 'IBMCore.json'); 
-	}
-
-	Sidebar.prototype.addIBMSetsPalette = function() 
-	{ 
-		this.createIBMPalette('ibmsets', 'IBMHelpers.json');
-		this.createIBMPalette('ibmsets', 'IBMStarters.json'); 
+	Sidebar.prototype.addIBMPalette = function() 
+	{
+		this.createIBMPalette('ibm', 'IBMIcons.json'); 
+		this.createIBMPalette('ibm', 'IBMShapes.json');
+		this.createIBMPalette('ibm', 'IBMCloud.json'); 
+		this.createIBMPalette('ibm', 'IBMCore.json'); 
+		this.createIBMPalette('ibm', 'IBMHelpers.json');
+		this.createIBMPalette('ibm', 'IBMStarters.json'); 
 	}
 
 	Sidebar.prototype.addIBMShapeEditorExtensions = function()
@@ -260,6 +252,10 @@ const ibmIcons = loadIBMIcons();
 
 		if (shapeFill)
 			coreProperties += "fillColor=" + ibmConfig.ibmColors[shapeFill] +';';
+		else if (shapeContainer)
+			systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
+		else
+			coreProperties += ibmConfig.ibmSystemProperties.noFill;
 
 		if (shapeFont)
 			coreProperties += "fontColor=" + ibmConfig.ibmColors[shapeFont] + ';';
@@ -268,7 +264,6 @@ const ibmIcons = loadIBMIcons();
 		let font = ibmConfig.ibmFonts[ibmLanguage];
 		fontProperty = fontProperty.replace(/REGULAR/g, font.regular);
 		fontProperty = fontProperty.replace(/SEMIBOLD/g, font.semibold);
-		//coreProperties += ibmConfig.ibmSystemProperties.basic + ibmConfig.ibmFontProperties[ibmLanguage + 'Primary'];
 		coreProperties += ibmConfig.ibmSystemProperties.basic + fontProperty;
 
 		if (shapeWeight)
@@ -362,19 +357,11 @@ const ibmIcons = loadIBMIcons();
 				if (shapeLayout === 'expandedStack')
 					systemProperties += ibmConfig.ibmSystemProperties.expandedStack;
 
-				if (!shapeFill)
-				{
-					if (shapeContainer)
-						systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
-					else
-						systemProperties += ibmConfig.ibmSystemProperties.noFill;
-				}
-
 				if (shapeContainer)
 					systemProperties += ibmConfig.ibmSystemProperties.container;
 
 			}
-			else { //if (shapeLayout.startsWith('item')) {
+			else { //if (shapeLayout.startsWith('item'))
 				//shapeHeight = 16;
 				//shapeWidth = 240;
 				if (shapeLayout === 'itemBadge') {
@@ -418,7 +405,7 @@ const ibmIcons = loadIBMIcons();
 		if (shapeType.startsWith('legend')) {
 			let label = ibmConfig.ibmFonts.legendLabel;
 			let font = ibmConfig.ibmFonts[ibmLanguage];
-			label = label.replace(/REGULAR/g, font.regular);
+			label = label.replace(/SEMIBOLD/g, font.semibold);
 
 			bg.setAttribute('label', label);
 			bg.setAttribute('Legend-Title', text);
