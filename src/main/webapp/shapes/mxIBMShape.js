@@ -592,28 +592,6 @@ mxIBMShapeBase.prototype.normalizeStyleColor = function(styleColor, lineColor)
 	return mxIBMShapeBase.prototype.normalizeFontColor(styleColor, lineColor);
 }
 
-// Normalize font/icon/style color to be visible if lineColor is too dark.
-mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
-{
-	if (lineColor === "none")
-		return fontColor;
-	else if (lineColor === ibmConfig.ibmColors.black)
-		return ibmConfig.ibmColors.white;
-
-	lineColor = lineColor.toUpperCase();
-	let name = ibmConfig.colorNames[lineColor.substring(1)];
-	let segments = name.split(' ');
-
-	for (var index = 0; index < segments.length; index++)
-	{
-		code = parseInt(segments[index]);
-		if (!isNaN(code) && code >= 50)
-			return ibmConfig.ibmColors.white;
-	}
-
-	return fontColor;
-}
-
 // Retrieve color settings.
 mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 {
