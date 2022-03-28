@@ -162,7 +162,7 @@
       },
 
      "Network Symbols": {
-        "arrows-horizontal": {"icon": "arrows-horizontal", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
+        "arrows--horizontal": {"icon": "arrows--horizontal", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
 	"router": {"icon": "router", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
 	"router--voice": {"icon": "router--voice", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
 	"router--wifi": {"icon": "router--wifi", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
@@ -216,7 +216,7 @@
 	"block-storage": {"icon": "block-storage", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
 	"block-storage--alt": {"icon": "block-storage--alt", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
 	"file-storage": {"icon": "file-storage", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
-	"file-storage--alt": {"icon": "file-storage--alt", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
+	"folder--detals": {"icon": "folder--details", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
         "object-storage": {"icon": "object-storage", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
 	"object-storage--alt": {"icon": "object-storage--alt", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},
         "volume--block-storage": {"icon": "volume--block-storage", "format": "$BASE_ICON", "$BASE_ICON_DEFAULT_PROPERTIES": null, "switch": null},

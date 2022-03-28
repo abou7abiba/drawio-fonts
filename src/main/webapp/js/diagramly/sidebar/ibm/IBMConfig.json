@@ -22,7 +22,9 @@
 	 {"stroke": "#a2191f", "fill": "#ffffff"}, {"stroke": "#a2191f", "fill": "#fff1f1"}, {"stroke": "#9f1853", "fill": "#ffffff"}, {"stroke": "#9f1853", "fill": "#fff0f7"}],
 
 	[{"stroke": "#b28600", "fill": "#ffffff"}, {"stroke": "#b28600", "fill": "#fcf4d6"}, {"stroke": "#eb6200", "fill": "#ffffff"}, {"stroke": "#eb6200", "fill": "#fff2e8"}, 
-	 {"stroke": "#684e00", "fill": "#ffffff"}, {"stroke": "#684e00", "fill": "#fcf4d6"}, {"stroke": "#8a3800", "fill": "#ffffff"}, {"stroke": "#8a3800", "fill": "#fff2e8"}]
+	 {"stroke": "#684e00", "fill": "#ffffff"}, {"stroke": "#684e00", "fill": "#fcf4d6"}, {"stroke": "#8a3800", "fill": "#ffffff"}, {"stroke": "#8a3800", "fill": "#fff2e8"}],
+
+	[{"stroke": "#000000", "fill": "#ffffff"}, {"stroke": "#000000", "fill": "#f2f4f8"}]
     ],
 
     "presetColors": [
@@ -44,7 +46,7 @@
     ],
 
     "colorNames": {
-    	"NONE": "Transparent", "FFFFFF": "White", "000000": "Black",
+    	"NONE": "Transparent (No Fill)", "FFFFFF": "White (White Fill/Font)", "000000": "Black (Dark Line/Font)",
     	"FFF1F1": "Red 10 (Light Fill)", "FFF0F7": "Magenta 10 (Light Fill)", "F6F2FF": "Purple 10 (Light Fill)", "EDF5FF": "Blue 10 (Light Fill)", "E5F6FF": "Cyan 10 (Light Fill)", "D9FBFB": "Teal 10 (Light Fill)", "DEFBE6": "Green 10 (Light Fill)", "FCF4D6": "Yellow 10 (Limited Light Fill)", "FFF2E8": "Orange 10 (Limited Light Fill)", "F2F4F8": "Cool Gray 10 (Light Fill)", "F4F4F4": "Gray 10 (Light Fill)" , "F7F3F2": "Warm Gray 10 (Light Fill)",
 	"FFD7D9": "Red 20 (Not Used)", "FFD6E8": "Magenta 20 (Not Used)", "E8DAFF": "Purple 20 (Not Used", "D0E2FF": "Blue 20 (Not Used)", "BAE6FF": "Cyan 20 (Not Used)", "9EF0F0": "Teal 20 (Not Used)", "A7F0BA": "Green 20 (Not Used)", "FDDC69": "Yellow 20 (Not Used)", "FFD9BE": "Orange 20 (Not Used)", "DDE1E6": "Cool Gray 20 (Not Used)", "E0E0E0": "Gray 20 (Not Used)", "E5E0DF": "Warm Gray 20 (Not Used)",
 	"FFB3B8": "Red 30 (Not Used)", "FFAFD2": "Magenta 30 (Not Used)", "D4BBFF": "Purple 30 (Not Used)", "A6C8FF": "Blue 30 (Not Used)", "82CFFF": "Cyan 30 (Not Used)", "3DDBD9": "Teal 30 (Not Used)", "6FDC8C": "Green 30 (Not Used)", "F1C21B": "Yellow 30 (Not Used)", "FFB784": "Orange 30 (Not Used)", "C1C7CD": "Cool Gray 30 (Not Used)", "C6C6C6": "Gray 30 (Not Used)", "CAC5C4": "Warm Gray 30 (Not Used)",
@@ -56,15 +58,7 @@
 	"520408": "Red 90 (Not Used)", "510224": "Magenta 90 (Not Used)", "31135E": "Purple 90 (Not Used)", "001D6C": "Blue 90 (Not Used)", "012749": "Cyan 90 (Not Used)", "022B30": "Teal 90 (Not Used)", "022D0D": "Green 90 (Not Used)", "302400": "Yellow 90 (Not Used)", "3E1A00": "Orange 90 (Not Used)", "21272A": "Cool Gray 90 (Not Used)", "262626": "Gray 90 (Not Used)", "272525": "Warm Gray 90 (Not Used)"
     },
 
-    "defaultLines": {
-	"solid": {"name": "Solid Line", "property": "", "description": "Active shape"},
-	"dashed": {"name": "Dashed Line", "property": "ibmDashed", "description": "Changed shape"},
-	"double": {"name": "Double Line", "property": "ibmDouble", "description": "Added shape"},
-	"strikethrough": {"name": "Strikethrough Line", "property": "ibmStrikethrough", "description": "Removed shape"},
-	"multiplicity": {"name": "Multiplicity Line", "property": "ibmMultiplicity", "description": "Multiplicity shape"}
-    },
-
-     "ibmFonts": {
+    "ibmFonts": {
 	"en": {"regular": "IBM Plex Sans Regular", "semibold": "IBM Plex Sans SmBld"},
 
         "fontProperty": "fontFamily=REGULAR;fontSize=14;",
@@ -112,7 +106,12 @@
         "LABEL_POSITION": "labelPosition", "LABEL_POSITION_DEFAULT": "center",
         "VERTICAL_LABEL_POSITION": "verticalLabelPosition", "VERTICAL_LABEL_POSITION_DEFAULT": "bottom",
 
-        "CONTAINER": "container", "CONTAINER_DEFAULT": true
+        "CONTAINER": "container", "CONTAINER_DEFAULT": true,
+
+	"UNUSED_COLOR_NAME": "Not Used",
+	"LINE_COLOR_NAME": "Line",
+	"FILL_COLOR_NAME": "Fill",
+	"FONT_COLOR_NAME": "Font"
     },
 
     "ibmBaseProperties": [ 
@@ -177,12 +176,12 @@
               {"val": "#a2191f", "dispName": "Dark Red"}, 
 	      {"val": "#005d5d", "dispName": "Dark Teal"},
 	      {"val": "#4d5358", "dispName": "Dark Cool Gray"}] },
-	{"name": "ibmRotation", "dispName": "Rotate Icon", "min": 0, "max": 359, "defVal": 0},
+	{"name": "ibmRotation", "dispName": "Rotate Icon", "type": "int", "min": 0, "max": 359, "defVal": 0},
         {"name": "ibmNoIcon", "dispName": "Hide Icon", "type": "bool", "defVal": "false"},
-        {"name": "ibmDashed", "dispName": "Dashed", "type": "bool", "defVal": "false"},
-        {"name": "ibmDouble", "dispName": "Double", "type": "bool", "defVal": "false"},
-        {"name": "ibmStrikethrough", "dispName": "Strikethrough", "type": "bool", "defVal": "false"},
-        {"name": "ibmMultiplicity", "dispName": "Multiplicity", "type": "bool", "defVal": "false"} ],
+        {"name": "ibmMultiplicity", "dispName": "Multiplicity", "type": "bool", "defVal": "false"},
+        {"name": "ibmDashed", "dispName": "Dashed Line", "type": "bool", "defVal": "false"},
+        {"name": "ibmDouble", "dispName": "Double Line", "type": "bool", "defVal": "false"},
+        {"name": "ibmStrikethrough", "dispName": "Strikethrough Line", "type": "bool", "defVal": "false"} ],
 
     "ibmLegendConstants": {
         "SHAPE": "mxgraph.ibm.legend",
@@ -229,10 +228,11 @@
              {"val": "unittp", "dispName": "Technical Presentation"}] }],
 
     "ibmSystemProperties": {
-	"basic": "html=1;metaEdit=1;whiteSpace=wrap;image=;",
+	"basic": "html=1;metaEdit=1;whiteSpace=wrap;",
 
 	"defaultFill": "fillColor=default;",
 	"noFill": "fillColor=none;",
+	"noImage": "image=;",
 
 	"styleDashedOff": "ibmDashed=null;",
 	"styleDoubleOff": "ibmDouble=null;",
@@ -241,13 +241,15 @@
 	"styleDoubleOn": "ibmDashed=null;ibmStrikethrough=null;",
 	"styleStrikethroughOn": "ibmDashed=null;ibmDouble=null;",
 
+	"styleDashPattern": "6 6",
+
 	"container": "container=1;collapsible=0;expand=0;recursiveResize=0;",
 	"containerNull": "container=null;collapsible=null;expand=null;recursiveResize=null;",
 
 	"collapsedLabel": "align=center;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=4;",
-	"expandedLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=0;",
-	"expandedTargetLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=0;",
-	"expandedTargetLabelNoIcon": "align=center;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=0;",
+	"expandedLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=0;", 
+	"expandedTargetLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=0;", 
+	"expandedTargetLabelNoIcon": "align=center;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=16;spacingRight=16;spacingTop=0;spacingBottom=0;", 
 	"legendLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=0;spacingRight=0;spacingTop=0;spacingBottom=0;",
 	"itemLabel": "align=left;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;spacing=0;spacingLeft=0;spacingRight=0;spacingTop=0;spacingBottom=0;",
 	"unitLabel": "align=left;verticalAlign=middle;spacing=0;spacingLeft=0;spacingRight=0;spacingTop=0;spacingBottom=0;",

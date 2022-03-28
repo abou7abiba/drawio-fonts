@@ -253,7 +253,7 @@ const ibmIcons = loadIBMIcons();
 		if (shapeFill)
 			coreProperties += "fillColor=" + ibmConfig.ibmColors[shapeFill] +';';
 		else if (shapeContainer)
-			systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
+			coreProperties += ibmConfig.ibmSystemProperties.defaultFill;
 		else
 			coreProperties += ibmConfig.ibmSystemProperties.noFill;
 
@@ -317,6 +317,8 @@ const ibmIcons = loadIBMIcons();
 			systemProperties += ibmConfig.ibmSystemProperties.unitLabel;
 		}
 		else {  // base
+			coreProperties += ibmConfig.ibmSystemProperties.noImage;
+
 			if (shapeLayout === 'collapsed') {
 				//shapeHeight = 48;
 				//shapeWidth = (shapeType === 'target') ? 64 : 48;
