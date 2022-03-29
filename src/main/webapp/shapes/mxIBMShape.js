@@ -15,6 +15,13 @@
  */
 
 
+const ibmURL = (new RegExp(/^.*\//)).exec(window.location.href)[0];
+const ibmParams = new URLSearchParams(window.location.search);
+const ibmLanguage = ibmParams.get('lang') ? ibmParams.get('lang') : 'en';
+const ibmConfig = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMConfig.json').getText());
+const ibmIcons = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMIcons.json').getText());
+
+
 //**********************************************************************************************************************************************************
 // Base Shapes
 //**********************************************************************************************************************************************************

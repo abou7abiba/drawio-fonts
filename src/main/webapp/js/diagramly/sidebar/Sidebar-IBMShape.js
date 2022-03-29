@@ -14,28 +14,13 @@
  * limitations under the License.
  */
 
-const ibmURL = (new RegExp(/^.*\//)).exec(window.location.href)[0];
-const ibmParams = new URLSearchParams(window.location.search);
-const ibmLanguage = ibmParams.get('lang') ? ibmParams.get('lang') : 'en';
-
-function loadIBMConfig()
-{
-        let jsonURL = ibmURL + 'js/diagramly/sidebar/ibm/IBMConfig.json';
-        let jsonText = mxUtils.load(jsonURL).getText();
-        return JSON.parse(jsonText);
-};
-const ibmConfig = loadIBMConfig();
-
-function loadIBMIcons()
-{
-        let jsonURL = ibmURL + 'js/diagramly/sidebar/ibm/IBMIcons.json';
-        let jsonText = mxUtils.load(jsonURL).getText();
-        return JSON.parse(jsonText);
-};
-const ibmIcons = loadIBMIcons();
-
 (function()
 {
+	const ibmURL = (new RegExp(/^.*\//)).exec(window.location.href)[0];
+	const ibmParams = new URLSearchParams(window.location.search);
+	const ibmLanguage = ibmParams.get('lang') ? ibmParams.get('lang') : 'en';
+	const ibmConfig = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMConfig.json').getText());
+
 	Sidebar.prototype.createIBMPalette = function(sidebarID, sidebarFile) 
 	{
 		let jsonURL = ibmURL + 'js/diagramly/sidebar/ibm/' + sidebarFile;
