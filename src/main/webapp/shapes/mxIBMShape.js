@@ -470,7 +470,6 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
 {
 	let properties = '';
 
-	/* In progress.
 	let changed = lineColor.isChanged || fillColor.isChanged || fontColor.isChanged || badgeColor.isChanged;
 	if (!changed)
 		return properties;
@@ -480,53 +479,27 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
         let FILL_COLOR_NAME = ibmConfig.ibmBaseConstants.FILL_COLOR_NAME;
         let FONT_COLOR_NAME = ibmConfig.ibmBaseConstants.FONT_COLOR_NAME;
 
-	let lineColorLast = lineColor.previous;
-	let fillColorLast = fillColor.previous;
-	let fontColorLast = fontColor.previous;
-
-	let lineColorName = this.getColorName(lineColor.previous);
-	let fillColorName = this.getColorName(fillColor.previous);
-	let fontColorName = this.getColorName(fontColor.previous);
-
-	let lineColorReset = false;
-	let fillColorReset = false;
-	let fontColorReset = false;
-	let badgeColorReset = false;
-
-	// If line color changed but not a valid line color then reset line color and fill color to previous.
+	// If line color changed but not a valid color then reset line and fill to previous.
         if (lineColor.isChanged)
         {
-		lineColorLast = lineColor.current;
-                lineColorName = this.getColorName(lineColor.current);
+                let lineColorName = this.getColorName(lineColor.current);
 
                 if (!lineColorName || lineColorName.indexOf(LINE_COLOR_NAME) === -1)
 		{
-			lineColorReset = true;
-
-			lineColorLast = lineColor.previous;
-			fillColorLast = fillColor.previous;
-
-                	lineColorName = this.getColorName(lineColor.previous);
-                	fillColorName = this.getColorName(fillColor.previous);
-
                         properties += 'strokeColor=' + lineColor.previous + ';';
                         properties += 'fillColor=' + fillColor.previous + ';';
 		}
         }
 
-	// If fill color changed but not a valid fill color then reset fill color.
+	/* In progress.
+	// If fill color changed but not a valid color then reset.
 	if (fillColor.isChanged && !lineColorReset)
 	{
-		fillColorLast = fillColor.current;
-                fillColorName = this.getColorName(fillColor.current);
 
-		*i** progress.
 		if (!fillColorName || fillColorName.indexOf(FILL_COLOR_NAME) === -1 ||
 				      (!fillColorName.startsWith('Transparent') && !fillColorName.startsWith('White')) ||
                                       fillColorName.search(/[0-9]/) != lineColorName.search(/[0-9]/))
 		{
-			fillColorReset = true;
-
                 	if (shapeLayout.previous === 'collapsed')
                 		properties += ibmConfig.ibmSystemProperties.noFill;
 			else if (shapeLayout.previous === 'expanded')
@@ -541,36 +514,26 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
 			else
                        		properties += ibmConfig.ibmSystemProperties.noFill;
 		}
-		***
 	}
+	*/
 
-	// If font color changed but not a valid text color then reset font color.
+	// If font color changed but not a valid color then reset.
         if (fontColor.isChanged)
         {
-                fontColorName = this.getColorName(fontColor.current);
+                let fontColorName = this.getColorName(fontColor.current);
 
-                if (!fontColorName || fontColorName.indexOf(TEXT_COLOR_NAME) === -1)
-                {
-			fontColorReset = true;
-                        fontColor.current = fontColor.previous;
+                if (!fontColorName || fontColorName.indexOf(FONT_COLOR_NAME) === -1)
                         properties += 'fontColor=' + fontColor.previous + ';';
-                }
         }
 
-	// If badge color changed but not a valid badge color then reset badge color.
-	// This is a placeholder in case needed.
+	// If badge color changed but not valid color then reset.
         if (badgeColor.isChanged)
         {
-                badgeColorName = this.getColorName(badgeColor.current);
+                let badgeColorName = this.getColorName(badgeColor.current);
 
                 if (!badgeColorName || badgeColorName.indexOf(LINE_COLOR_NAME) === -1)
-                {
-			badgeColorReset = true;
-                        badgeColor.current = badgeColor.previous;
                         properties += 'ibmBadgeColor=' + badgeColor.previous + ';';
-                }
         }
-	*/
 
 	return properties;
 }
