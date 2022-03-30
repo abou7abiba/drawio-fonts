@@ -72,13 +72,16 @@ mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 	var cStyleStr = event.properties.change.style;
 	var pStyle = this.getStylesObj(pStyleStr);
 	var cStyle = this.getStylesObj(cStyleStr);
+	// get shapeType and shapeLayout
+	var shapeType = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
+	var shapeLayout = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_LAYOUT_DEFAULT);
 
 	// Hold all the changes
 	var changes = {};
-	changes.style = cStyleStr;	
+	changes.style = cStyleStr;
 	// get the new style
-	changes.style = this.setLayoutStyle(changes.style, pStyle, cStyle);	
-	changes.style = this.setLineStyle(changes.style, pStyle, cStyle);	
+	changes.style = this.setLayoutStyle(changes.style, pStyle, cStyle);
+	changes.style = this.setLineStyle(changes.style, pStyle, cStyle);
 	changes.style = this.setColorStyle(changes.style, pStyle, cStyle);
 
 	// Get the new geometry
@@ -775,17 +778,17 @@ mxIBMShapeBase.prototype.getLayoutProperties = function(shapeType, shapeLayout, 
 
 	if (shapeType.current.startsWith('group') && shapeLayout.current === 'collapsed')
 	{
-		shapeLayout = 'expanded';
+		shapeLayout.current = 'expanded';
 		properties = 'ibmLayout=expanded;';
 	}
 	else if (shapeType.current === 'actor' && shapeLayout.current.startsWith('expanded'))
 	{
-		shapeLayout = 'collapsed';
+		shapeLayout.current = 'collapsed';
 		properties = 'ibmLayout=collapsed;';
 	}
 	else if (shapeType.current === 'target' && shapeLayout.current === 'expandedStack')
 	{
-		shapeLayout = 'expanded';
+		shapeLayout.current = 'expanded';
 		properties = 'ibmLayout=expanded;';
 	}
 
