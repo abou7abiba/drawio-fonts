@@ -42,6 +42,440 @@ mxIBMShapeBase.prototype.cst = ibmConfig.ibmBaseConstants;
 
 mxIBMShapeBase.prototype.customProperties = ibmConfig.ibmBaseProperties;
 
+mxIBMShapeBase.prototype.init = function (container) {
+	if (this.node == null) {
+		this.node = this.create(container);
+		if (container != null) {
+			container.appendChild(this.node);
+		}
+		// Define custom event handler
+		this.customEventsHandler = mxUtils.bind(this, function (sender, event) {
+			if (event.properties.change && event.properties.change.cell && event.properties.change.cell.id === this.state.cell.id) {
+				if ("mxStyleChange" === event.properties.change.constructor.name) {
+					this.styleChangedEventsHandler(this.state.view.graph, event);
+				}
+			}
+		})
+		this.state.view.graph.model.addListener('executed', this.customEventsHandler);
+	}
+}
+
+/**
+ * styleChangedEventsHandler
+ * @param {*} graph 
+ * @param {*} event 
+ */
+mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
+// console.log('mxIBMShapeBase.prototype.styleChangedEventsHandler', event);
+	var cell = event.properties.change.cell;	
+	var pStyleStr = event.properties.change.previous;
+	var cStyleStr = event.properties.change.style;
+	var pStyle = this.getStylesObj(pStyleStr);
+	var cStyle = this.getStylesObj(cStyleStr);
+	// get shapeType and shapeLayout
+	var shapeType = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
+	var shapeLayout = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_LAYOUT_DEFAULT);
+
+	// Hold all the changes
+	var changes = {};
+	changes.style = cStyleStr;
+	// get the new style
+	changes.style = this.setLayoutStyle(changes.style, pStyle, cStyle);
+	changes.style = this.setLineStyle(changes.style, pStyle, cStyle);
+	changes.style = this.setColorStyle(changes.style, pStyle, cStyle);
+
+	// Get the new geometry
+	changes.geometry = cell.getGeometry();
+	var properties = this.getDetails(this, shapeType.current, shapeLayout.current, null, null);
+	if (!shapeLayout.current.startsWith('item')) {
+		if (shapeType.current == 'actor') {
+			changes.geometry.width = properties.minWidth;
+			changes.geometry.height = properties.minHeight;			
+		} else if (shapeType.current.startsWith('node') || shapeType.current.startsWith('comp') || shapeType.current == 'target') {
+			if (shapeLayout.current == 'collapsed') {
+				changes.geometry.width = properties.minWidth;
+				changes.geometry.height = properties.minHeight;
+			} else {
+				changes.geometry.height = properties.defaultHeight;
+				changes.geometry.width = properties.defaultWidth;
+			}
+		}
+	}
+
+	graph.model.beginUpdate();
+	try {		
+		graph.model.setStyle(cell, changes.style);
+		graph.model.setGeometry(cell, changes.geometry);
+	} finally {
+		graph.model.endUpdate();
+	}	
+}
+
+/**
+* Function: paintVertexShape
+* 
+* Paints the vertex shape.
+*/
+mxIBMShapeBase.prototype.paintVertexShape = function (c, x, y, w, h) {
+	var properties = this.getProperties(this, h, w);
+console.log('mxIBMShapeBase.prototype.paintVertexShape', properties);
+
+	c.translate(x, y);
+
+	if(!properties.shapeLayout.startsWith('item')) {		
+		if (properties.shapeType == 'target' || properties.shapeType == 'actor') {
+			this.drawRoundRectShape(c, properties);
+		} else {
+			this.drawRectShape(c, properties);
+		}
+		this.drawStencil(c, properties);		
+		this.drawStyle(c, properties);		
+		this.drawBadge(c, properties);
+	} else {
+		if (properties.shapeLayout == 'itemColor' || properties.shapeLayout == 'itemShape' || properties.shapeLayout == 'itemStyle' || properties.shapeLayout == 'itemIcon') {
+			if (properties.shapeType == 'target' || properties.shapeType == 'actor') {
+				this.drawRoundRectShape(c, properties);
+			} else {
+				this.drawRectShape(c, properties);
+			}
+		}
+		if (properties.shapeLayout == 'itemIcon') {
+			this.drawStencil(c, properties);
+		}
+		if (properties.shapeLayout == 'itemStyle') {
+			this.drawStyle(c, properties);
+		}
+		if (properties.shapeLayout == 'itemBadge') { 
+			this.drawBadge(c, properties);
+		}
+	}
+}
+
+mxIBMShapeBase.prototype.getProperties = function (shape, shapeHeight, shapeWidth) {
+	var properties = {}
+	if (shape.state.style) {
+		properties.shapeType = mxUtils.getValue(shape.state.style, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
+		properties.shapeLayout = mxUtils.getValue(shape.state.style, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_LAYOUT_DEFAULT);
+		properties.styleDashed = mxUtils.getValue(shape.state.style, this.cst.STYLE_DASHED, this.cst.STYLE_DASHED_DEFAULT);
+		properties.styleDouble = mxUtils.getValue(shape.state.style, this.cst.STYLE_DOUBLE, this.cst.STYLE_DOUBLE_DEFAULT);
+		properties.styleStrikethrough = mxUtils.getValue(shape.state.style, this.cst.STYLE_STRIKETHROUGH, this.cst.STYLE_STRIKETHROUGH_DEFAULT);
+		properties.styleMultiplicity = mxUtils.getValue(shape.state.style, this.cst.STYLE_MULTIPLICITY, this.cst.STYLE_MULTIPLICITY_DEFAULT);
+		properties.ibmBadge = mxUtils.getValue(shape.state.style, this.cst.BADGE, this.cst.BADGE_DEFAULT);
+		properties.hideIcon = mxUtils.getValue(shape.state.style, this.cst.HIDE_ICON, this.cst.HIDE_ICON_DEFAULT);
+		properties.rotateIcon = mxUtils.getValue(shape.state.style, this.cst.ROTATE_ICON, this.cst.ROTATE_ICON_DEFAULT);
+		properties.lineColor = mxUtils.getValue(shape.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
+		properties.fillColor = mxUtils.getValue(shape.state.style, this.cst.FILL_COLOR, this.cst.FILL_COLOR_DEFAULT);
+		properties.fontColor = mxUtils.getValue(shape.state.style, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
+
+		var details = this.getDetails(shape, properties.shapeType, properties.shapeLayout, shapeWidth, shapeHeight);
+		for (var key in details) {
+			properties[key] = details[key];
+		}
+	}
+
+	// set the min size
+	if (details['shapeHeight'] == null) {
+		details['shapeHeight'] = properties.defaultHeight;
+	}
+	if (details['shapeWidth'] == null) {
+		details['shapeWidth'] = properties.defaultWidth;
+	}
+	if (!properties.shapeLayout.startsWith('item')) {
+		details['shapeHeight'] = Math.max(details['shapeHeight'], properties.minHeight);
+		details['shapeWidth'] = Math.max(details['shapeWidth'], properties.minWidth);
+	}
+	return properties;
+}
+
+/**
+ * Draw round rect shape for actor, target system
+ * @param {*} c 
+ * @param {*} properties 
+ */
+mxIBMShapeBase.prototype.drawRoundRectShape = function (c, properties) {
+	if (properties.styleDashed || properties.styleDouble) {
+		c.roundrect(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius, properties.curveRadius);
+		if (properties.styleDashed) {
+			c.setDashed(true, true);
+			c.setDashPattern('6 6');
+		} else {
+			c.setDashed(false);
+		}
+		c.setStrokeColor(properties.lineColor);
+		c.fillAndStroke();
+
+		drawShapeContainer(properties.doubleAlign, properties.doubleAlign, properties.shapeWidth - properties.doubleAlign * 2, properties.shapeHeight - properties.doubleAlign * 2);
+	} else {
+		drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight)
+	}
+
+	function drawShapeContainer(x, y, w, h) {
+		c.roundrect(x, y, w, h, properties.curveRadius, properties.curveRadius);
+		c.setStrokeColor(properties.lineColor);
+		if (properties.shapeLayout.startsWith('item')) {
+			c.setFillColor(ibmConfig.ibmColors.white);
+		} else {
+			c.setFillColor(properties.lineColor);
+		}
+		c.setDashed(false);
+		c.fillAndStroke();
+	}
+}
+
+/**
+ * Draw rect shape for logical component, prescribed component, logical node, prescribed node, logical group, prescribed group
+ * @param {*} c 
+ * @param {*} properties 
+ */
+mxIBMShapeBase.prototype.drawRectShape = function (c, properties) {	
+	if (properties.styleDashed || properties.styleDouble) {
+		if (properties.styleDashed) {
+			c.setDashed(true, true);
+			c.setDashPattern('6 6');
+		} else {
+			c.setDashed(false);
+		}
+		c.setStrokeColor(properties.lineColor);
+		drawNode(0, 0, properties.shapeWidth, properties.shapeHeight);
+		c.fillAndStroke();
+
+		drawShapeContainer(properties.doubleAlign, properties.doubleAlign, properties.shapeWidth - properties.doubleAlign * 2, properties.shapeHeight - properties.doubleAlign * 2);
+	} else {
+		drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight);
+	}
+	
+
+	if (properties.shapeType.startsWith('group')) {
+		c.rect(0, 0, properties.sidebarWidth, properties.sidebarHeight);
+		c.setStrokeColor(properties.lineColor);
+		c.setFillColor(properties.lineColor);
+		c.fillAndStroke();
+	} else {
+		if (properties.shapeLayout.startsWith('expanded')) {
+			if (!properties.hideIcon) {
+				drawNode(0, 0, properties.iconAreaWidth, properties.iconAreaHeight);
+				c.setStrokeColor(properties.lineColor);
+				c.setFillColor(properties.lineColor);
+				c.fillAndStroke();
+			}
+		}
+		if (properties.shapeType.startsWith('comp')) {
+			c.setStrokeColor(properties.lineColor);
+			c.setFillColor(properties.fillColor);
+			c.rect(properties.sidetickAlign, properties.shapeHeight / 4, properties.sidetickWidth, properties.sidetickHeight);
+			c.fillAndStroke();
+			c.rect(properties.sidetickAlign, properties.shapeHeight - properties.shapeHeight / 4 - properties.sidetickHeight, properties.sidetickWidth, properties.sidetickHeight);
+			c.fillAndStroke();
+		}
+	}
+
+	function drawNode(x, y, w, h) {
+		if (properties.shapeType.endsWith('l')) { // nodel, compl, groupl 
+			c.roundrect(x, y, w, h, properties.curveRadius, properties.curveRadius);
+		} else {
+			c.rect(x, y, w, h);
+		}
+	}
+
+	function drawShapeContainer(x, y, w, h) {
+		if (properties.shapeLayout == 'itemIcon') {
+			c.setStrokeColor('none');
+			c.setFillColor(properties.fillColor);
+		} else {
+			c.setStrokeColor(properties.lineColor);		
+			if (properties.shapeLayout == 'collapsed') {
+				c.setFillColor(properties.lineColor);
+			} else {
+				c.setFillColor(properties.fillColor);
+			}
+		}
+		c.setDashed(false);
+		drawNode(x, y, w, h);
+		c.fillAndStroke();
+	}
+}
+
+/**
+ * Draw stencil, hideIcon if set
+ * @param {*} c 
+ * @param {*} properties 
+ */
+mxIBMShapeBase.prototype.drawStencil = function (c, properties) {
+	if (!properties.hideIcon) {
+		var prIcon = this.state.cell.getAttribute('Icon-Name');
+		var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + prIcon);
+		if (prStencil) {
+			c.save();
+			// rotate icon if set
+			if (properties.rotateIcon) {
+				c.rotate(properties.rotateIcon, false, false, properties.iconAreaWidth / 2, properties.iconAreaHeight / 2);
+			}
+			// set icon color
+			c.setFillColor(properties.iconColor)
+			c.setStrokeColor(properties.lineColor);
+			if (properties.shapeType == 'target' && properties.shapeLayout == 'collapsed') {
+				prStencil.drawShape(c, this, properties.defaultWidth / 2 - properties.iconSize / 2, properties.iconAlign, properties.iconSize, properties.iconSize);
+			} else {
+				prStencil.drawShape(c, this, properties.iconAlign, properties.iconAlign, properties.iconSize, properties.iconSize);
+			}
+			c.restore();
+		}
+	}
+}
+
+/**
+ * Draw style, styleStrikethrough and styleMultiplicity
+ * @param {*} c 
+ * @param {*} properties 
+ */
+mxIBMShapeBase.prototype.drawStyle = function (c, properties) {
+	if (properties.styleStrikethrough) {
+		c.begin();
+		if (properties.shapeLayout == 'collapsed' || properties.shapeLayout == 'itemStyle' || properties.shapeType.startsWith('group')) {
+			c.moveTo(0, 0);
+			c.lineTo(properties.shapeWidth, properties.shapeHeight);
+		} else if (properties.shapeLayout.startsWith('expanded')) {
+			if (properties.shapeType == 'target') {
+				c.moveTo(properties.iconSize, 0);
+				c.lineTo(properties.shapeWidth - properties.iconSize, properties.iconAreaHeight);
+			} else {
+				properties.hideIcon ? c.moveTo(0, 0) : c.moveTo(properties.iconAreaWidth, 0);
+				c.lineTo(properties.shapeWidth, properties.iconAreaHeight);
+			}
+		}
+		c.setStrokeColor(properties.styleColor);
+		c.close();
+		c.stroke();
+	}
+
+	if (properties.styleMultiplicity) {
+		c.begin();
+		for (var i = 1; i <= 2; i++) {
+			var offSet = properties.multiplicityAlign * i;
+			if (properties.shapeType == 'actor') {
+				c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
+				c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
+				c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
+			} else if (properties.shapeType == 'target') {
+				c.moveTo(properties.iconSize + offSet, - offSet);
+				c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
+				c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
+				c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
+				c.moveTo(properties.iconSize + offSet, - offSet);
+			} else if (properties.shapeType.endsWith('l')) {
+				c.moveTo(offSet, - offSet);
+				c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
+				c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
+				c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
+				c.moveTo(offSet, - offSet);
+			} else {
+				c.moveTo(offSet, - offSet);
+				c.lineTo(properties.shapeWidth + offSet, - offSet);
+				c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
+				c.moveTo(offSet, - offSet);
+			}
+		}
+		if (properties.styleDashed) {
+			c.setDashed(true, true);
+			c.setDashPattern('6 6');
+		} else {
+			c.setDashed(false);
+		}
+		c.setStrokeColor(properties.lineColor);
+		c.close();
+		c.stroke();
+	}
+}
+
+/**
+ * Draw badge shape, color, text, font color
+ * @param {*} c 
+ * @param {*} properties 
+ */
+mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
+	var bW = 14;
+	var bM = 1;
+	if (properties.shapeLayout == 'itemBadge') {
+		if (properties.ibmBadge == 'circle' || properties.ibmBadge == 'square') {
+			drawBadgeIcon(properties.badgeColor, 0, 1, bW, bW);
+		} else {
+			drawBadgeIcon(properties.badgeColor, bW / 2, 1, bW, bW);
+		}
+	} else {
+		var offset = properties.shapeType == 'target' || properties.shapeType == 'actor' ? 0 : bW / 2 + 1;
+		if (properties.ibmBadge == 'circle' || properties.ibmBadge == 'square') {
+			drawBadgeIcon(properties.badgeFontColor, properties.shapeWidth - bW - bM * 2 + offset, - bW / 2 - bM, bW + bM * 2, bW + bM * 2);
+			drawBadgeIcon(properties.badgeColor, properties.shapeWidth - bW - bM + offset, - bW / 2, bW, bW);
+		} else {
+			drawBadgeIcon(properties.badgeFontColor, properties.shapeWidth - bW / 2 - bM + offset, - bW / 2 - bM, bW + bM * 2, bW + bM * 2);
+			drawBadgeIcon(properties.badgeColor, properties.shapeWidth - bW / 2 - bM + offset, - bW / 2, bW, bW);
+		}
+	}
+
+	function drawBadgeIcon(color, x, y, w, h) {
+		switch (properties.ibmBadge) {
+			case 'circle':
+				c.ellipse(x, y, w, h);
+				break;
+			case 'square':
+				c.rect(x, y, w, h);
+				break;
+			case 'diamond':
+				c.begin();
+				c.moveTo(x, y);
+				c.lineTo(x - w / 2, y + h / 2);
+				c.lineTo(x, y + h);
+				c.lineTo(x + w / 2, y + h / 2);
+				c.close();
+				break;
+			case 'hexagon':
+				c.begin();
+				c.moveTo(x - w / 2 / 2, y);
+				c.lineTo(x - w / 2, y + h / 2);
+				c.lineTo(x - w / 2 / 2, y + h);
+				c.lineTo(x + w / 2 / 2, y + h);
+				c.lineTo(x + w / 2, y + h / 2);
+				c.lineTo(x + w / 2 / 2, y);
+				c.close();
+				break;
+			case 'octagon':
+				c.begin();
+				c.moveTo(x - w / 2 / 2, y);
+				c.lineTo(x - w / 2, y + h / 2 / 2);
+				c.lineTo(x - w / 2, y + h / 2 / 2 + h / 2);
+				c.lineTo(x - w / 2 / 2, y + h);
+				c.lineTo(x + w / 2 / 2, y + h);
+				c.lineTo(x + w / 2, y + h / 2 / 2 + h / 2);
+				c.lineTo(x + w / 2, y + h / 2 / 2);
+				c.lineTo(x + w / 2 / 2, y);
+				c.close();
+				break;
+			case 'triangle':
+				c.begin();
+				c.moveTo(x, y);
+				c.lineTo(x - w / 2, y + h);
+				c.lineTo(x + w / 2, y + h);
+				c.close();
+				break;
+			default: ;
+		}
+		c.setFillColor(color);
+		c.setStrokeColor(color);
+		c.setDashed(false);
+		c.fillAndStroke();
+	}
+}
+
+/**
+ * Rewrite label position
+ * @param {*} rect 
+ * @returns 
+ */
+mxIBMShapeBase.prototype.getLabelBounds = function (rect) {
+	var properties = this.getProperties(this, null, null);
+	var offSet = properties.hideIcon || properties.shapeLayout.startsWith('item') ? properties.labelAlign : properties.iconAreaWidth + properties.labelAlign;
+	return new mxRectangle(rect.x + offSet * this.scale, rect.y, rect.width - properties.labelAlign * this.scale, properties.labelHeight * this.scale);
+};
 
 // Convert RGB values to hex values.
 mxIBMShapeBase.prototype.rgb2hex = function(color)
@@ -344,17 +778,17 @@ mxIBMShapeBase.prototype.getLayoutProperties = function(shapeType, shapeLayout, 
 
 	if (shapeType.current.startsWith('group') && shapeLayout.current === 'collapsed')
 	{
-		shapeLayout = 'expanded';
+		shapeLayout.current = 'expanded';
 		properties = 'ibmLayout=expanded;';
 	}
 	else if (shapeType.current === 'actor' && shapeLayout.current.startsWith('expanded'))
 	{
-		shapeLayout = 'collapsed';
+		shapeLayout.current = 'collapsed';
 		properties = 'ibmLayout=collapsed;';
 	}
 	else if (shapeType.current === 'target' && shapeLayout.current === 'expandedStack')
 	{
-		shapeLayout = 'expanded';
+		shapeLayout.current = 'expanded';
 		properties = 'ibmLayout=expanded;';
 	}
 
@@ -591,9 +1025,132 @@ mxIBMShapeLegend.prototype.cst = ibmConfig.ibmLegendConstants;
 
 mxIBMShapeLegend.prototype.customProperties = ibmConfig.ibmLegendProperties;
 
+mxIBMShapeLegend.prototype.init = function (container) {
+	if (this.node == null) {
+		this.node = this.create(container);
+		if (container != null) {
+			container.appendChild(this.node);
+		}
+		// Define custom event handler
+		this.customEventsHandler = mxUtils.bind(this, function (sender, event) {
+			if (event.properties.change && event.properties.change.cell && event.properties.change.cell.id === this.state.cell.id) {
+				if ("mxStyleChange" === event.properties.change.constructor.name) {
+					this.styleChangedEventsHandler(this.state.view.graph, event);
+				}
+			}
+		})
+		this.state.view.graph.model.addListener('executed', this.customEventsHandler);
+	}
+}
 
+mxIBMShapeLegend.prototype.styleChangedEventsHandler = function (graph, event) {	
+	var cell = event.properties.change.cell;
+	// var pStyle = getStylesObj(event.properties.change.previous);
+	var cStyle = getStylesObj(event.properties.change.style);
 
+	// set the default style of shapeType
+	var shapeType = mxUtils.getValue(cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);	
+	// var pNoHeader = mxUtils.getValue(pStyle, this.cst.HIDE_HEADER, this.cst.HIDE_HEADER_DEFAULT);
+	var cNoHeader = mxUtils.getValue(cStyle, this.cst.HIDE_HEADER, this.cst.HIDE_HEADER_DEFAULT);
+	
+	var cellStyles = this.getCellStyles(shapeType, cNoHeader);
+	for (let key in cellStyles) {
+		cStyle[key] = cellStyles[key];
+	}
 
+	graph.model.beginUpdate();
+	try {
+		graph.model.setStyle(cell, getStylesStr(cStyle));
+		this.setCellGeometry(graph, cell, shapeType, cStyle);
+	} finally {
+		graph.model.endUpdate();
+	}
+}
+
+mxIBMShapeLegend.prototype.setCellGeometry = function(graph, cell, shapeType, cStyle) {
+	var cells = graph.getChildCells(cell, true, false);
+	if (cells.length > 0) {			
+		// Set child's geometry
+		var childMaxWidth = 0;
+		var childMaxHeight = 0;
+		for (var i = 0; i < cells.length; i++) {
+			var cellBounds = graph.getCellBounds(cells[i], true, false);
+			childMaxWidth = Math.max(cellBounds.width / this.scale, childMaxWidth);
+			childMaxHeight = Math.max(cellBounds.height / this.scale, childMaxHeight);
+		}
+		for (var i = 0; i < cells.length; i++) {
+			var geometry = cells[i].getGeometry();
+			geometry.width = childMaxWidth;
+			geometry.height = childMaxHeight;
+			graph.model.setGeometry(cells[i], geometry);
+		}
+		// set parent's geometry
+		var geometry = cell.getGeometry();
+		if (shapeType == 'legendh') {
+			geometry.width = cStyle.marginLeft * 1 + childMaxWidth * cells.length + cStyle.marginRight * 1;
+			geometry.height = cStyle.marginTop * 1 + childMaxHeight + cStyle.marginBottom * 1;
+		} else {
+			geometry.width =  cStyle.marginLeft * 1 + childMaxWidth + cStyle.marginRight * 1;
+			geometry.height = cStyle.marginTop * 1 + childMaxHeight * cells.length + cStyle.marginBottom * 1;
+		}		
+		graph.model.setGeometry(cell, geometry);
+	}
+}
+
+mxIBMShapeLegend.prototype.paintVertexShape = function (c, x, y, w, h) {
+	var properties = this.getProperties();
+	c.rect(x, y, w, h);
+	c.setFillColor(properties.fillColor);
+	c.setStrokeColor(properties.strokeColor);
+	c.setFontColor(properties.fontColor);
+	c.fillAndStroke();
+}
+
+mxIBMShapeLegend.prototype.getProperties = function () {
+	var properties = {}
+	properties = ibmConfig.ibmShapeSizes.legend;
+	properties.shapeType = mxUtils.getValue(this.state.style, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
+	properties.fillColor = mxUtils.getValue(this.state.style, this.cst.FILL_COLOR, this.cst.FILL_COLOR_DEFAULT);
+	properties.strokeColor = mxUtils.getValue(this.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
+	properties.fontColor = mxUtils.getValue(this.state.style, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
+	properties.ibmNoHeader = mxUtils.getValue(this.state.style, this.cst.HIDE_HEADER, this.cst.HIDE_HEADER_DEFAULT);
+	return properties;
+}
+
+mxIBMShapeLegend.prototype.getCellStyles = function(shapeType, ibmNoHeader) {
+	let properties = '';
+	let styles = {};
+
+	if (shapeType === "legendh") {
+		if (ibmNoHeader == 1) {
+			properties = ibmConfig.ibmSystemProperties.legendStack + ibmConfig.ibmSystemProperties.legendhStackNoHeader;
+		} else {
+			properties = ibmConfig.ibmSystemProperties.legendStack + ibmConfig.ibmSystemProperties.legendhStack;
+		}
+	} else if (shapeType === "legendv") {
+		if (ibmNoHeader == 1) {
+			properties = ibmConfig.ibmSystemProperties.legendStack + ibmConfig.ibmSystemProperties.legendvStackNoHeader;
+		} else {
+			properties = ibmConfig.ibmSystemProperties.legendStack + ibmConfig.ibmSystemProperties.legendvStack;
+		}		
+	}
+
+	properties = properties.slice(0, -1);
+	let array = properties.split(';');
+	for (var index = 0; index < array.length; index++) {
+		element = array[index].split('=');
+		if (element[1] === 'null')
+			styles[element[0]] = null;
+		else	
+			styles[element[0]] = element[1];
+	}
+	return styles;
+}
+
+mxIBMShapeLegend.prototype.getLabelBounds = function (rect) {
+	var properties = this.getProperties();	
+	return new mxRectangle(rect.x, rect.y, rect.width, properties.shapeHeight * this.scale);
+};
 //**********************************************************************************************************************************************************
 // Deployment Units
 //**********************************************************************************************************************************************************
@@ -613,9 +1170,74 @@ mxIBMShapeUnit.prototype.cst = ibmConfig.ibmUnitConstants;
  
 mxIBMShapeUnit.prototype.customProperties = ibmConfig.ibmUnitProperties;
 
+mxIBMShapeUnit.prototype.paintVertexShape = function (c, x, y, w, h) {
+	var properties = this.getProperties();
+// console.log("mxIBMShapeUnit.prototype.paintVertexShape", properties);
+	var textStr = "";
+	switch(properties.shapeType) {
+		case "unite" : textStr = "E"; break;
+		case "uniti" : textStr = "I"; break;
+		case "unitp" : textStr = "P"; break;
+		case "unittd" : textStr = "TD"; break;
+		case "unitte" : textStr = "TE"; break;
+		case "unitti" : textStr = "TI"; break;
+		case "unittp" : textStr = "TP"; break;
+		case "unitd" : textStr = "D"; break;
+		default : textStr = "D";
+	}
+	c.translate(x, y);
+	// background
+	c.rect(0, 0, w, h);
+	c.setFillColor(properties.fillColor);
+	// c.setStrokeColor(properties.strokeColor);
+	c.setStrokeColor('none');
+	c.setFontColor(properties.fontColor);
+	c.fillAndStroke();
+	// text
+	c.text(properties.iconSize / 2, properties.iconSize / 2, w, h, textStr, 'center', 'middle', 0, 0, 0, 0, 0, 0);
+}
 
+mxIBMShapeUnit.prototype.getProperties = function () {
+	var properties = {}
+	properties = ibmConfig.ibmShapeSizes.unit;
+	properties.shapeType = mxUtils.getValue(this.state.style, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
+	properties.fillColor = mxUtils.getValue(this.state.style, this.cst.FILL_COLOR, this.cst.FILL_COLOR_DEFAULT);
+	properties.fontColor = mxUtils.getValue(this.state.style, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
+	// properties.strokeColor = mxUtils.getValue(this.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
+	return properties;
+}
 
+mxIBMShapeUnit.prototype.getLabelBounds = function (rect) {
+	var properties = this.getProperties();	
+	var offSet = properties.labelAlign;
+	return new mxRectangle(rect.x + offSet * this.scale, rect.y, rect.width - properties.labelAlign * this.scale, properties.labelHeight * this.scale);
+};
 
 mxCellRenderer.registerShape(mxIBMShapeBase.prototype.cst.SHAPE, mxIBMShapeBase);
 mxCellRenderer.registerShape(mxIBMShapeLegend.prototype.cst.SHAPE, mxIBMShapeLegend);
 mxCellRenderer.registerShape(mxIBMShapeUnit.prototype.cst.SHAPE, mxIBMShapeUnit);
+
+//**********************************************************************************************************************************************************
+// Common Functions
+//**********************************************************************************************************************************************************
+function getStylesObj(stylesStr) {
+	var styles = {};
+	stylesStr = stylesStr.slice(0, -1); // Remove trailing semicolon.
+	let array = stylesStr.split(';');
+	for (var index = 0; index < array.length; index++) {
+		element = array[index].split('=');
+		if (element[1] === 'null')
+			styles[element[0]] = null;
+		else
+			styles[element[0]] = element[1];
+	}
+	return styles;
+}
+
+function getStylesStr(stylesObj) {
+	var stylesStr = '';
+	for (var key in stylesObj) {
+		stylesStr += key + '=' + stylesObj[key] + ';'
+	}
+	return stylesStr
+} 
