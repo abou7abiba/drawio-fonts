@@ -319,7 +319,7 @@
           "$DEFAULT_PROPERTIES": null
         },
         "File Storage": {
-          "icon": "file-storage--alt",
+          "icon": "folder--details",
           "format": "$LN_FORMAT_COLLAPSED",
           "color": "$STORAGE_COLOR",
           "$DEFAULT_PROPERTIES": null
@@ -449,7 +449,7 @@
       },
       "Network / Devices": {
         "Bridge": {
-          "icon": "arrows-horizontal",
+          "icon": "arrows--horizontal",
           "format": "$LN_FORMAT_COLLAPSED",
           "color": "$NETWORK_COLOR",
           "$DEFAULT_PROPERTIES": null

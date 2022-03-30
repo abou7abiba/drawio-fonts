@@ -14,28 +14,13 @@
  * limitations under the License.
  */
 
-const ibmURL = (new RegExp(/^.*\//)).exec(window.location.href)[0];
-const ibmParams = new URLSearchParams(window.location.search);
-const ibmLanguage = ibmParams.get('lang') ? ibmParams.get('lang') : 'en';
-
-function loadIBMConfig()
-{
-        let jsonURL = ibmURL + 'js/diagramly/sidebar/ibm/IBMConfig.json';
-        let jsonText = mxUtils.load(jsonURL).getText();
-        return JSON.parse(jsonText);
-};
-const ibmConfig = loadIBMConfig();
-
-function loadIBMIcons()
-{
-        let jsonURL = ibmURL + 'js/diagramly/sidebar/ibm/IBMIcons.json';
-        let jsonText = mxUtils.load(jsonURL).getText();
-        return JSON.parse(jsonText);
-};
-const ibmIcons = loadIBMIcons();
-
 (function()
 {
+	const ibmURL = (new RegExp(/^.*\//)).exec(window.location.href)[0];
+	const ibmParams = new URLSearchParams(window.location.search);
+	const ibmLanguage = ibmParams.get('lang') ? ibmParams.get('lang') : 'en';
+	const ibmConfig = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMConfig.json').getText());
+
 	Sidebar.prototype.createIBMPalette = function(sidebarID, sidebarFile) 
 	{
 		let jsonURL = ibmURL + 'js/diagramly/sidebar/ibm/' + sidebarFile;
@@ -253,7 +238,7 @@ const ibmIcons = loadIBMIcons();
 		if (shapeFill)
 			coreProperties += "fillColor=" + ibmConfig.ibmColors[shapeFill] +';';
 		else if (shapeContainer)
-			systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
+			coreProperties += ibmConfig.ibmSystemProperties.defaultFill;
 		else
 			coreProperties += ibmConfig.ibmSystemProperties.noFill;
 
@@ -317,6 +302,8 @@ const ibmIcons = loadIBMIcons();
 			systemProperties += ibmConfig.ibmSystemProperties.unitLabel;
 		}
 		else {  // base
+			coreProperties += ibmConfig.ibmSystemProperties.noImage;
+
 			if (shapeLayout === 'collapsed') {
 				//shapeHeight = 48;
 				//shapeWidth = (shapeType === 'target') ? 64 : 48;

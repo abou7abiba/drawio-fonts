@@ -2334,7 +2334,7 @@
         <fillstroke/>
     </foreground>
 </shape>
-<shape aspect="variable" h="32" name="arrows-horizontal" strokewidth="inherit" w="32">
+<shape aspect="variable" h="32" name="arrows--horizontal" strokewidth="inherit" w="32">
     <connections/>
     <foreground>
         <path>
@@ -6093,7 +6093,7 @@
         <fill/>
     </foreground>
 </shape>
-<shape aspect="variable" h="32" name="file-storage--alt" strokewidth="inherit" w="32">
+<shape aspect="variable" h="32" name="file-storage" strokewidth="inherit" w="32">
     <connections/>
     <foreground>
         <path>
@@ -9363,7 +9363,7 @@
         <fill/>
     </foreground>
 </shape>
-<shape aspect="variable" h="32" name="file-storage" strokewidth="inherit" w="32">
+<shape aspect="variable" h="32" name="folder--details" strokewidth="inherit" w="32">
     <connections/>
     <foreground>
         <path>
