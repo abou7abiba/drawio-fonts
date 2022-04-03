@@ -747,18 +747,35 @@ mxIBMShapeBase.prototype.getStylesStr = function(stylesObj, stylesStr)
 	return stylesStr;
 }
 
-// Change icon using switch statement in ibmIcons when switching between logical and prescribed.
-mxIBMShapeBase.prototype.switchIcon = function(shapeType, shapeLayout)
+// Remove categories leaving only icons.
+mxIBMShapeBase.prototype.flattenIcons = function(icons)
 {
-	/* In progress.
-	console.log(this.state.cell.getAttribute('Icon-Name',null));
-	this.state.cell.setAttribute('Icon-Name','ibm-cloud');
+	let flatIcons = {};
+	for (let categoryKey in icons)
+	{       
+		let category = icons[categoryKey];
+		for (let iconKey in category)
+			flatIcons[iconKey] = category[iconKey];
+	}
+	return flatIcons;
+}
 
-	if (previousType.slice(-1) === 'l' && currentType.slice(-1) === 'p')
-		// Lookup logical icon in ibmIcons and switch to prescribed icon if available.
-	else if (previousType.slice(-1) === 'p' && currentType.slice(-1) === 'l')
-		// Lookup prescribed icon in ibmIcons and switch to logical icon if available.
-	*/
+// Change icon to iconl or iconp if available when changing between logical and prescribed shapes.
+mxIBMShapeBase.prototype.changeIcon = function(shapeType)
+{
+	let changed = shapeType.isChanged;
+	if (!changed)
+		return;
+
+	let icons = this.flattenIcons(ibmIcons.Sidebars.Icons);
+
+	iconKey = 'icon' + shapeType.current.slice(-1);
+
+	iconName = this.state.cell.getAttribute('Icon-Name',null);
+	icon = icons[iconName];
+
+	if (icon[iconKey])
+		this.state.cell.setAttribute('Icon-Name', icon[iconKey]);
 
 	return;
 }
@@ -775,6 +792,14 @@ mxIBMShapeBase.prototype.getLayoutProperties = function(shapeType, shapeLayout, 
 		return properties;
 
 	// Prevent invalid changes.
+	
+	if ((shapeType.previous.startsWith('group') && shapeLayout.current === 'collapsed') ||
+		(shapeType.previous === 'actor' && shapeLayout.current.startsWith('expanded')) ||
+		(shapeType.previous === 'target' && shapeLayout.current === 'expandedStack'))
+	{
+		properties += 'ibmLayout=' + shapeLayout.previous + ';';
+		return properties;
+	}
 
 	if (shapeType.current.startsWith('group') && shapeLayout.current === 'collapsed')
 	{
@@ -839,8 +864,8 @@ mxIBMShapeBase.prototype.setLayoutStyle = function(cStyleStr, pStyle, cStyle)
 	var shapeLayout = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_TYPE_LAYOUT);
 	var hideIcon = this.getStyleValues(pStyle, cStyle, this.cst.HIDE_ICON, this.cst.HIDE_ICON_DEFAULT);
 
-	// Change icon if available when switching between logical and prescribed.
-	this.switchIcon(shapeType, shapeLayout);
+	// Change icon if changing between logical and prescribed.
+	this.changeIcon(shapeType);
 
 	// Get properties corresponding to layout change.
 	var properties = this.getLayoutProperties(shapeType, shapeLayout, hideIcon);

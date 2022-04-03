@@ -320,8 +320,7 @@
 					shapeHeight = ibmConfig.ibmShapeSizes.collapsed.defaultHeight;
 				}
 
-				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel +
-							ibmConfig.ibmSystemProperties.noFill;
+				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel;
 			}
 			else if (shapeLayout.startsWith('expanded')) {
 				//shapeHeight = shapeType.startsWith('group') ? 152 : 48;
