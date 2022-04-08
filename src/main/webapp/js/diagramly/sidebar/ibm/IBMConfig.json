@@ -329,7 +329,7 @@
 		            "sidebarWidth": 2, "sidebarHeight": 12, "sidetickWidth": 4, "sidetickHeight": 2, "sidetickAlign": -2,
          		    "doubleAlign": 2, "multiplicityAlign": 2},
 
-    	"legend":          {"defaultWidth": 128, "defaultHeight": 32, "minWidth": 128, "minHeight": 32},
+    	"legend":          {"defaultWidth": 132, "defaultHeight": 32, "minWidth": 132, "minHeight": 32},
 
     	"unit":            {"defaultWidth": 192, "defaultHeight": 16, "minWidth": 192, "minHeight": 16, "labelHeight": 16, "labelAlign": 24, "iconSize": 16, "iconAlign": 0}
     }    
