@@ -66,15 +66,12 @@ mxIBMShapeBase.prototype.init = function (container) {
  * @param {*} event 
  */
 mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
-// console.log('mxIBMShapeBase.prototype.styleChangedEventsHandler', event);
+
 	var cell = event.properties.change.cell;	
 	var pStyleStr = event.properties.change.previous;
 	var cStyleStr = event.properties.change.style;
 	var pStyle = this.getStylesObj(pStyleStr);
 	var cStyle = this.getStylesObj(cStyleStr);
-	// get shapeType and shapeLayout
-	var shapeType = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
-	var shapeLayout = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_LAYOUT_DEFAULT);
 
 	// Hold all the changes
 	var changes = {};
@@ -85,23 +82,16 @@ mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 	changes.style = this.setColorStyle(changes.style, pStyle, cStyle);
 
 	// Get the new geometry
-	changes.geometry = cell.getGeometry();
-	var properties = this.getDetails(this, shapeType.current, shapeLayout.current, null, null);
-	if (!shapeLayout.current.startsWith('item')) {
-		if (shapeType.current == 'actor') {
-			changes.geometry.width = properties.minWidth;
-			changes.geometry.height = properties.minHeight;			
-		} else if (shapeType.current.startsWith('node') || shapeType.current.startsWith('comp') || shapeType.current == 'target') {
-			if (shapeLayout.current == 'collapsed') {
-				changes.geometry.width = properties.minWidth;
-				changes.geometry.height = properties.minHeight;
-			} else {
-				changes.geometry.height = properties.defaultHeight;
-				changes.geometry.width = properties.defaultWidth;
-			}
-		}
-	}
+	var geometry = cell.getGeometry();
+	// get shapeType and shapeLayout
+	var shapeType = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
+	var shapeLayout = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_LAYOUT_DEFAULT);	
+	var geometryRect = this.getGeometryRect(shapeType.current, shapeLayout.current, new mxRectangle(geometry.x, geometry.y, geometry.width, geometry.height), false);
+	geometry.height = geometryRect.height;
+	geometry.width = geometryRect.width;
+	changes.geometry = geometry;
 
+	// set the new style and geometry
 	graph.model.beginUpdate();
 	try {		
 		graph.model.setStyle(cell, changes.style);
@@ -118,36 +108,26 @@ mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 */
 mxIBMShapeBase.prototype.paintVertexShape = function (c, x, y, w, h) {
 	var properties = this.getProperties(this, h, w);
-console.log('mxIBMShapeBase.prototype.paintVertexShape', properties);
+// console.log('mxIBMShapeBase.prototype.paintVertexShape', properties);
 
 	c.translate(x, y);
-
-	if(!properties.shapeLayout.startsWith('item')) {		
-		if (properties.shapeType == 'target' || properties.shapeType == 'actor') {
-			this.drawRoundRectShape(c, properties);
-		} else {
-			this.drawRectShape(c, properties);
-		}
-		this.drawStencil(c, properties);		
-		this.drawStyle(c, properties);		
-		this.drawBadge(c, properties);
-	} else {
+	if(properties.shapeLayout.startsWith('item')) {		
 		if (properties.shapeLayout == 'itemColor' || properties.shapeLayout == 'itemShape' || properties.shapeLayout == 'itemStyle' || properties.shapeLayout == 'itemIcon') {
-			if (properties.shapeType == 'target' || properties.shapeType == 'actor') {
-				this.drawRoundRectShape(c, properties);
-			} else {
-				this.drawRectShape(c, properties);
-			}
-		}
+			this.drawShape(c, properties);
+		} 
+		
 		if (properties.shapeLayout == 'itemIcon') {
 			this.drawStencil(c, properties);
-		}
-		if (properties.shapeLayout == 'itemStyle') {
+		} else if (properties.shapeLayout == 'itemStyle') {
 			this.drawStyle(c, properties);
-		}
-		if (properties.shapeLayout == 'itemBadge') { 
+		} else if (properties.shapeLayout == 'itemBadge') {
 			this.drawBadge(c, properties);
 		}
+	} else {
+		this.drawShape(c, properties);
+		this.drawStencil(c, properties);
+		this.drawStyle(c, properties);
+		this.drawBadge(c, properties);
 	}
 }
 
@@ -171,79 +151,31 @@ mxIBMShapeBase.prototype.getProperties = function (shape, shapeHeight, shapeWidt
 		for (var key in details) {
 			properties[key] = details[key];
 		}
-	}
 
-	// set the min size
-	if (details['shapeHeight'] == null) {
-		details['shapeHeight'] = properties.defaultHeight;
+		// set the shape size
+		if (properties['shapeHeight'] == null) {
+			properties['shapeHeight'] = properties.defaultHeight;
+		}
+		if (properties['shapeWidth'] == null) {
+			properties['shapeWidth'] = properties.defaultWidth;
+		}
 	}
-	if (details['shapeWidth'] == null) {
-		details['shapeWidth'] = properties.defaultWidth;
-	}
-	if (!properties.shapeLayout.startsWith('item')) {
-		details['shapeHeight'] = Math.max(details['shapeHeight'], properties.minHeight);
-		details['shapeWidth'] = Math.max(details['shapeWidth'], properties.minWidth);
-	}
+		
 	return properties;
 }
 
 /**
- * Draw round rect shape for actor, target system
+ * Draw shape for logical component, prescribed component, logical node, prescribed node, logical group, prescribed group
  * @param {*} c 
  * @param {*} properties 
  */
-mxIBMShapeBase.prototype.drawRoundRectShape = function (c, properties) {
+mxIBMShapeBase.prototype.drawShape = function (c, properties) {	
 	if (properties.styleDashed || properties.styleDouble) {
-		c.roundrect(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius, properties.curveRadius);
-		if (properties.styleDashed) {
-			c.setDashed(true, true);
-			c.setDashPattern('6 6');
-		} else {
-			c.setDashed(false);
-		}
-		c.setStrokeColor(properties.lineColor);
-		c.fillAndStroke();
-
-		drawShapeContainer(properties.doubleAlign, properties.doubleAlign, properties.shapeWidth - properties.doubleAlign * 2, properties.shapeHeight - properties.doubleAlign * 2);
+		drawDoubleShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
+		drawShapeContainer(properties.doubleAlign, properties.doubleAlign, properties.shapeWidth - properties.doubleAlign * 2, properties.shapeHeight - properties.doubleAlign * 2, properties.curveRadius - properties.doubleAlign);
 	} else {
-		drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight)
+		drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
 	}
-
-	function drawShapeContainer(x, y, w, h) {
-		c.roundrect(x, y, w, h, properties.curveRadius, properties.curveRadius);
-		c.setStrokeColor(properties.lineColor);
-		if (properties.shapeLayout.startsWith('item')) {
-			c.setFillColor(ibmConfig.ibmColors.white);
-		} else {
-			c.setFillColor(properties.lineColor);
-		}
-		c.setDashed(false);
-		c.fillAndStroke();
-	}
-}
-
-/**
- * Draw rect shape for logical component, prescribed component, logical node, prescribed node, logical group, prescribed group
- * @param {*} c 
- * @param {*} properties 
- */
-mxIBMShapeBase.prototype.drawRectShape = function (c, properties) {	
-	if (properties.styleDashed || properties.styleDouble) {
-		if (properties.styleDashed) {
-			c.setDashed(true, true);
-			c.setDashPattern('6 6');
-		} else {
-			c.setDashed(false);
-		}
-		c.setStrokeColor(properties.lineColor);
-		drawNode(0, 0, properties.shapeWidth, properties.shapeHeight);
-		c.fillAndStroke();
-
-		drawShapeContainer(properties.doubleAlign, properties.doubleAlign, properties.shapeWidth - properties.doubleAlign * 2, properties.shapeHeight - properties.doubleAlign * 2);
-	} else {
-		drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight);
-	}
-	
 
 	if (properties.shapeType.startsWith('group')) {
 		c.rect(0, 0, properties.sidebarWidth, properties.sidebarHeight);
@@ -251,47 +183,93 @@ mxIBMShapeBase.prototype.drawRectShape = function (c, properties) {
 		c.setFillColor(properties.lineColor);
 		c.fillAndStroke();
 	} else {
-		if (properties.shapeLayout.startsWith('expanded')) {
+		if (properties.shapeLayout.startsWith('expanded') && properties.shapeType !== 'target') {
 			if (!properties.hideIcon) {
-				drawNode(0, 0, properties.iconAreaWidth, properties.iconAreaHeight);
+				drawIconArea(0, 0, properties.iconAreaWidth, properties.iconAreaHeight, properties.curveRadius);
 				c.setStrokeColor(properties.lineColor);
 				c.setFillColor(properties.lineColor);
 				c.fillAndStroke();
 			}
 		}
 		if (properties.shapeType.startsWith('comp')) {
+			c.rect(properties.sidetickAlign, properties.minHeight / 4, properties.sidetickWidth, properties.sidetickHeight);
 			c.setStrokeColor(properties.lineColor);
-			c.setFillColor(properties.fillColor);
-			c.rect(properties.sidetickAlign, properties.shapeHeight / 4, properties.sidetickWidth, properties.sidetickHeight);
+			c.setFillColor(properties.fillColor);			
 			c.fillAndStroke();
-			c.rect(properties.sidetickAlign, properties.shapeHeight - properties.shapeHeight / 4 - properties.sidetickHeight, properties.sidetickWidth, properties.sidetickHeight);
+
+			c.rect(properties.sidetickAlign, properties.minHeight - properties.minHeight / 4 - properties.sidetickHeight, properties.sidetickWidth, properties.sidetickHeight);
 			c.fillAndStroke();
 		}
+	}	
+
+	function drawShapeContainer(x, y, w, h, curveRadius) {
+		drawBaseShape(x, y, w, h, curveRadius);
+		if (properties.shapeLayout == 'itemIcon') {
+			c.setStrokeColor('none');
+			c.setFillColor(properties.fillColor);
+		} else if (properties.shapeLayout == 'itemStyle' || properties.shapeLayout == 'itemShape') {			
+			c.setFillColor(ibmConfig.ibmColors.white)		
+		} else {
+			c.setStrokeColor(properties.lineColor);			
+			if (properties.shapeLayout.startsWith('expanded') && properties.shapeType !== 'target') {
+				c.setFillColor(properties.fillColor)
+			} else {
+				c.setFillColor(properties.lineColor);
+			}
+		}
+		c.setDashed(false);
+		c.fillAndStroke();
 	}
 
-	function drawNode(x, y, w, h) {
-		if (properties.shapeType.endsWith('l')) { // nodel, compl, groupl 
-			c.roundrect(x, y, w, h, properties.curveRadius, properties.curveRadius);
+	function drawDoubleShapeContainer(x, y, w, h, curveRadius) {		
+		drawBaseShape(x, y, w, h, curveRadius);
+		if (properties.styleDashed) {
+			c.setDashed(true, true);
+			c.setDashPattern('6 6');
+		} else {
+			c.setDashed(false);
+		}
+		c.setStrokeColor(properties.lineColor);
+		c.fillAndStroke();
+	}
+
+	function drawBaseShape(x, y, w, h, curveRadius) {
+		if (properties.shapeType == 'actor') {
+			c.ellipse(x, y, w, h);
+		} else if (properties.shapeType == 'target') {
+			c.roundrect(x, y, w, h, curveRadius, curveRadius);
+		} else if (properties.shapeType.endsWith('l')) { // nodel, compl, groupl 
+			c.roundrect(x, y, w, h, curveRadius, curveRadius);
 		} else {
 			c.rect(x, y, w, h);
 		}
 	}
 
-	function drawShapeContainer(x, y, w, h) {
-		if (properties.shapeLayout == 'itemIcon') {
-			c.setStrokeColor('none');
-			c.setFillColor(properties.fillColor);
-		} else {
-			c.setStrokeColor(properties.lineColor);		
-			if (properties.shapeLayout == 'collapsed') {
-				c.setFillColor(properties.lineColor);
+	function drawIconArea(x, y, w, h, curveRadius) {
+		if (properties.shapeType == 'nodel' || properties.shapeType == 'compl') {
+			if (properties.sidebarHeight < properties.shapeHeight) {
+				c.begin()
+				c.moveTo(curveRadius, y);
+				c.lineTo(w, y);
+				c.lineTo(w, h);
+				c.lineTo(x, h);
+				c.lineTo(x, curveRadius);
+				c.arcTo(curveRadius, curveRadius, 0, 0, 1, curveRadius, y);
+				c.close();
 			} else {
-				c.setFillColor(properties.fillColor);
+				c.begin()
+				c.moveTo(curveRadius, y);
+				c.lineTo(w, y);
+				c.lineTo(w, h);
+				c.lineTo(curveRadius, h);
+				c.arcTo(curveRadius, curveRadius, 0, 0, 1, x, h - curveRadius);	
+				c.lineTo(x, curveRadius);
+				c.arcTo(curveRadius, curveRadius, 0, 0, 1, curveRadius, y);
+				c.close();
 			}
+		} else {
+			c.rect(x, y, w, h);
 		}
-		c.setDashed(false);
-		drawNode(x, y, w, h);
-		c.fillAndStroke();
 	}
 }
 
@@ -464,6 +442,35 @@ mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
 		c.setDashed(false);
 		c.fillAndStroke();
 	}
+}
+
+/**
+ * Get the shape size
+ * @param {*} shapeType 
+ * @returns 
+ */
+ mxIBMShapeBase.prototype.getGeometryRect = function(shapeType, shapeLayout, rect, minSize) {	
+	var details = this.getDetails(null, shapeType, shapeLayout, rect.width, rect.height);
+	if (shapeLayout === 'collapsed') {
+		rect.width = details.minWidth;
+		rect.height = details.minHeight;
+	} else if (shapeLayout.startsWith('expanded')) {
+		if (minSize) {
+			rect.width = Math.max(details.minWidth, rect.width);
+		} else {
+			rect.width = Math.max(details.defaultWidth, rect.width);
+		}
+		if (shapeType === 'target') {
+			rect.height = details.minHeight;
+		} else {
+			rect.height = Math.max(details.minHeight, rect.height);
+		}		
+	} else {
+		rect.width = Math.max(details.minWidth, rect.width);
+		rect.height = details.minHeight;
+	}
+	// console.log('rect', rect)
+	return rect;
 }
 
 /**
@@ -1028,8 +1035,19 @@ mxIBMShapeBase.prototype.setColorStyle = function(cStyleStr, pStyle, cStyle)
 	return cStyleStr;
 }
 
-
-
+// https://jgraph.github.io/mxgraph/docs/js-api/files/handler/mxVertexHandler-js.html#mxVertexHandler.union
+var vertexHandlerUnion = mxVertexHandler.prototype.union;
+mxVertexHandler.prototype.union = function(bounds, dx, dy, index, gridEnabled, scale, tr, constrained) {
+	let rect = vertexHandlerUnion.apply(this, arguments);
+	
+	if (this.state.style['shape'] === mxIBMShapeBase.prototype.cst.SHAPE) {
+		const shapeType = mxUtils.getValue(this.state.style, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);		
+		const shapeLayout = mxUtils.getValue(this.state.style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT_DEFAULT);
+		rect = mxIBMShapeBase.prototype.getGeometryRect(shapeType, shapeLayout, rect, true);
+	}
+	
+	return rect;
+};
 
 //**********************************************************************************************************************************************************
 // Legends
@@ -1099,7 +1117,7 @@ mxIBMShapeLegend.prototype.setCellGeometry = function(graph, cell, shapeType, cS
 		var childMaxWidth = 0;
 		var childMaxHeight = 0;
 		for (var i = 0; i < cells.length; i++) {
-			var cellBounds = graph.getCellBounds(cells[i], true, false);
+			var cellBounds = graph.getCellBounds(cells[i], true, false);			
 			childMaxWidth = Math.max(cellBounds.width / this.scale, childMaxWidth);
 			childMaxHeight = Math.max(cellBounds.height / this.scale, childMaxHeight);
 		}
@@ -1124,10 +1142,9 @@ mxIBMShapeLegend.prototype.setCellGeometry = function(graph, cell, shapeType, cS
 
 mxIBMShapeLegend.prototype.paintVertexShape = function (c, x, y, w, h) {
 	var properties = this.getProperties();
-	c.rect(x, y, w, h);
 	c.setFillColor(properties.fillColor);
 	c.setStrokeColor(properties.strokeColor);
-	c.setFontColor(properties.fontColor);
+	c.rect(x, y, w, h);		
 	c.fillAndStroke();
 }
 
@@ -1173,9 +1190,11 @@ mxIBMShapeLegend.prototype.getCellStyles = function(shapeType, ibmNoHeader) {
 }
 
 mxIBMShapeLegend.prototype.getLabelBounds = function (rect) {
-	var properties = this.getProperties();	
-	return new mxRectangle(rect.x, rect.y, rect.width, properties.shapeHeight * this.scale);
+	const legendPadding = 8;
+	const legendTitleHeight = 16;
+	return new mxRectangle(rect.x + legendPadding * this.scale, rect.y + legendPadding * this.scale, rect.width -  (2* legendPadding * this.scale), legendTitleHeight * this.scale);
 };
+
 //**********************************************************************************************************************************************************
 // Deployment Units
 //**********************************************************************************************************************************************************
@@ -1212,10 +1231,9 @@ mxIBMShapeUnit.prototype.paintVertexShape = function (c, x, y, w, h) {
 	}
 	c.translate(x, y);
 	// background
-	c.rect(0, 0, w, h);
-	c.setFillColor(properties.fillColor);
-	// c.setStrokeColor(properties.strokeColor);
+	c.rect(0, 0, w, h);	
 	c.setStrokeColor('none');
+	c.setFillColor('none');
 	c.setFontColor(properties.fontColor);
 	c.fillAndStroke();
 	// text
