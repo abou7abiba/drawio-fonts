@@ -194,7 +194,7 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 		if (properties.shapeType.startsWith('comp')) {
 			c.rect(properties.sidetickAlign, properties.minHeight / 4, properties.sidetickWidth, properties.sidetickHeight);
 			c.setStrokeColor(properties.lineColor);
-			c.setFillColor(properties.fillColor);			
+			c.setFillColor(ibmConfig.ibmColors.white);
 			c.fillAndStroke();
 
 			c.rect(properties.sidetickAlign, properties.minHeight - properties.minHeight / 4 - properties.sidetickHeight, properties.sidetickWidth, properties.sidetickHeight);
