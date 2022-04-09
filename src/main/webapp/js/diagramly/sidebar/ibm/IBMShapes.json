@@ -21,8 +21,8 @@
       "Groups": {
 	"Logical Group": {"format": "$LG_FORMAT_CONTAINER", "$DEFAULT_PROPERTIES": null},
 	"Prescribed Group": {"format": "$PG_FORMAT_CONTAINER", "$DEFAULT_PROPERTIES": null},
-	"Logical Group No Container": {"format": "$LG_FORMAT_NOCONTAINER", "$DEFAULT_TRANSPARENT_PROPERTIES": null},
-	"Prescribed Group No Container": {"format": "$PG_FORMAT_NOCONTAINER", "$DEFAULT_TRANSPARENT_PROPERTIES": null}
+	"Logical Group<br>No Container": {"format": "$LG_FORMAT_NOCONTAINER", "$DEFAULT_TRANSPARENT_PROPERTIES": null},
+	"Prescribed Group<br>No Container": {"format": "$PG_FORMAT_NOCONTAINER", "$DEFAULT_TRANSPARENT_PROPERTIES": null}
       },
       
       "Deployment Units": {

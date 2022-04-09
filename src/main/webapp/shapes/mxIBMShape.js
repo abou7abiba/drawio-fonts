@@ -505,13 +505,7 @@ mxIBMShapeBase.prototype.rgb2hex = function(color)
 		return color;
 }
 
-// Normalize line color.
-mxIBMShapeBase.prototype.normalizeLineColor = function(lineColor)
-{
-	return lineColor;
-}
-
-// Normalize fill color and line color.
+// Normalize fill color to ensure proper use of palette.
 mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
 {
 	let fillColorHex = this.rgb2hex(fillColor);
@@ -539,16 +533,16 @@ mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
         }
 }
 
-// Normalize font color to be visible if lineColor is too dark.
-mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
+// Normalize object color to be visible if background color is too dark.
+mxIBMShapeBase.prototype.normalizeObjectColor = function(objectColor, backgroundColor)
 {
-	if (lineColor === "none")
-		return fontColor;
-	else if (lineColor === ibmConfig.ibmColors.black)
+	if (backgroundColor === "none")
+		return objectColor;
+	else if (backgroundColor === ibmConfig.ibmColors.black)
 		return ibmConfig.ibmColors.white;
 
-	lineColor = lineColor.toUpperCase();
-	let name = ibmConfig.colorNames[lineColor.substring(1)];
+	backgroundColor = backgroundColor.toUpperCase();
+	let name = ibmConfig.colorNames[backgroundColor.substring(1)];
 	if (!name) {
 		return name;
 	}
@@ -561,21 +555,7 @@ mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
 			return ibmConfig.ibmColors.white;
 	}
 
-	return fontColor;
-}
-
-// Normalize icon color to be visible if lineColor is too dark.
-mxIBMShapeBase.prototype.normalizeIconColor = function(iconColor, lineColor)
-{
-	// Same as font logic initially.
-	return mxIBMShapeBase.prototype.normalizeFontColor(iconColor, lineColor);
-}
-
-// Normalize style color to be visible if lineColor is too dark.
-mxIBMShapeBase.prototype.normalizeStyleColor = function(styleColor, lineColor)
-{
-	// Same as font logic initially.
-	return mxIBMShapeBase.prototype.normalizeFontColor(styleColor, lineColor);
+	return objectColor;
 }
 
 // Retrieve color settings.
@@ -608,29 +588,20 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	// Set icon area color to fill color for expanded target shapes.
 	iconAreaColor = (shapeLayout === 'expanded' && shapeType === 'target' && fillColor != this.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
 
-	// Set font color to black if not set otherwise use font color.
-	fontColor = (fontColor === this.cst.FONT_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(fontColor);
-
-	// Normalize font color to be visible for expanded target shapes.
-	fontColor = (shapeType === 'target' && shapeLayout === 'expanded') ? this.normalizeFontColor(fontColor, iconAreaColor) : fontColor;
-
-	// Normalize font color to be visible for collapsed shapes after expanded target shape.
-	fontColor = (shapeType === 'target' && shapeLayout === 'collapsed') ? ibmConfig.ibmColors.black : fontColor;
-
 	// Set badge color to line color if not set otherwise use badge color.
 	badgeColor = (badgeColor === this.cst.BADGE_COLOR_DEFAULT) ? lineColor : this.rgb2hex(badgeColor);
 
 	// Normalize badge font color to be visible if badge color is too dark.
-	badgeFontColor = this.normalizeFontColor(badgeFontColor, badgeColor);
+	badgeFontColor = this.normalizeObjectColor(badgeFontColor, badgeColor);
 
 	// Normalize icon color to be visible if icon area color is too dark.
-	iconColor = this.normalizeIconColor(iconColor, iconAreaColor);
+	iconColor = this.normalizeObjectColor(iconColor, iconAreaColor);
 
 	// Set icon color to black for legend icon items.
 	iconColor = (shapeLayout === 'itemIcon') ? ibmConfig.ibmColors.coolgray : iconColor;
 
 	// Normalize style color to be visibile if icon area color is too dark.
-	styleColor = this.normalizeStyleColor(styleColor, iconAreaColor);
+	styleColor = this.normalizeObjectColor(styleColor, iconAreaColor);
 
 	// Set style color to black for expanded shapes and legend style items.
 	styleColor = (shapeLayout.startsWith('expanded') || shapeLayout === 'itemStyle') ? lineColor : styleColor;
@@ -943,7 +914,7 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
 {
 	let properties = '';
 
-	let changed = lineColor.isChanged || fillColor.isChanged || fontColor.isChanged || badgeColor.isChanged;
+	let changed = lineColor.isChanged || fillColor.isChanged || fontColor.isChanged || badgeColor.isChanged || shapeLayout.isChanged;
 	if (!changed)
 		return properties;
 
@@ -951,6 +922,12 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
         let LINE_COLOR_NAME = ibmConfig.ibmBaseConstants.LINE_COLOR_NAME;
         let FILL_COLOR_NAME = ibmConfig.ibmBaseConstants.FILL_COLOR_NAME;
         let FONT_COLOR_NAME = ibmConfig.ibmBaseConstants.FONT_COLOR_NAME;
+        let LIGHT_COLOR_NAME = ibmConfig.ibmBaseConstants.LIGHT_COLOR_NAME;
+
+	let lineColorReset = false;
+	let lineColorValue = lineColor.previous;
+	let fillColorValue = fillColor.previous;
+	let fontColorValue = fontColor.previous;
 
 	// If line color changed but not a valid color then reset line and fill to previous.
         if (lineColor.isChanged)
@@ -959,16 +936,26 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
 
                 if (!lineColorName || lineColorName.indexOf(LINE_COLOR_NAME) === -1)
 		{
+			lineColorReset = true;
+
                         properties += 'strokeColor=' + lineColor.previous + ';';
-                        properties += 'fillColor=' + fillColor.previous + ';';
+
+			if (fillColor.isChanged)
+                        	properties += 'fillColor=' + fillColor.previous + ';';
+
+			if (fontColor.isChanged)
+                        	properties += 'fontColor=' + fontColor.previous + ';';
 		}
+		else
+			lineColorValue = lineColor.current;
         }
 
-	/* In progress.
 	// If fill color changed but not a valid color then reset.
 	if (fillColor.isChanged && !lineColorReset)
 	{
+		fillColorValue = fillColor.current;
 
+		/* In progress.
 		if (!fillColorName || fillColorName.indexOf(FILL_COLOR_NAME) === -1 ||
 				      (!fillColorName.startsWith('Transparent') && !fillColorName.startsWith('White')) ||
                                       fillColorName.search(/[0-9]/) != lineColorName.search(/[0-9]/))
@@ -987,8 +974,8 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
 			else
                        		properties += ibmConfig.ibmSystemProperties.noFill;
 		}
+		*/
 	}
-	*/
 
 	// If font color changed but not a valid color then reset.
         if (fontColor.isChanged)
@@ -997,6 +984,8 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
 
                 if (!fontColorName || fontColorName.indexOf(FONT_COLOR_NAME) === -1)
                         properties += 'fontColor=' + fontColor.previous + ';';
+		else
+			fontColorValue = fontColor.current;
         }
 
 	// If badge color changed but not valid color then reset.
@@ -1006,6 +995,28 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
 
                 if (!badgeColorName || badgeColorName.indexOf(LINE_COLOR_NAME) === -1)
                         properties += 'ibmBadgeColor=' + badgeColor.previous + ';';
+        }
+
+	// If shape layout changed then normalize font color for target system shape.
+        if (shapeLayout.isChanged)
+        {
+		let shapeTypeValue = shapeType.isChanged ? shapeType.current : shapeType.previous;
+		let shapeLayoutValue = shapeLayout.current;
+
+		if (shapeTypeValue === 'target')
+		{
+			if (shapeLayoutValue === 'collapsed')
+        			properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
+			else if (shapeLayoutValue === 'expanded')
+			{
+                		let fillColorName = this.getColorName(fillColorValue);
+
+                		if (!fillColorName || fillColorName.indexOf(LIGHT_COLOR_NAME) === -1)
+        				properties += 'fontColor=' + ibmConfig.ibmColors.white + ';';
+				else
+        				properties += ibmConfig.ibmSystemProperties.defaultFont;
+			}
+		}
         }
 
 	return properties;
