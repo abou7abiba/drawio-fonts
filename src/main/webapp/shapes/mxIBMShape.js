@@ -501,36 +501,10 @@ mxIBMShapeBase.prototype.rgb2hex = function(color)
 		bhex = (bhex.length < 2) ? "0" + bhex : bhex;
 		return "#" + rhex.toString() + ghex.toString() + bhex.toString();
 	}
+	else if (color.toUpperCase() === 'DEFAULT')
+		return ibmConfig.ibmColors.white;
 	else
 		return color;
-}
-
-// Normalize fill color to ensure proper use of palette.
-mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
-{
-	let fillColorHex = this.rgb2hex(fillColor);
-        let fillColorUpper = fillColorHex.toUpperCase();
-        let fillColorName = ibmConfig.colorNames[(fillColorUpper === "NONE") ? "NONE" : fillColorUpper.substring(1)];
-
-	let lineColorHex = this.rgb2hex(lineColor);
-        let lineColorUpper = lineColorHex.toUpperCase();
-        let lineColorName = ibmConfig.colorNames[(lineColorUpper === "NONE") ? "NONE" : lineColorUpper.substring(1)];
-
-        if (fillColorName === "NONE")
-		return "none";
-	else if (fillColorName.startsWith("White"))
-                return ibmConfig.ibmColors.white;
-        else if (fillColorName.startsWith("Black") || fillColorName.startsWith("Transparent"))
-                return ibmConfig.ibmColors.none;
-	else {
-                let lineColorSegments = lineColorName.toLowerCase().split(' ');
-                let lineColorFamily = lineColorSegments[0];
-
-                if (lineColorSegments[1] === "gray")
-                        lineColorFamily = lineColorFamily + "gray";
-
-                return ibmConfig.ibmColors["light" + lineColorFamily];
-        }
 }
 
 // Normalize object color to be visible if background color is too dark.
@@ -559,7 +533,7 @@ mxIBMShapeBase.prototype.normalizeElementColor = function(objectColor, backgroun
 }
 
 // Retrieve color settings.
-mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
+mxIBMShapeBase.prototype.getColorStyles = function(shape, shapeType, shapeLayout)
 {
 	// Retrieve color settings.
 	let lineColor = mxUtils.getValue(shape.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
@@ -669,7 +643,7 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
         // Add shape colors.
 
         if (shape) {
-                let colors = this.getColors(shape, shapeType, shapeLayout);
+                let colors = this.getColorStyles(shape, shapeType, shapeLayout);
 
                 details['lineColor'] = colors.lineColor;
                 details['fillColor'] = colors.fillColor;
@@ -889,7 +863,7 @@ mxIBMShapeBase.prototype.getColorName = function(color)
 {
         var colorHex = this.rgb2hex(color);
         var colorUpper = colorHex.toUpperCase();
-        var colorName = ibmConfig.colorNames[colorUpper.substring(1)];
+        var colorName = ibmConfig.colorNames[colorUpper === "NONE" ? "NONE" : colorUpper.substring(1)];
 	return colorName;
 }
 
@@ -908,71 +882,51 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
         let FONT_COLOR_NAME = ibmConfig.ibmBaseConstants.FONT_COLOR_NAME;
         let LIGHT_COLOR_NAME = ibmConfig.ibmBaseConstants.LIGHT_COLOR_NAME;
 
-	let lineColorReset = false;
-	let lineColorValue = lineColor.previous;
-	let fillColorValue = fillColor.previous;
-	let fontColorValue = fontColor.previous;
+	let colorReset = false;
 
-	// If line color changed but not a valid color then reset line and fill to previous.
-        if (lineColor.isChanged)
-        {
-                let lineColorName = this.getColorName(lineColor.current);
+	let lineColorValue = lineColor.isChanged ? lineColor.current : lineColor.previous;
+        let lineColorName = this.getColorName(lineColorValue);
+        let lineColorSegments = lineColorName.split(' ');
+        let lineColorFamily = lineColorSegments[1] === "Gray" ? lineColorSegments[0] + lineColorSegments[1] : lineColorSegments[0];
 
-                if (!lineColorName || lineColorName.indexOf(LINE_COLOR_NAME) === -1)
-		{
-			lineColorReset = true;
+	let fillColorValue = fillColor.isChanged ? fillColor.current : fillColor.previous;
+        let fillColorName = this.getColorName(fillColorValue);
+        let fillColorSegments = fillColorName.split(' ');
+        let fillColorFamily = fillColorSegments[1] === "Gray" ? fillColorSegments[0] + fillColorSegments[1] : fillColorSegments[0];
 
-                        properties += 'strokeColor=' + lineColor.previous + ';';
+	// Check that line color is valid and fill color is valid.
+        let validNames = lineColorName.indexOf(LINE_COLOR_NAME) != -1 && fillColorName.indexOf(FILL_COLOR_NAME) != -1;
 
-			if (fillColor.isChanged)
-                        	properties += 'fillColor=' + fillColor.previous + ';';
+	// Check that line color and fill color are from the same family or fill color is transparent or white.
+	let validFill = validNames && (fillColorName.startsWith('Transparent') || 
+					fillColorName.startsWith('White') ||
+                			fillColorFamily == lineColorFamily);
 
-			if (fontColor.isChanged)
-                        	properties += 'fontColor=' + fontColor.previous + ';';
-		}
-		else
-			lineColorValue = lineColor.current;
-        }
-
-	// If fill color changed but not a valid color then reset.
-	if (fillColor.isChanged && !lineColorReset)
+	// If not valid line color and fill color combination then reset.
+	if (!validNames || !validFill)
 	{
-		fillColorValue = fillColor.current;
+		colorReset = true;
 
-		/* In progress.
-		if (!fillColorName || fillColorName.indexOf(FILL_COLOR_NAME) === -1 ||
-				      (!fillColorName.startsWith('Transparent') && !fillColorName.startsWith('White')) ||
-                                      fillColorName.search(/[0-9]/) != lineColorName.search(/[0-9]/))
-		{
-                	if (shapeLayout.previous === 'collapsed')
-                		properties += ibmConfig.ibmSystemProperties.noFill;
-			else if (shapeLayout.previous === 'expanded')
-			{
-                        	if (container.previous === '1')
-                                	properties += ibmConfig.ibmSystemProperties.defaultFill;
-				else
-                        		properties += ibmConfig.ibmSystemProperties.noFill;
-			}
-			else if (shapeLayout.previous === "expandedStack")
-                		properties += ibmConfig.ibmSystemProperties.defaultFill;
-			else
-                       		properties += ibmConfig.ibmSystemProperties.noFill;
-		}
-		*/
+		if (lineColor.isChanged)
+			properties += 'strokeColor=' + lineColor.previous + ';';
+
+		if (fillColor.isChanged)
+			properties += 'fillColor=' + fillColor.previous + ';';
+
+		if (fontColor.isChanged)
+			properties += 'fontColor=' + fontColor.previous + ';';
 	}
 
-	// If font color changed but not a valid color then reset.
-        if (fontColor.isChanged)
+	// If not valid font color then reset.
+        if (fontColor.isChanged && !colorReset)
         {
                 let fontColorName = this.getColorName(fontColor.current);
 
                 if (!fontColorName || fontColorName.indexOf(FONT_COLOR_NAME) === -1)
                         properties += 'fontColor=' + fontColor.previous + ';';
-		else
-			fontColorValue = fontColor.current;
         }
 
-	// If badge color changed but not valid color then reset.
+	// If not valid badge color then reset (future use).
         if (badgeColor.isChanged)
         {
                 let badgeColorName = this.getColorName(badgeColor.current);
@@ -998,7 +952,7 @@ mxIBMShapeBase.prototype.getColorProperties = function(shapeType, shapeLayout, l
                 		if (!fillColorName || fillColorName.indexOf(LIGHT_COLOR_NAME) === -1)
         				properties += 'fontColor=' + ibmConfig.ibmColors.white + ';';
 				else
-        				properties += ibmConfig.ibmSystemProperties.defaultFont;
+        				properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
 			}
 		}
         }
@@ -1028,6 +982,19 @@ mxIBMShapeBase.prototype.setColorStyle = function(cStyleStr, pStyle, cStyle)
 	cStyleStr = this.getStylesStr(stylesObj, cStyleStr);
 
 	return cStyleStr;
+}
+
+
+mxIBMShapeBase.prototype.setStyles = function(cStyleStr, pStyle, cStyle)
+{
+	// Hold all the changes
+	var changes = {};
+	changes.style = cStyleStr;
+	// get the new style
+	changes.style = this.setLayoutStyle(cStyleStr, pStyle, cStyle);
+	changes.style = this.setLineStyle(cStyleStr, pStyle, cStyle);
+	changes.style = this.setColorStyle(cStyleStr, pStyle, cStyle);
+	return changes;
 }
 
 // https://jgraph.github.io/mxgraph/docs/js-api/files/handler/mxVertexHandler-js.html#mxVertexHandler.union

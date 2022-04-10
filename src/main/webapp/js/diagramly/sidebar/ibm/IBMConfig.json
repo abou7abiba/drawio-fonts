@@ -46,7 +46,7 @@
     ],
 
     "colorNames": {
-    	"NONE": "Transparent (No Fill)", "FFFFFF": "White (Light Fill/Font)", "000000": "Black (Dark Line/Font)",
+    	"NONE": "Transparent (Light Fill)", "FFFFFF": "White (Light Fill/Font)", "000000": "Black (Dark Line/Font)",
     	"FFF1F1": "Red 10 (Light Fill)", "FFF0F7": "Magenta 10 (Light Fill)", "F6F2FF": "Purple 10 (Light Fill)", "EDF5FF": "Blue 10 (Light Fill)", "E5F6FF": "Cyan 10 (Light Fill)", "D9FBFB": "Teal 10 (Light Fill)", "DEFBE6": "Green 10 (Light Fill)", "FCF4D6": "Yellow 10 (Limited Light Fill)", "FFF2E8": "Orange 10 (Limited Light Fill)", "F2F4F8": "Cool Gray 10 (Light Fill)", "F4F4F4": "Gray 10 (Light Fill)" , "F7F3F2": "Warm Gray 10 (Light Fill)",
 	"FFD7D9": "Red 20 (Not Used)", "FFD6E8": "Magenta 20 (Not Used)", "E8DAFF": "Purple 20 (Not Used", "D0E2FF": "Blue 20 (Not Used)", "BAE6FF": "Cyan 20 (Not Used)", "9EF0F0": "Teal 20 (Not Used)", "A7F0BA": "Green 20 (Not Used)", "FDDC69": "Yellow 20 (Not Used)", "FFD9BE": "Orange 20 (Not Used)", "DDE1E6": "Cool Gray 20 (Not Used)", "E0E0E0": "Gray 20 (Not Used)", "E5E0DF": "Warm Gray 20 (Not Used)",
 	"FFB3B8": "Red 30 (Not Used)", "FFAFD2": "Magenta 30 (Not Used)", "D4BBFF": "Purple 30 (Not Used)", "A6C8FF": "Blue 30 (Not Used)", "82CFFF": "Cyan 30 (Not Used)", "3DDBD9": "Teal 30 (Not Used)", "6FDC8C": "Green 30 (Not Used)", "F1C21B": "Yellow 30 (Not Used)", "FFB784": "Orange 30 (Not Used)", "C1C7CD": "Cool Gray 30 (Not Used)", "C6C6C6": "Gray 30 (Not Used)", "CAC5C4": "Warm Gray 30 (Not Used)",
