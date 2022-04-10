@@ -534,7 +534,7 @@ mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
 }
 
 // Normalize object color to be visible if background color is too dark.
-mxIBMShapeBase.prototype.normalizeObjectColor = function(objectColor, backgroundColor)
+mxIBMShapeBase.prototype.normalizeElementColor = function(objectColor, backgroundColor)
 {
 	if (backgroundColor === "none")
 		return objectColor;
@@ -592,16 +592,16 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	badgeColor = (badgeColor === this.cst.BADGE_COLOR_DEFAULT) ? lineColor : this.rgb2hex(badgeColor);
 
 	// Normalize badge font color to be visible if badge color is too dark.
-	badgeFontColor = this.normalizeObjectColor(badgeFontColor, badgeColor);
+	badgeFontColor = this.normalizeElementColor(badgeFontColor, badgeColor);
 
 	// Normalize icon color to be visible if icon area color is too dark.
-	iconColor = this.normalizeObjectColor(iconColor, iconAreaColor);
+	iconColor = this.normalizeElementColor(iconColor, iconAreaColor);
 
 	// Set icon color to black for legend icon items.
 	iconColor = (shapeLayout === 'itemIcon') ? ibmConfig.ibmColors.coolgray : iconColor;
 
 	// Normalize style color to be visibile if icon area color is too dark.
-	styleColor = this.normalizeObjectColor(styleColor, iconAreaColor);
+	styleColor = this.normalizeElementColor(styleColor, iconAreaColor);
 
 	// Set style color to black for expanded shapes and legend style items.
 	styleColor = (shapeLayout.startsWith('expanded') || shapeLayout === 'itemStyle') ? lineColor : styleColor;
@@ -777,22 +777,6 @@ mxIBMShapeBase.prototype.getLayoutProperties = function(shapeType, shapeLayout, 
 	{
 		properties += 'ibmLayout=' + shapeLayout.previous + ';';
 		return properties;
-	}
-
-	if (shapeType.current.startsWith('group') && shapeLayout.current === 'collapsed')
-	{
-		shapeLayout.current = 'expanded';
-		properties = 'ibmLayout=expanded;';
-	}
-	else if (shapeType.current === 'actor' && shapeLayout.current.startsWith('expanded'))
-	{
-		shapeLayout.current = 'collapsed';
-		properties = 'ibmLayout=collapsed;';
-	}
-	else if (shapeType.current === 'target' && shapeLayout.current === 'expandedStack')
-	{
-		shapeLayout.current = 'expanded';
-		properties = 'ibmLayout=expanded;';
 	}
 
 	// Get shape-specific properties.

@@ -15,14 +15,14 @@
 	"Logical Component": {"format": "$LC_FORMAT_EXPANDED", "$DEFAULT_PROPERTIES": null},
 	"Prescribed Node": {"format": "$PN_FORMAT_EXPANDED", "$DEFAULT_PROPERTIES": null},
 	"Prescribed Component": {"format": "$PC_FORMAT_EXPANDED", "$DEFAULT_PROPERTIES": null},
-	"Target System": {"format": "$TS_FORMAT_EXPANDED", "$DEFAULT_PROPERTIES": null}
+	"Target System": {"format": "$TS_FORMAT_EXPANDED", "$DEFAULT_TARGET_PROPERTIES": null}
       },
       
       "Groups": {
-	"Logical Group": {"format": "$LG_FORMAT_CONTAINER", "$DEFAULT_PROPERTIES": null},
-	"Prescribed Group": {"format": "$PG_FORMAT_CONTAINER", "$DEFAULT_PROPERTIES": null},
-	"Logical Group<br>No Container": {"format": "$LG_FORMAT_NOCONTAINER", "$DEFAULT_TRANSPARENT_PROPERTIES": null},
-	"Prescribed Group<br>No Container": {"format": "$PG_FORMAT_NOCONTAINER", "$DEFAULT_TRANSPARENT_PROPERTIES": null}
+	"LogicalGroup1": {"text": "Logical Group", "subtext": "Container", "format": "$LG_FORMAT_CONTAINER", "$DEFAULT_GROUP_PROPERTIES": null},
+	"PrescribedGroup1": {"text": "Prescribed Group", "subtext": "Container", "format": "$PG_FORMAT_CONTAINER", "$DEFAULT_GROUP_PROPERTIES": null},
+	"LogicalGroup2": {"text": "Logical Group", "subtext": "No Container", "format": "$LG_FORMAT_NOCONTAINER", "$DEFAULT_TRANSPARENT_PROPERTIES": null},
+	"PrescribedGroup2": {"text": "Prescribed Group", "subtext": "No Container", "format": "$PG_FORMAT_NOCONTAINER", "$DEFAULT_TRANSPARENT_PROPERTIES": null}
       },
       
       "Deployment Units": {
@@ -110,8 +110,13 @@
     "$DEFAULT_BADGE": {"form": null, "line": null, "text": null},
     "$DEFAULT_STYLE": {"dashed": false, "doubled": false, "strikethrough": false, "multiplicity": false},
 
-    "$DEFAULT_TRANSPARENT_PROPERTIES": {"text": null, "subtext": null, "icon": "undefined", "color": "$DEFAULT_TRANSPARENT_COLOR", "badge": "$DEFAULT_BADGE", "style": "$DEFAULT_STYLE", "ignore": false},
+    "$DEFAULT_TARGET_PROPERTIES": {"text": null, "subtext": null, "icon": "undefined", "color": "$DEFAULT_TARGET_COLOR", "badge": "$DEFAULT_BADGE", "style": "$DEFAULT_STYLE", "ignore": false},
+    "$DEFAULT_TARGET_COLOR": {"line": "coolgray", "fill": null, "font": "white"},
+
+    "$DEFAULT_TRANSPARENT_PROPERTIES": {"icon": "undefined", "color": "$DEFAULT_TRANSPARENT_COLOR", "badge": "$DEFAULT_BADGE", "style": "$DEFAULT_STYLE", "ignore": false},
     "$DEFAULT_TRANSPARENT_COLOR": {"line": "coolgray", "fill": "none", "font": null},
+
+    "$DEFAULT_GROUP_PROPERTIES": {"icon": "undefined", "color": "$DEFAULT_COLOR", "badge": "$DEFAULT_BADGE", "style": "$DEFAULT_STYLE", "ignore": false},
 
     "$ACTOR_FORMAT": {"type": "actor", "layout": "collapsed", "weight": null, "header": true, "container": false},
     "$TS_FORMAT_COLLAPSED": {"type": "target", "layout": "collapsed", "weight": null, "header": true, "container": false},
