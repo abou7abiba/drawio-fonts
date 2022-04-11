@@ -78,7 +78,7 @@ mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 
 	// Get the new geometry	
 	var geometry = cell.getGeometry();
-	var geometryRect = this.getNewGeometryRect(cStyle, new mxRectangle(geometry.x, geometry.y, geometry.width, geometry.height), false);	
+	var geometryRect = this.getNewGeometryRect(cStyle, new mxRectangle(geometry.x, geometry.y, geometry.width, geometry.height), false);
 	geometry.height = geometryRect.height;
 	geometry.width = geometryRect.width;
 	changes.geometry = geometry;
@@ -157,7 +157,7 @@ mxIBMShapeBase.prototype.getProperties = function (shape, shapeHeight, shapeWidt
 }
 
 /**
- * Draw shape for logical component, prescribed component, logical node, prescribed node, logical group, prescribed group
+ * Draw base shape
  * @param {*} c 
  * @param {*} properties 
  */
@@ -459,7 +459,7 @@ mxIBMShapeBase.prototype.getNewStyles = function (cStyleStr, pStyle, cStyle) {
  */
 mxIBMShapeBase.prototype.getNewGeometryRect = function (style, rect, minSize) {
 	const shapeType = mxUtils.getValue(style, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);
-	const shapeLayout = mxUtils.getValue(style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT_DEFAULT);	
+	const shapeLayout = mxUtils.getValue(style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT_DEFAULT);
 	var details = this.getDetails(null, shapeType, shapeLayout, rect.width, rect.height);
 	if (shapeLayout === 'collapsed') {
 		rect.width = details.minWidth;
@@ -974,10 +974,11 @@ var vertexHandlerUnion = mxVertexHandler.prototype.union;
 mxVertexHandler.prototype.union = function (bounds, dx, dy, index, gridEnabled, scale, tr, constrained) {
 	let rect = vertexHandlerUnion.apply(this, arguments);
 
-	if (this.state.style['shape'] === mxIBMShapeBase.prototype.cst.SHAPE) {		
+	if (this.state.style['shape'] === mxIBMShapeBase.prototype.cst.SHAPE) {
 		rect = mxIBMShapeBase.prototype.getNewGeometryRect(this.state.style, rect, true);
+	} else if (this.state.style['shape'] === mxIBMShapeLegend.prototype.cst.SHAPE) {
+		rect = mxIBMShapeLegend.prototype.getNewGeometryRect(this.graph, this.state.cell, this.state.style, rect);
 	}
-
 	return rect;
 };
 
@@ -1022,71 +1023,40 @@ mxIBMShapeLegend.prototype.styleChangedEventsHandler = function (graph, event) {
 	// var pStyle = getStylesObj(event.properties.change.previous);
 	var cStyle = getStylesObj(event.properties.change.style);
 
-	// set the default style of shapeType
-	var shapeType = mxUtils.getValue(cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
-	// var pNoHeader = mxUtils.getValue(pStyle, this.cst.HIDE_HEADER, this.cst.HIDE_HEADER_DEFAULT);
-	var cNoHeader = mxUtils.getValue(cStyle, this.cst.HIDE_HEADER, this.cst.HIDE_HEADER_DEFAULT);
+	var changes = {};
+	changes.style = this.getNewStyles(cStyle);
 
-	var cellStyles = this.getCellStyles(shapeType, cNoHeader);
-	for (let key in cellStyles) {
-		cStyle[key] = cellStyles[key];
-	}
+	var geometry = cell.getGeometry();
+	var geometryRect = this.getNewGeometryRect(graph, cell, cStyle, new mxRectangle(geometry.x, geometry.y, geometry.width, geometry.height));
+	geometry.height = geometryRect.height;
+	geometry.width = geometryRect.width;
+	changes.geometry = geometry;
 
 	graph.model.beginUpdate();
 	try {
-		graph.model.setStyle(cell, getStylesStr(cStyle));
-		this.setCellGeometry(graph, cell, shapeType, cStyle);
+		graph.model.setStyle(cell, changes.style);
+		graph.model.setGeometry(cell, changes.geometry);
 	} finally {
 		graph.model.endUpdate();
 	}
 }
 
-mxIBMShapeLegend.prototype.setCellGeometry = function (graph, cell, shapeType, cStyle) {
-	var cells = graph.getChildCells(cell, true, false);
-	if (cells.length > 0) {
-		// Set child's geometry
-		var childMaxWidth = 0;
-		var childMaxHeight = 0;
-		for (var i = 0; i < cells.length; i++) {
-			var cellBounds = graph.getCellBounds(cells[i], true, false);
-			childMaxWidth = Math.max(cellBounds.width / this.scale, childMaxWidth);
-			childMaxHeight = Math.max(cellBounds.height / this.scale, childMaxHeight);
-		}
-		for (var i = 0; i < cells.length; i++) {
-			var geometry = cells[i].getGeometry();
-			geometry.width = childMaxWidth;
-			geometry.height = childMaxHeight;
-			graph.model.setGeometry(cells[i], geometry);
-		}
-		// set parent's geometry
-		var geometry = cell.getGeometry();
-		if (shapeType == 'legendh') {
-			geometry.width = cStyle.marginLeft * 1 + childMaxWidth * cells.length + cStyle.marginRight * 1;
-			geometry.height = cStyle.marginTop * 1 + childMaxHeight + cStyle.marginBottom * 1;
-		} else {
-			geometry.width = cStyle.marginLeft * 1 + childMaxWidth + cStyle.marginRight * 1;
-			geometry.height = cStyle.marginTop * 1 + childMaxHeight * cells.length + cStyle.marginBottom * 1;
-		}
-		graph.model.setGeometry(cell, geometry);
-	}
-}
-
 mxIBMShapeLegend.prototype.paintVertexShape = function (c, x, y, w, h) {
-	var properties = this.getProperties();
+	var properties = this.getProperties(this.state.style);
 	c.setFillColor(properties.fillColor);
 	c.setStrokeColor(properties.strokeColor);
 	c.rect(x, y, w, h);
 	c.fillAndStroke();
 }
 
-mxIBMShapeLegend.prototype.getProperties = function () {
+mxIBMShapeLegend.prototype.getProperties = function (style) {
 	var properties = {}
 	properties = ibmConfig.ibmShapeSizes.legend;
-	properties.shapeType = mxUtils.getValue(this.state.style, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
-	properties.fillColor = mxUtils.getValue(this.state.style, this.cst.FILL_COLOR, this.cst.FILL_COLOR_DEFAULT);
-	properties.strokeColor = mxUtils.getValue(this.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
-	properties.fontColor = mxUtils.getValue(this.state.style, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
-	properties.ibmNoHeader = mxUtils.getValue(this.state.style, this.cst.HIDE_HEADER, this.cst.HIDE_HEADER_DEFAULT);
+	properties.shapeType = mxUtils.getValue(style, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
+	properties.fillColor = mxUtils.getValue(style, this.cst.FILL_COLOR, this.cst.FILL_COLOR_DEFAULT);
+	properties.strokeColor = mxUtils.getValue(style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
+	properties.fontColor = mxUtils.getValue(style, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
+	properties.ibmNoHeader = mxUtils.getValue(style, this.cst.HIDE_HEADER, this.cst.HIDE_HEADER_DEFAULT);
 	return properties;
 }
 
@@ -1118,6 +1088,64 @@ mxIBMShapeLegend.prototype.getCellStyles = function (shapeType, ibmNoHeader) {
 			styles[element[0]] = element[1];
 	}
 	return styles;
+}
+
+/**
+ * get new style of mxIBMShapeLegend
+ * @param {*} style 
+ */
+mxIBMShapeLegend.prototype.getNewStyles = function (style) {
+	var shapeType = mxUtils.getValue(style, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
+	// var pNoHeader = mxUtils.getValue(pStyle, this.cst.HIDE_HEADER, this.cst.HIDE_HEADER_DEFAULT);
+	var cNoHeader = mxUtils.getValue(style, this.cst.HIDE_HEADER, this.cst.HIDE_HEADER_DEFAULT);
+
+	var cellStyles = this.getCellStyles(shapeType, cNoHeader);
+	for (let key in cellStyles) {
+		style[key] = cellStyles[key];
+	}
+	return getStylesStr(style);
+}
+
+/**
+ * get new size of mxIBMShapeLegend
+ * @param {*} style 
+ * @param {*} rect 
+ * @returns 
+ */
+mxIBMShapeLegend.prototype.getNewGeometryRect = function (graph, cell, style, rect) {
+	var minChildWidth = 64;
+	var minChildHeight = 16;
+	var childMaxWidth = 0; 
+	var childMaxHeight = 0;
+	
+	var properties = this.getProperties(style);
+	var cells = graph.getChildCells(cell, true, false);
+	// Set child's geometry	
+	if (cells.length > 0) {
+		for (var i = 0; i < cells.length; i++) {
+			var tmpGeometry = cells[i].getGeometry();
+			childMaxWidth = Math.max(tmpGeometry.width, childMaxWidth, minChildWidth);
+			childMaxHeight = Math.max(tmpGeometry.height, childMaxHeight, minChildHeight);
+		}
+		for (var i = 0; i < cells.length; i++) {
+			var tmpGeometry = cells[i].getGeometry();
+			tmpGeometry.width = Math.max(childMaxWidth, properties.minWidth);
+			// tmpGeometry.height = Math.max(childMaxHeight, properties.minHeight);
+			tmpGeometry.height = childMaxHeight;
+			graph.model.setGeometry(cells[i], tmpGeometry);
+		}
+	}
+	// set parent's geometry	
+	if (properties.shapeType == 'legendh') {
+		rect.width = style.marginLeft * 1 + childMaxWidth * cells.length + style.marginRight * 1;
+		rect.height = style.marginTop * 1 + childMaxHeight + style.marginBottom * 1;
+	} else {
+		rect.width = style.marginLeft * 1 + childMaxWidth + style.marginRight * 1;
+		rect.height = style.marginTop * 1 + childMaxHeight * cells.length + style.marginBottom * 1;
+	}
+	rect.width = Math.max(rect.width, properties.minWidth);
+	rect.height = Math.max(rect.height, properties.minHeight);
+	return rect;
 }
 
 mxIBMShapeLegend.prototype.getLabelBounds = function (rect) {
