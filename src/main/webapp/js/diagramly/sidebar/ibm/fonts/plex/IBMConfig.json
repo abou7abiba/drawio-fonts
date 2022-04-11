@@ -1,0 +1,93 @@
+{
+    "css": ".geMenubarContainer { background-color: #d0e2ff !important; } .geMenubar { background-color: #d0e2ff !important; }",
+
+    "fontCss": 
+    	"@font-face {font-family: 'IBM Plex Sans Regular'; font-style: normal; font-weight: 400; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans/IBMPlexSans-Regular.woff2)} @font-face {font-family: 'IBM Plex Sans Italic'; font-style: italic; font-weight: 400; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans/IBMPlexSans-Italic.woff2)} @font-face {font-family: 'IBM Plex Sans SmBold'; font-style: normal; font-weight: 600; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans/IBMPlexSans-SemiBold.woff2)} @font-face {font-family: 'IBM Plex Sans Arabic Regular'; font-style: normal; font-weight: 400; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans-Arabic/IBMPlexSansArabic-Regular.woff2)} @font-face {font-family: 'IBM Plex Sans Arabic SmBold'; font-style: normal; font-weight: 600; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans-Arabic/IBMPlexSansArabic-SemiBold.woff2)}", 
+
+    "defaultFonts":
+    	["IBM Plex Sans Regular",
+	 "IBM Plex Sans Italic", 
+	 "IBM Plex Sans SmBld",
+	 "IBM Plex Sans Arabic Regular",
+	 "IBM Plex Sans Arabic SmBld" ],
+
+    "mapFonts": {
+	"regular": "IBM Plex Sans Regular",
+	"italic": "IBM Plex Sans Italic",
+	"semibold": "IBM Plex Sans SmBld",
+	"arabic_regular": "IBM Plex Sans Arabic Regular",
+	"arabic_semibold": "IBM Plex Sans Arabic SmBld"
+    },
+
+    "defaultColorSchemes": [
+	[{"stroke": "#0f62fe", "fill": "#ffffff"}, {"stroke": "#0f62fe", "fill": "#edf5ff"}, {"stroke": "#1192e8", "fill": "#ffffff"}, {"stroke": "#1192e8", "fill": "#e5f6ff"}, 
+	 {"stroke": "#002d9c", "fill": "#ffffff"}, {"stroke": "#002d9c", "fill": "#edf5ff"}, {"stroke": "#00539a", "fill": "#ffffff"}, {"stroke": "#00539a", "fill": "#e5f6ff"}],
+	
+	[{"stroke": "#198038", "fill": "#ffffff"}, {"stroke": "#198038", "fill": "#defbe6"}, {"stroke": "#009d9a", "fill": "#ffffff"}, {"stroke": "#009d9a", "fill": "#d9fbfb"}, 
+	 {"stroke": "#044317", "fill": "#ffffff"}, {"stroke": "#044317", "fill": "#defbe6"}, {"stroke": "#005d5d", "fill": "#ffffff"}, {"stroke": "#005d5d", "fill": "#d9fbfb"}],
+	
+	[{"stroke": "#a56eff", "fill": "#ffffff"}, {"stroke": "#a56eff", "fill": "#f6f2ff"}, {"stroke": "#878d96", "fill": "#ffffff"}, {"stroke": "#878d96", "fill": "#f2f4f8"}, 
+	 {"stroke": "#6929c4", "fill": "#ffffff"}, {"stroke": "#6929c4", "fill": "#f6f2ff"}, {"stroke": "#4d5358", "fill": "#ffffff"}, {"stroke": "#4d5358", "fill": "#f2f4f8"}],
+	
+	[{"stroke": "#fa4d56", "fill": "#ffffff"}, {"stroke": "#fa4d56", "fill": "#fff1f1"}, {"stroke": "#ee5396", "fill": "#ffffff"}, {"stroke": "#ee5396", "fill": "#fff0f7"}, 
+	 {"stroke": "#a2191f", "fill": "#ffffff"}, {"stroke": "#a2191f", "fill": "#fff1f1"}, {"stroke": "#9f1853", "fill": "#ffffff"}, {"stroke": "#9f1853", "fill": "#fff0f7"}],
+
+	[{"stroke": "#b28600", "fill": "#ffffff"}, {"stroke": "#b28600", "fill": "#fcf4d6"}, {"stroke": "#eb6200", "fill": "#ffffff"}, {"stroke": "#eb6200", "fill": "#fff2e8"}, 
+	 {"stroke": "#684e00", "fill": "#ffffff"}, {"stroke": "#684e00", "fill": "#fcf4d6"}, {"stroke": "#8a3800", "fill": "#ffffff"}, {"stroke": "#8a3800", "fill": "#fff2e8"}]
+    ],
+
+    "presetColors": [
+        "fa4d56", "ee5396", "a56eff", "0f62fe", "1192e8", "009d9a", "198038", "b28600", "eb6200", "878d96", "8d8d8d", "8f8b8b",
+        "a2191f", "9f1853", "6929c4", "002d9c", "00539a", "005d5d", "044317", "684e00", "8a3800", "4d5358", "525252", "565151"
+    ],
+
+    "defaultColors": [
+    	"none",   "ffffff", "f2f4f8", "dde1e6", "c1c7cd", "a2a9b0", "878d96", "697077", "4d5358", "343a3f", "21272a", "000000",
+    	"fff1f1", "fff0f7", "f6f2ff", "edf5ff", "e5f6ff", "d9fbfb", "defbe6", "fcf4d6", "fff2e8", "f2f4f8", "f4f4f4", "f7f3f2",
+	"ffd7d9", "ffd6e8", "e8daff", "d0e2ff", "bae6ff", "9ef0f0", "a7f0ba", "fddc69", "ffd9be", "dde1e6", "e0e0e0", "e5e0df",
+	"ffb3b8", "ffafd2", "d4bbff", "a6c8ff", "82cfff", "3ddbd9", "6fdc8c", "f1c21b", "ffb784", "c1c7cd", "c6c6c6", "cac5c4",
+	"ff8389", "ff7eb6", "be95ff", "78a9ff", "33b1ff", "08bdba", "42be65", "d2a106", "ff832b", "a2a9b0", "a8a8a8", "ada8a8",
+	"fa4d56", "ee5396", "a56eff", "4589ff", "1192e8", "009d9a", "24a148", "b28600", "eb6200", "878d96", "8d8d8d", "8f8b8b",
+	"da1e28", "d02670", "8a3ffc", "0f62fe", "0072c3", "007d79", "198038", "8e6a00", "ba4e00", "697077", "6f6f6f", "726e6e",
+	"a2191f", "9f1853", "6929c4", "0043ce", "00539a", "005d5d", "0e6027", "684e00", "8a3800", "4d5358", "525252", "565151",
+	"750e13", "740937", "491d8b", "002d9c", "003a6d", "004144", "044317", "483700", "5e2900", "343a3f", "393939", "3c3838",
+	"520408", "510224", "31135e", "001d6c", "012749", "022b30", "022d0d", "302400", "3e1a00", "21272a", "262626", "272525"
+    ],
+
+    "colorNames": {
+    	"NONE": "Transparent", "FFFFFF": "White", "F2F4F8": "Cool Gray 10", "DDE1E6": "Cool Gray 20", "C1C7CD": "Cool Gray 30", "A2A9B0": "Cool Gray 40", "878D96": "Cool Gray 50", "697077": "Cool Gray 60", "4D5358": "Cool Gray 70", "343A3F": "Cool Gray 80", "21272A": "Cool Gray 90", "000000": "Black",
+    	"FFF1F1": "Red 10 (Light Fill)", "FFF0F7": "Magenta 10 (Light Fill)", "F6F2FF": "Purple 10 (Light Fill)", "EDF5FF": "Blue 10 (Light Fill)", "E5F6FF": "Cyan 10 (Light Fill)", "D9FBFB": "Teal 10 (Light Fill)", "DEFBE6": "Green 10 (Light Fill)", "FCF4D6": "Yellow 10 (Limited Light Fill)", "FFF2E8": "Orange 10 (Limited Light Fill)", "F2F4F8": "Cool Gray 10 (Light Fill)", "F4F4F4": "Gray 10 (Light Fill)" , "F7F3F2": "Warm Gray 10 (Light Fill)",
+	"FFD7D9": "Red 20 (Not Used)", "FFD6E8": "Magenta 20 (Not Used)", "E8DAFF": "Purple 20 (Not Used", "D0E2FF": "Blue 20 (Not Used)", "BAE6FF": "Cyan 20 (Not Used)", "9EF0F0": "Teal 20 (Not Used)", "A7F0BA": "Green 20 (Not Used)", "FDDC69": "Yellow 20 (Not Used)", "FFD9BE": "Orange 20 (Not Used)", "DDE1E6": "Cool Gray 20 (Not Used)", "E0E0E0": "Gray 20 (Not Used)", "E5E0DF": "Warm Gray 20 (Not Used)",
+	"FFB3B8": "Red 30 (Not Used)", "FFAFD2": "Magenta 30 (Not Used)", "D4BBFF": "Purple 30 (Not Used)", "A6C8FF": "Blue 30 (Not Used)", "82CFFF": "Cyan 30 (Not Used)", "3DDBD9": "Teal 30 (Not Used)", "6FDC8C": "Green 30 (Not Used)", "F1C21B": "Yellow 30 (Not Used)", "FFB784": "Orange 30 (Not Used)", "C1C7CD": "Cool Gray 30 (Not Used)", "C6C6C6": "Gray 30 (Not Used)", "CAC5C4": "Warm Gray 30 (Not Used)",
+	"FF8389": "Red 40 (Not Used)", "FF7EB6": "Magenta 40 (Not Used)", "BE95FF": "Purple 40 (Not Used)", "78A9FF": "Blue 40 (Not Used)", "33B1FF": "Cyan 40 (Not Used)", "08BDBA": "Teal 40 (Not Used)", "42BE65": "Green 40 (Not Used)", "D2A106": "Yellow 40 (Not Used)", "FF832B": "Orange 40 (Not Used)", "A2A9B0": "Cool Gray 40 (Not Used)", "A8A8A8": "Gray 40 (Not Used)", "ADA8A8": "Warm Gray 40 (Not Used)",
+	"FA4D56": "Red 50 (Medium Line)", "EE5396": "Magenta 50 (Medium Line)", "A56EFF": "Purple 50 (Medium Line)", "4589FF": "Blue 50 (Not Used)", "1192E8": "Cyan 50 (Medium Line)", "009D9A": "Teal 50 (Medium Line)", "24A148": "Green 50 (Not Used)", "B28600": "Yellow 50 (Limited Medium Line)", "EB6200": "Orange 50 (Limited Medium Line)", "878D96": "Cool Gray 50 (Medium Line)", "8D8D8D": "Gray 50 (Medium Line)", "8F8B8B": "Warm Gray 50 (Medium Line)",
+	"DA1E28": "Red 60 (Not Used", "D02670": "Magenta 60 (Not Used)", "8A3FFC": "Purple 60 (Not Used)", "0F62FE": "Blue 60 (Medium Line)", "0072C3": "Cyan 60 (Not Used)", "007D79": "Teal 60 (Not Used)", "198038": "Green 60 (Medium Line)", "8E6A00": "Yellow 60 (Not Used)", "BA4E00": "Orange 60 (Not Used)", "697077": "Cool Gray 60 (Not Used)", "6F6F6F": "Gray 60 (Not Used)", "726E6E": "Warm Gray 60 (Not Used)",
+	"A2191F": "Red 70 (Dark Line)", "9F1853": "Magenta 70 (Dark Line)", "6929C4": "Purple 70 (Dark Line)", "0043CE": "Blue 70 (Not Used)", "00539A": "Cyan 70 (Dark Line)", "005D5D": "Teal 70 (Dark Line)", "0E6027": "Green 70 (Not Used)", "684E00": "Yellow 70 (Limited Dark Line))", "8A3800": "Orange 70 (Limited Dark Line)", "4D5358": "Cool Gray 70 (Dark Line)", "525252": "Gray 70 (Dark Line)", "565151": "Warm Gray 70 (Dark Line)",
+	"750E13": "Red 80 (Not Used)", "740937": "Magenta 80 (Not Used)", "491D8B": "Purple 80 (Not Used)", "002D9C": "Blue 80 (Dark Line)", "003A6D": "Cyan 80 (Used)", "004144": "Teal 80 (Not Used)", "044317": "Green 80 (Dark Line)", "483700": "Yellow 80 (Not Used)", "5E2900": "Orange 80 (Not Used)", "343A3F": "Cool Gray 80 (Not Used)", "393939": "Gray 80 (Not Used) ", "3C3838": "Warm Gray 80 (Not Used)",
+	"520408": "Red 90 (Not Used)", "510224": "Magenta 90 (Not Used)", "31135E": "Purple 90 (Not Used)", "001D6C": "Blue 90 (Not Used)", "012749": "Cyan 90 (Not Used)", "022B30": "Teal 90 (Not Used)", "022D0D": "Green 90 (Not Used)", "302400": "Yellow 90 (Not Used)", "3E1A00": "Orange 90 (Not Used)", "21272A": "Cool Gray 90 (Not Used)", "262626": "Gray 90 (Not Used)", "272525": "Warm Gray 90 (Not Used)"
+    },
+
+    "mapColors": {
+        "none": "none", "white": "#ffffff", "black": "#000000",
+        "lightred": "#fff1f1", "red": "#fa4d56" , "darkred": "#a2191f",
+        "lightmagenta": "#fff0f7", "magenta": "#ee5396" , "darkmagenta": "#9f1853",
+        "lightpurple": "#f6f2ff", "purple": "#a56eff" , "darkpurple": "#6929c4",
+        "lightblue": "#edf5ff", "blue": "#0f62fe" , "darkblue": "#002d9c",
+        "lightcyan": "#e5f6ff", "cyan": "#1192e8" , "darkcyan": "#00539a",
+        "lightteal": "#d9fbfb", "teal": "#009d9a" , "darkteal": "#005d5d",
+        "lightgreen": "#defbe6", "green": "#198038" , "darkgreen": "#044317",
+        "lightyellow": "#fcf4d6", "yellow": "#b28600" , "darkyellow": "#684e00",
+        "lightorange": "#fff2e8", "orange": "#eb6200" , "darkorange": "#8a3800",
+        "lightcoolgray": "#f2f4f8", "coolgray": "#878d96" , "darkcoolgray": "#4d5358",
+        "lightgray": "#f4f4f4", "gray": "#8d8d8d", "darkgray": "#525252",
+        "lightwarmgray": "#f7f3f2", "warmgray": "#8f8b8b" , "darkwarmgray": "#565151"
+    },
+
+    "defaultLines": {
+	"solid": {"name": "Solid Line", "property": "", "description": "Active shape"},
+	"dashed": {"name": "Dashed Line", "property": "ibmDashed", "description": "Changed shape"},
+	"double": {"name": "Double Line", "property": "ibmDouble", "description": "Added shape"},
+	"strikethrough": {"name": "Strikethrough Line", "property": "ibmStrikethrough", "description": "Removed shape"},
+	"multiplicity": {"name": "Multiplicity Line", "property": "ibmMultiplicity", "description": "Multiplicity shape"}
+    }
+}
