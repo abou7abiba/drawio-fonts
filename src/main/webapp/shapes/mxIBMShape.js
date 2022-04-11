@@ -78,7 +78,7 @@ mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 
 	// Get the new geometry	
 	var geometry = cell.getGeometry();
-	var geometryRect = this.getGeometryRect(cStyle, new mxRectangle(geometry.x, geometry.y, geometry.width, geometry.height), false);	
+	var geometryRect = this.getNewGeometryRect(cStyle, new mxRectangle(geometry.x, geometry.y, geometry.width, geometry.height), false);	
 	geometry.height = geometryRect.height;
 	geometry.width = geometryRect.width;
 	changes.geometry = geometry;
@@ -451,11 +451,13 @@ mxIBMShapeBase.prototype.getNewStyles = function (cStyleStr, pStyle, cStyle) {
 }
 
 /**
- * Get the shape size
- * @param {*} shapeType 
+ * get the new shape size as per shapeType and shapeLayout
+ * @param {*} style 
+ * @param {*} rect 
+ * @param {*} minSize 
  * @returns 
  */
-mxIBMShapeBase.prototype.getGeometryRect = function (style, rect, minSize) {
+mxIBMShapeBase.prototype.getNewGeometryRect = function (style, rect, minSize) {
 	const shapeType = mxUtils.getValue(style, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);
 	const shapeLayout = mxUtils.getValue(style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT_DEFAULT);	
 	var details = this.getDetails(null, shapeType, shapeLayout, rect.width, rect.height);
@@ -973,7 +975,7 @@ mxVertexHandler.prototype.union = function (bounds, dx, dy, index, gridEnabled, 
 	let rect = vertexHandlerUnion.apply(this, arguments);
 
 	if (this.state.style['shape'] === mxIBMShapeBase.prototype.cst.SHAPE) {		
-		rect = mxIBMShapeBase.prototype.getGeometryRect(this.state.style, rect, true);
+		rect = mxIBMShapeBase.prototype.getNewGeometryRect(this.state.style, rect, true);
 	}
 
 	return rect;
