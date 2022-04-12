@@ -976,9 +976,10 @@ mxVertexHandler.prototype.union = function (bounds, dx, dy, index, gridEnabled, 
 
 	if (this.state.style['shape'] === mxIBMShapeBase.prototype.cst.SHAPE) {
 		rect = mxIBMShapeBase.prototype.getNewGeometryRect(this.state.style, rect, true);
-	} else if (this.state.style['shape'] === mxIBMShapeLegend.prototype.cst.SHAPE) {
-		rect = mxIBMShapeLegend.prototype.getNewGeometryRect(this.graph, this.state.cell, this.state.style, rect);
-	}
+	} 
+	// else if (this.state.style['shape'] === mxIBMShapeLegend.prototype.cst.SHAPE) {
+	// 	rect = mxIBMShapeLegend.prototype.getNewGeometryRect(this.graph, this.state.cell, this.state.style, rect);
+	// }
 	return rect;
 };
 
@@ -1011,6 +1012,16 @@ mxIBMShapeLegend.prototype.init = function (container) {
 			if (event.properties.change && event.properties.change.cell && event.properties.change.cell.id === this.state.cell.id) {
 				if ("mxStyleChange" === event.properties.change.constructor.name) {
 					this.styleChangedEventsHandler(this.state.view.graph, event);
+				}
+				if ("mxGeometryChange" === event.properties.change.constructor.name) {
+					var cell = event.properties.change.cell;
+					var graph = this.state.view.graph;
+					var cStyle = getStylesObj(cell.style);
+					var geometry = cell.getGeometry();
+					var geometryRect = this.getNewGeometryRect(graph, cell, cStyle, new mxRectangle(geometry.x, geometry.y, geometry.width, geometry.height));
+					geometry.height = geometryRect.height;
+					geometry.width = geometryRect.width;
+					graph.model.setGeometry(cell, geometry);
 				}
 			}
 		})
@@ -1113,38 +1124,37 @@ mxIBMShapeLegend.prototype.getNewStyles = function (style) {
  * @returns 
  */
 mxIBMShapeLegend.prototype.getNewGeometryRect = function (graph, cell, style, rect) {
-	var minChildWidth = 64;
-	var minChildHeight = 16;
-	var childMaxWidth = 0; 
-	var childMaxHeight = 0;
-	
-	var properties = this.getProperties(style);
+	// Get child's geometry	
+	var childWidth = 0;
+	var childHeight = 0;
+	var childMinWidth = 64;
+	var childMinHeight = 16;
 	var cells = graph.getChildCells(cell, true, false);
-	// Set child's geometry	
 	if (cells.length > 0) {
 		for (var i = 0; i < cells.length; i++) {
 			var tmpGeometry = cells[i].getGeometry();
-			childMaxWidth = Math.max(tmpGeometry.width, childMaxWidth, minChildWidth);
-			childMaxHeight = Math.max(tmpGeometry.height, childMaxHeight, minChildHeight);
+			childWidth = Math.max(tmpGeometry.width, childWidth, childMinWidth);
+			childHeight = Math.max(tmpGeometry.height, childHeight, childMinHeight);
 		}
 		for (var i = 0; i < cells.length; i++) {
 			var tmpGeometry = cells[i].getGeometry();
-			tmpGeometry.width = Math.max(childMaxWidth, properties.minWidth);
-			// tmpGeometry.height = Math.max(childMaxHeight, properties.minHeight);
-			tmpGeometry.height = childMaxHeight;
+			tmpGeometry.width = childWidth;
+			tmpGeometry.height = childHeight;
 			graph.model.setGeometry(cells[i], tmpGeometry);
 		}
 	}
-	// set parent's geometry	
+	// Get parent's geometry	
+	var properties = this.getProperties(style);	
 	if (properties.shapeType == 'legendh') {
-		rect.width = style.marginLeft * 1 + childMaxWidth * cells.length + style.marginRight * 1;
-		rect.height = style.marginTop * 1 + childMaxHeight + style.marginBottom * 1;
+		rect.width = style.marginLeft * 1 + (childWidth + style.marginRight * 1 ) * cells.length;
+		rect.height = style.marginTop * 1 + childHeight + style.marginBottom * 1;
 	} else {
-		rect.width = style.marginLeft * 1 + childMaxWidth + style.marginRight * 1;
-		rect.height = style.marginTop * 1 + childMaxHeight * cells.length + style.marginBottom * 1;
+		rect.width = style.marginLeft * 1 + childWidth + style.marginRight * 1;
+		rect.height = style.marginTop * 1 + (childHeight + style.marginBottom * 1) * cells.length;
 	}
 	rect.width = Math.max(rect.width, properties.minWidth);
 	rect.height = Math.max(rect.height, properties.minHeight);
+	
 	return rect;
 }
 
