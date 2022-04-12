@@ -90,7 +90,7 @@
 
     "ibmBaseConstants": {
         "SHAPE": "mxgraph.ibm.base",
-        "SHAPE_TYPE": "ibmType", "SHAPE_TYPE_DEFAULT": "pn",
+        "SHAPE_TYPE": "ibmType", "SHAPE_TYPE_DEFAULT": "nodep",
         "SHAPE_LAYOUT": "ibmLayout", "SHAPE_LAYOUT_DEFAULT": "expanded",
         "BADGE": "ibmBadge", "BADGE_DEFAULT": "none",
         "ROTATE_ICON": "ibmRotation", "ROTATE_ICON_DEFAULT": 0,

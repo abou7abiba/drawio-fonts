@@ -15,12 +15,13 @@
  */
 
 
-const ibmURL = (new RegExp(/^.*\//)).exec(window.location.href)[0];
-const ibmParams = new URLSearchParams(window.location.search);
-const ibmLanguage = ibmParams.get('lang') ? ibmParams.get('lang') : 'en';
-const ibmConfig = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMConfig.json').getText());
-const ibmIcons = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMIcons.json').getText());
-
+(function()
+{
+	const ibmURL = (new RegExp(/^.*\//)).exec(window.location.href)[0];
+	const ibmParams = new URLSearchParams(window.location.search);
+	const ibmLanguage = ibmParams.get('lang') ? ibmParams.get('lang') : 'en';
+	const ibmConfig = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMConfig.json').getText());
+	const ibmIcons = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMIcons.json').getText());
 
 //**********************************************************************************************************************************************************
 // Base Shapes
@@ -444,9 +445,9 @@ mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
  * @returns 
  */
 mxIBMShapeBase.prototype.getNewStyles = function (cStyleStr, pStyle, cStyle) {
-	var newStyle = this.setLayoutStyle(cStyleStr, pStyle, cStyle);
-	newStyle = this.setLineStyle(newStyle, pStyle, cStyle);
-	newStyle = this.setColorStyle(newStyle, pStyle, cStyle);
+	var newStyle = this.getLayoutStyles(cStyleStr, pStyle, cStyle);
+	newStyle = this.getLineStyles(newStyle, pStyle, cStyle);
+	newStyle = this.getColorStyles(newStyle, pStyle, cStyle);
 	return newStyle;
 }
 
@@ -494,115 +495,20 @@ mxIBMShapeBase.prototype.getLabelBounds = function (rect) {
 	return new mxRectangle(rect.x + offSet * this.scale, rect.y, rect.width - properties.labelAlign * this.scale, properties.labelHeight * this.scale);
 };
 
-// Convert RGB values to hex values.
-mxIBMShapeBase.prototype.rgb2hex = function (color) {
-	if (color.toUpperCase().startsWith('RGB')) {
-		let rgb = color.split(',');
-		let r = parseInt(rgb[0].substring(4));
-		let g = parseInt(rgb[1]);
-		let b = parseInt(rgb[2]);
-		var rhex = Number(r).toString(16)
-		rhex = (rhex.length < 2) ? "0" + rhex : rhex;
-		var ghex = Number(r).toString(16)
-		ghex = (ghex.length < 2) ? "0" + ghex : ghex;
-		var bhex = Number(r).toString(16)
-		bhex = (bhex.length < 2) ? "0" + bhex : bhex;
-		return "#" + rhex.toString() + ghex.toString() + bhex.toString();
-	}
-	else if (color.toUpperCase() === 'DEFAULT')
-		return ibmConfig.ibmColors.white;
-	else
-		return color;
-}
-
-// Normalize object color to be visible if background color is too dark.
-mxIBMShapeBase.prototype.normalizeElementColor = function (objectColor, backgroundColor) {
-	if (backgroundColor === "none")
-		return objectColor;
-	else if (backgroundColor === ibmConfig.ibmColors.black)
-		return ibmConfig.ibmColors.white;
-
-	backgroundColor = backgroundColor.toUpperCase();
-	let name = ibmConfig.colorNames[backgroundColor.substring(1)];
-	if (!name) {
-		return name;
-	}
-	let segments = name.split(' ');
-
-	for (var index = 0; index < segments.length; index++) {
-		code = parseInt(segments[index]);
-		if (!isNaN(code) && code >= 50)
-			return ibmConfig.ibmColors.white;
-	}
-
-	return objectColor;
-}
-
-// Retrieve color settings.
-mxIBMShapeBase.prototype.getColorStyles = function (shape, shapeType, shapeLayout) {
-	// Retrieve color settings.
-	let lineColor = mxUtils.getValue(shape.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
-	let fillColor = mxUtils.getValue(shape.state.style, this.cst.FILL_COLOR, this.cst.FILL_COLOR_DEFAULT);
-	let fontColor = mxUtils.getValue(shape.state.style, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
-	let badgeColor = mxUtils.getValue(shape.state.style, this.cst.BADGE_COLOR, this.cst.BADGE_COLOR_DEFAULT);
-
-	let badgeFontColor = fontColor;
-	let iconColor = ibmConfig.ibmColors.black;
-	let iconAreaColor = (shapeType.startsWith('group')) ? 'none' : lineColor;
-	//if (shapeLayout === 'collapsed' && fillColor != this.cst.FILL_COLOR_DEFAULT) iconAreaColor = fillColor;
-	let styleColor = lineColor;
-
-	// Set line color to black if not set otherwise use line color.
-	lineColor = (lineColor === this.cst.LINE_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(lineColor);
-
-	// Set fill color to transparent if not set otherwise use fill color.
-	fillColor = (fillColor === this.cst.FILL_COLOR_DEFAULT) ? ibmConfig.ibmColors.none : this.rgb2hex(fillColor);
-
-	// Set fill color to same as line color for legend color items.
-	fillColor = (shapeLayout === 'itemColor') ? lineColor : fillColor;
-
-	// Set icon area color to fill color for collapsed shapes.
-	iconAreaColor = (shapeLayout === 'collapsed' && fillColor != this.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
-
-	// Set icon area color to fill color for expanded target shapes.
-	iconAreaColor = (shapeLayout === 'expanded' && shapeType === 'target' && fillColor != this.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
-
-	// Set badge color to line color if not set otherwise use badge color.
-	badgeColor = (badgeColor === this.cst.BADGE_COLOR_DEFAULT) ? lineColor : this.rgb2hex(badgeColor);
-
-	// Normalize badge font color to be visible if badge color is too dark.
-	badgeFontColor = this.normalizeElementColor(badgeFontColor, badgeColor);
-
-	// Normalize icon color to be visible if icon area color is too dark.
-	iconColor = this.normalizeElementColor(iconColor, iconAreaColor);
-
-	// Set icon color to black for legend icon items.
-	iconColor = (shapeLayout === 'itemIcon') ? ibmConfig.ibmColors.coolgray : iconColor;
-
-	// Normalize style color to be visibile if icon area color is too dark.
-	styleColor = this.normalizeElementColor(styleColor, iconAreaColor);
-
-	// Set style color to black for expanded shapes and legend style items.
-	styleColor = (shapeLayout.startsWith('expanded') || shapeLayout === 'itemStyle') ? lineColor : styleColor;
-
-	return {
-		'lineColor': lineColor,
-		'fillColor': fillColor,
-		'fontColor': fontColor,
-		'badgeColor': badgeColor,
-		'badgeFontColor': badgeFontColor,
-		'iconColor': iconColor,
-		'iconAreaColor': iconAreaColor,
-		'styleColor': styleColor
-	};
-}
-
-// Retrieve size and color details.
-// Sizes should in general only be defined in IBMConfig.json.
+/**
+ * Retrieve size and color details.
+ * @param {*} shape
+ * @param {*} shapeType
+ * @param {*} shapeLayout
+ * @param {*} shapeWidth
+ * @param {*} shapeHeight
+ * @returns 
+ */
 mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, shapeWidth, shapeHeight) {
+	const cst = this.cst;
 	let details = {};
 
-	// Get shape-specific sizes.
+	// Get defined shape sizes.
 
 	if (shapeLayout === 'collapsed') {
 		if (shapeType === 'target')
@@ -649,7 +555,7 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 	// Add shape colors.
 
 	if (shape) {
-		let colors = this.getColorStyles(shape, shapeType, shapeLayout);
+		let colors = getColorDetails(shape, shapeType, shapeLayout);
 
 		details['lineColor'] = colors.lineColor;
 		details['fillColor'] = colors.fillColor;
@@ -662,6 +568,86 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 	}
 
 	return details;
+
+	// Retrieve color settings.
+	function getColorDetails (shape, shapeType, shapeLayout) {
+		// Retrieve color settings.
+		let lineColor = mxUtils.getValue(shape.state.style, cst.LINE_COLOR, cst.LINE_COLOR_DEFAULT);
+		let fillColor = mxUtils.getValue(shape.state.style, cst.FILL_COLOR, cst.FILL_COLOR_DEFAULT);
+		let fontColor = mxUtils.getValue(shape.state.style, cst.FONT_COLOR, cst.FONT_COLOR_DEFAULT);
+		let badgeColor = mxUtils.getValue(shape.state.style, cst.BADGE_COLOR, cst.BADGE_COLOR_DEFAULT);
+
+		let badgeFontColor = fontColor;
+		let iconColor = ibmConfig.ibmColors.black;
+		let iconAreaColor = (shapeType.startsWith('group')) ? 'none' : lineColor;
+		let styleColor = lineColor;
+
+		// Set line color to black if not set otherwise use line color.
+		lineColor = (lineColor === cst.LINE_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : rgb2hex(lineColor);
+
+		// Set fill color to transparent if not set otherwise use fill color.
+		fillColor = (fillColor === cst.FILL_COLOR_DEFAULT) ? ibmConfig.ibmColors.none : rgb2hex(fillColor);
+
+		// Set fill color to same as line color for legend color items.
+		fillColor = (shapeLayout === 'itemColor') ? lineColor : fillColor;
+
+		// Set icon area color to fill color for collapsed shapes.
+		iconAreaColor = (shapeLayout === 'collapsed' && fillColor != cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
+
+		// Set icon area color to fill color for expanded target shapes.
+		iconAreaColor = (shapeLayout === 'expanded' && shapeType === 'target' && fillColor != cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
+
+		// Set badge color to line color if not set otherwise use badge color.
+		badgeColor = (badgeColor === cst.BADGE_COLOR_DEFAULT) ? lineColor : rgb2hex(badgeColor);
+
+		// Normalize badge font color to be visible if badge color is too dark.
+		badgeFontColor = normalizeElementColor(badgeFontColor, badgeColor);
+
+		// Normalize icon color to be visible if icon area color is too dark.
+		iconColor = normalizeElementColor(iconColor, iconAreaColor);
+
+		// Set icon color to black for legend icon items.
+		iconColor = (shapeLayout === 'itemIcon') ? ibmConfig.ibmColors.coolgray : iconColor;
+
+		// Normalize style color to be visibile if icon area color is too dark.
+		styleColor = normalizeElementColor(styleColor, iconAreaColor);
+
+		// Set style color to black for expanded shapes and legend style items.
+		styleColor = (shapeLayout.startsWith('expanded') || shapeLayout === 'itemStyle') ? lineColor : styleColor;
+
+		return {
+			'lineColor': lineColor,
+			'fillColor': fillColor,
+			'fontColor': fontColor,
+			'badgeColor': badgeColor,
+			'badgeFontColor': badgeFontColor,
+			'iconColor': iconColor,
+			'iconAreaColor': iconAreaColor,
+			'styleColor': styleColor
+		};
+	}
+
+	// Normalize element color to be visible if background color is too dark.
+	function normalizeElementColor(elementColor, backgroundColor) {
+		if (backgroundColor === "none")
+			return elementColor;
+		else if (backgroundColor === ibmConfig.ibmColors.black)
+			return ibmConfig.ibmColors.white;
+
+		backgroundColor = backgroundColor.toUpperCase();
+		let name = ibmConfig.colorNames[backgroundColor.substring(1)];
+		if (!name) return name;
+	
+		let segments = name.split(' ');
+
+		for (var index = 0; index < segments.length; index++) {
+			code = parseInt(segments[index]);
+			if (!isNaN(code) && code >= 50)
+				return ibmConfig.ibmColors.white;
+		}
+
+		return elementColor;
+	}
 }
 
 // Build object for current and previous values.
@@ -688,14 +674,6 @@ mxIBMShapeBase.prototype.getStylesObj = function (stylesStr) {
 
 // Update styles string from styles object.
 mxIBMShapeBase.prototype.getStylesStr = function (stylesObj, stylesStr) {
-	/*
-	var stylesStr = '';
-	for (var key in stylesObj) {
-		stylesStr += key + '=' + stylesObj[key] + ';'
-	}
-	return stylesStr
-	*/
-
 	for (let key in stylesObj)
 		stylesStr = mxUtils.setStyle(stylesStr, key, stylesObj[key]);
 
@@ -789,8 +767,8 @@ mxIBMShapeBase.prototype.getLayoutProperties = function (shapeType, shapeLayout,
 	return properties;
 }
 
-// Get and set layout style called by event handler.
-mxIBMShapeBase.prototype.setLayoutStyle = function (cStyleStr, pStyle, cStyle) {
+// Get layout styles called by event handler.
+mxIBMShapeBase.prototype.getLayoutStyles = function (cStyleStr, pStyle, cStyle) {
 	var shapeType = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
 	var shapeLayout = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_TYPE_LAYOUT);
 	var hideIcon = this.getStyleValues(pStyle, cStyle, this.cst.HIDE_ICON, this.cst.HIDE_ICON_DEFAULT);
@@ -802,10 +780,10 @@ mxIBMShapeBase.prototype.setLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 	var properties = this.getLayoutProperties(shapeType, shapeLayout, hideIcon);
 
 	// Build styles object from styles string.
-	var stylesObj = this.getStylesObj(properties);
+	var stylesObj = getStylesObj(properties);
 
 	// Update styles string from styles object.
-	cStyleStr = this.getStylesStr(stylesObj, cStyleStr);
+	cStyleStr = getStylesStr(stylesObj, cStyleStr);
 
 	return cStyleStr;
 };
@@ -833,8 +811,8 @@ mxIBMShapeBase.prototype.getLineProperties = function (styleDashed, styleDouble,
 	return properties;
 }
 
-// Get and set line style (dashed, double, strikethrough) called by event handler.
-mxIBMShapeBase.prototype.setLineStyle = function (cStyleStr, pStyle, cStyle) {
+// Get line styles (dashed, double, strikethrough) called by event handler.
+mxIBMShapeBase.prototype.getLineStyles = function (cStyleStr, pStyle, cStyle) {
 	var styleDashed = this.getStyleValues(pStyle, cStyle, this.cst.STYLE_DASHED, this.cst.STYLE_DASHED_DEFAULT);
 	var styleDouble = this.getStyleValues(pStyle, cStyle, this.cst.STYLE_DOUBLE, this.cst.STYLE_DOUBLE_DEFAULT);
 	var styleStrikethrough = this.getStyleValues(pStyle, cStyle, this.cst.STYLE_STRIKETHROUGH, this.cst.STYLE_STRIKETHROUGH_DEFAULT);
@@ -843,17 +821,17 @@ mxIBMShapeBase.prototype.setLineStyle = function (cStyleStr, pStyle, cStyle) {
 	var properties = this.getLineProperties(styleDashed, styleDouble, styleStrikethrough);
 
 	// Build styles object from styles string.
-	var stylesObj = this.getStylesObj(properties);
+	var stylesObj = getStylesObj(properties);
 
 	// Update styles string from styles object.
-	cStyleStr = this.getStylesStr(stylesObj, cStyleStr);
+	cStyleStr = getStylesStr(stylesObj, cStyleStr);
 
 	return cStyleStr;
 }
 
 // Get name of color from rbg/hex value.
 mxIBMShapeBase.prototype.getColorName = function (color) {
-	var colorHex = this.rgb2hex(color);
+	var colorHex = rgb2hex(color);
 	var colorUpper = colorHex.toUpperCase();
 	var colorName = ibmConfig.colorNames[colorUpper === "NONE" ? "NONE" : colorUpper.substring(1)];
 	return colorName;
@@ -867,7 +845,6 @@ mxIBMShapeBase.prototype.getColorProperties = function (shapeType, shapeLayout, 
 	if (!changed)
 		return properties;
 
-	let UNUSED_COLOR_NAME = ibmConfig.ibmBaseConstants.UNUSED_COLOR_NAME;
 	let LINE_COLOR_NAME = ibmConfig.ibmBaseConstants.LINE_COLOR_NAME;
 	let FILL_COLOR_NAME = ibmConfig.ibmBaseConstants.FILL_COLOR_NAME;
 	let FONT_COLOR_NAME = ibmConfig.ibmBaseConstants.FONT_COLOR_NAME;
@@ -946,8 +923,8 @@ mxIBMShapeBase.prototype.getColorProperties = function (shapeType, shapeLayout, 
 	return properties;
 }
 
-// Get and set color style called by event handler.
-mxIBMShapeBase.prototype.setColorStyle = function (cStyleStr, pStyle, cStyle) {
+// Get color styles called by event handler.
+mxIBMShapeBase.prototype.getColorStyles = function (cStyleStr, pStyle, cStyle) {
 	var shapeType = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
 	var shapeLayout = this.getStyleValues(pStyle, cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_TYPE_LAYOUT);
 	var container = this.getStyleValues(pStyle, cStyle, this.cst.CONTAINER, this.cst.CONTAINER_DEFAULT);
@@ -961,10 +938,10 @@ mxIBMShapeBase.prototype.setColorStyle = function (cStyleStr, pStyle, cStyle) {
 	var properties = this.getColorProperties(shapeType, shapeLayout, lineColor, fillColor, fontColor, badgeColor, container);
 
 	// Build styles object from styles string.
-	var stylesObj = this.getStylesObj(properties);
+	var stylesObj = getStylesObj(properties);
 
 	// Update styles string from styles object.
-	cStyleStr = this.getStylesStr(stylesObj, cStyleStr);
+	cStyleStr = getStylesStr(stylesObj, cStyleStr);
 
 	return cStyleStr;
 }
@@ -1227,6 +1204,8 @@ mxCellRenderer.registerShape(mxIBMShapeUnit.prototype.cst.SHAPE, mxIBMShapeUnit)
 //**********************************************************************************************************************************************************
 // Common Functions
 //**********************************************************************************************************************************************************
+
+// Convert string to styles substituting 'null' in strings for null value.
 function getStylesObj(stylesStr) {
 	var styles = {};
 	stylesStr = stylesStr.slice(0, -1); // Remove trailing semicolon.
@@ -1241,10 +1220,41 @@ function getStylesObj(stylesStr) {
 	return styles;
 }
 
+// Convert styles to string.
 function getStylesStr(stylesObj) {
 	var stylesStr = '';
 	for (var key in stylesObj) {
 		stylesStr += key + '=' + stylesObj[key] + ';'
 	}
-	return stylesStr
+	return stylesStr;
 } 
+
+// Convert styles to string.
+function getStylesStr(stylesObj, stylesStr) {
+	for (let key in stylesObj)
+		stylesStr = mxUtils.setStyle(stylesStr, key, stylesObj[key]);
+
+	return stylesStr;
+}
+// Convert RGB values to hex values.
+function rgb2hex(color) {
+	if (color.toUpperCase().startsWith('RGB')) {
+		let rgb = color.split(',');
+		let r = parseInt(rgb[0].substring(4));
+		let g = parseInt(rgb[1]);
+		let b = parseInt(rgb[2]);
+		var rhex = Number(r).toString(16)
+		rhex = (rhex.length < 2) ? "0" + rhex : rhex;
+		var ghex = Number(r).toString(16)
+		ghex = (ghex.length < 2) ? "0" + ghex : ghex;
+		var bhex = Number(r).toString(16)
+		bhex = (bhex.length < 2) ? "0" + bhex : bhex;
+		return "#" + rhex.toString() + ghex.toString() + bhex.toString();
+	}
+	else if (color.toUpperCase() === 'DEFAULT')
+		return ibmConfig.ibmColors.white;
+	else
+		return color;
+}
+
+})();
