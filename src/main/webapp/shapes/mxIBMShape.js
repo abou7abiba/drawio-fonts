@@ -973,13 +973,9 @@ mxIBMShapeBase.prototype.setColorStyle = function (cStyleStr, pStyle, cStyle) {
 var vertexHandlerUnion = mxVertexHandler.prototype.union;
 mxVertexHandler.prototype.union = function (bounds, dx, dy, index, gridEnabled, scale, tr, constrained) {
 	let rect = vertexHandlerUnion.apply(this, arguments);
-
 	if (this.state.style['shape'] === mxIBMShapeBase.prototype.cst.SHAPE) {
 		rect = mxIBMShapeBase.prototype.getNewGeometryRect(this.state.style, rect, true);
-	} 
-	// else if (this.state.style['shape'] === mxIBMShapeLegend.prototype.cst.SHAPE) {
-	// 	rect = mxIBMShapeLegend.prototype.getNewGeometryRect(this.graph, this.state.cell, this.state.style, rect);
-	// }
+	}	
 	return rect;
 };
 
