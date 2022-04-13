@@ -272,25 +272,39 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
  * @param {*} properties 
  */
 mxIBMShapeBase.prototype.drawStencil = function (c, properties) {
-	if (!properties.hideIcon) {
-		var prIcon = this.state.cell.getAttribute('Icon-Name');
-		var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + prIcon);
-		if (prStencil) {
-			c.save();
-			// rotate icon if set
-			if (properties.rotateIcon) {
-				c.rotate(properties.rotateIcon, false, false, properties.iconAreaWidth / 2, properties.iconAreaHeight / 2);
-			}
-			// set icon color
-			c.setFillColor(properties.iconColor)
-			c.setStrokeColor('none');
-			if (properties.shapeType == 'target' && properties.shapeLayout == 'collapsed') {
-				prStencil.drawShape(c, this, properties.defaultWidth / 2 - properties.iconSize / 2, properties.iconAlign, properties.iconSize, properties.iconSize);
-			} else {
-				prStencil.drawShape(c, this, properties.iconAlign, properties.iconAlign, properties.iconSize, properties.iconSize);
-			}
-			c.restore();
+	if (!properties.hideIcon) {		
+		var x = properties.iconAreaWidth / 2 - properties.iconSize / 2;
+		var y = properties.iconAreaHeight / 2 - properties.iconSize / 2;
+		if (properties.shapeType.startsWith('group')) {
+			x = properties.iconAreaWidth - properties.iconSize;
 		}
+		if (properties.shapeLayout.startsWith('expanded') && properties.shapeType  === 'target') {
+			x = x + properties.curveRadius / 2;
+		}
+		if (properties.shapeLayout.startsWith('item')) {
+			x = 0;
+		}
+
+		c.save();
+		// rotate icon if set
+		if (properties.rotateIcon) {
+			c.rotate(properties.rotateIcon, false, false, x + properties.iconSize / 2, properties.iconAreaHeight / 2);
+		}
+		// draw image or stencil
+		if (this.image) { // if the shape style contains image attribute
+			c.image(x, y, properties.iconSize, properties.iconSize, this.image, true, false, false);
+		} else  {
+			var prIcon = this.state.cell.getAttribute('Icon-Name');
+			var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + prIcon);
+			if (prStencil) {
+				c.setFillColor(properties.iconColor)
+				c.setStrokeColor('none');
+				c.setDashed(false);
+				c.strokewidth = 1;
+				prStencil.drawShape(c, this, x, y, properties.iconSize, properties.iconSize);
+			}
+		}
+		c.restore();
 	}
 }
 
@@ -444,11 +458,13 @@ mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
  * @param {*} cStyle 
  * @returns 
  */
-mxIBMShapeBase.prototype.getNewStyles = function (cStyleStr, pStyle, cStyle) {
-	var newStyle = this.getLayoutStyles(cStyleStr, pStyle, cStyle);
-	newStyle = this.getLineStyles(newStyle, pStyle, cStyle);
-	newStyle = this.getColorStyles(newStyle, pStyle, cStyle);
-	newStyle = this.getBaseStyle(newStyle, pStyle, cStyle);
+mxIBMShapeBase.prototype.getNewStyles = function (cStyleStr, pStyle, cStyle) {	
+	var style = this.getBaseStyle(cStyleStr, pStyle, cStyle);
+
+	var newStyle = this.getLayoutStyles(style.cStyleStr, style.pStyle, style.cStyle);
+	newStyle = this.getLineStyles(newStyle, style.pStyle, style.cStyle);
+	newStyle = this.getColorStyles(newStyle, style.pStyle, style.cStyle);
+
 	return newStyle;
 }
 
@@ -652,17 +668,16 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 }
 
 // Get base style called by event handler to revert shape back to base for drop-in images.
-mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {
-	// Get property corresponding to shape change.
-	var properties = 'shape=' + this.cst.SHAPE + ';';
+mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {	
+	// if shape is image, change it to base shape
+	if (cStyle && cStyle.shape === 'image') {		
+		var tempStyle = Object.assign({}, pStyle);
+		tempStyle.image = cStyle.image;
+		cStyle = tempStyle;
+		cStyleStr = getStylesStr(cStyle);
+	}
 
-	// Build styles object from styles string.
-	var stylesObj = getStylesObj(properties);
-
-	// Update styles string from styles object.
-	cStyleStr = getStylesStr(stylesObj, cStyleStr);
-
-	return cStyleStr;
+	return {cStyleStr, pStyle, cStyle}
 };
 
 // Change icon to iconl or iconp if available when changing between logical and prescribed shapes.
