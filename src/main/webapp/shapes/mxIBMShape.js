@@ -283,7 +283,7 @@ mxIBMShapeBase.prototype.drawStencil = function (c, properties) {
 			}
 			// set icon color
 			c.setFillColor(properties.iconColor)
-			c.setStrokeColor(properties.lineColor);
+			c.setStrokeColor('none');
 			if (properties.shapeType == 'target' && properties.shapeLayout == 'collapsed') {
 				prStencil.drawShape(c, this, properties.defaultWidth / 2 - properties.iconSize / 2, properties.iconAlign, properties.iconSize, properties.iconSize);
 			} else {
