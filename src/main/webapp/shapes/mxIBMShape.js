@@ -70,8 +70,8 @@ mxIBMShapeBase.prototype.styleChangedEventsHandler = function (graph, event) {
 	var cell = event.properties.change.cell;
 	var pStyleStr = event.properties.change.previous;
 	var cStyleStr = event.properties.change.style;
-	var pStyle = this.getStylesObj(pStyleStr);
-	var cStyle = this.getStylesObj(cStyleStr);
+	var pStyle = getStylesObj(pStyleStr);
+	var cStyle = getStylesObj(cStyleStr);
 
 	// Hold all the changes
 	var changes = {};
@@ -649,10 +649,6 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 
 		return elementColor;
 	}
-}
-
-mxIBMShapeBase.prototype.getStylesObj = function (stylesStr) {
-	return getStylesObj(stylesStr);
 }
 
 // Get base style called by event handler to revert shape back to base for drop-in images.
