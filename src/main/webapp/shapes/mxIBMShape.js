@@ -173,14 +173,14 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 	if (properties.shapeType.startsWith('group')) {
 		c.rect(0, 0, properties.sidebarWidth, properties.sidebarHeight);
 		c.setStrokeColor(properties.lineColor);
-		c.setFillColor(properties.lineColor);
+		c.setFillColor(properties.styleColor);
 		c.fillAndStroke();
 	} else {
 		if (properties.shapeLayout.startsWith('expanded') && properties.shapeType !== 'target') {
 			if (!properties.hideIcon) {
 				drawIconArea(0, 0, properties.iconAreaWidth, properties.iconAreaHeight, properties.curveRadius);
 				c.setStrokeColor(properties.lineColor);
-				c.setFillColor(properties.lineColor);
+				c.setFillColor(properties.iconAreaColor);
 				c.fillAndStroke();
 			}
 		}
@@ -207,8 +207,8 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 			if (properties.shapeLayout.startsWith('expanded') && properties.shapeType !== 'target') {
 				c.setFillColor(properties.fillColor)
 			} else {
-				c.setFillColor(properties.lineColor);
-			}
+				c.setFillColor(properties.iconAreaColor);
+			} 			
 		}
 		c.setDashed(false);
 		c.fillAndStroke();
