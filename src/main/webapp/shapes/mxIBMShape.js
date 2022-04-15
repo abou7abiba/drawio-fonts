@@ -249,9 +249,20 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 			c.ellipse(x, y, w, h);
 		} else if (properties.shapeType == 'target') {
 			c.roundrect(x, y, w, h, curveRadius, curveRadius);
-		} else if (properties.shapeType.endsWith('l')) { // nodel, compl, groupl 
+		} else if (properties.shapeType == 'nodel' || properties.shapeType == 'compl') {
 			c.roundrect(x, y, w, h, curveRadius, curveRadius);
-		} else {
+		} else if (properties.shapeType == 'groupl') {
+			c.begin()
+			c.moveTo(x, y);
+			c.lineTo(x + w - curveRadius, y);
+			c.arcTo(curveRadius, curveRadius, 0, 0, 1, x + w, curveRadius);
+			c.lineTo(x + w, h - curveRadius);
+			c.arcTo(curveRadius, curveRadius, 0, 0, 1, x + w - curveRadius, h);
+			c.lineTo(curveRadius, h);			
+			c.arcTo(curveRadius, curveRadius, 0, 0, 1, x, h - curveRadius);
+			c.close();
+		}
+		else {
 			c.rect(x, y, w, h);
 		}
 	}
