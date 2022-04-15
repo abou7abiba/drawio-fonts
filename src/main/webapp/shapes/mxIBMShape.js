@@ -962,7 +962,7 @@ mxIBMShapeBase.prototype.getColorProperties = function (shapeType, shapeLayout, 
 	}
 
 	// If shape layout changed then normalize font color for target system shape.
-	if (shapeLayout.isChanged) {
+	if (shapeLayout.isChanged || fillColor.isChanged) {
 		let shapeTypeValue = shapeType.isChanged ? shapeType.current : shapeType.previous;
 		let shapeLayoutValue = shapeLayout.current;
 
@@ -973,10 +973,10 @@ mxIBMShapeBase.prototype.getColorProperties = function (shapeType, shapeLayout, 
 
 				let fillColorName = getColorName(fillColorValue);
 
-				if (!fillColorName || fillColorName.indexOf(LIGHT_COLOR_NAME) === -1)
-					properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
-				else
+				if (!fillColorName || fillColorName.indexOf(LIGHT_COLOR_NAME) === -1 || fillColorName.indexOf('Transparent') !== -1)
 					properties += 'fontColor=' + ibmConfig.ibmColors.white + ';';
+				else
+					properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
 			}
 		}
 	}
