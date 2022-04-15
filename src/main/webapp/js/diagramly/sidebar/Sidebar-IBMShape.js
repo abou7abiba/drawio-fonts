@@ -56,44 +56,6 @@
 		}
 	}
 
-	Sidebar.prototype.addIBMShapePaletteMembers = function(shapeName, shape, shapes, bg)
-	{
-		let maxName = shapeName.length;
-		let memberList = shape.members;
-		for (var index = 0; index < memberList.length; index++)
-		{
-			let memberName = memberList[index];
-			let memberShape = shapes[memberName];
-
-			var bgmember = Sidebar.prototype.addIBMShapeVertexTemplateFactory(memberName, memberShape);
-
-			if (memberShape.members != null)
-				Sidebar.prototype.addIBMShapePaletteMembers(memberName, memberShape, shapes, bgmember);
-
-			bg.insert(bgmember);
-
-			if (memberShape.geometry != null)
-			{
-				bgmember.geometry.x = memberShape.geometry[0];
-				bgmember.geometry.y = memberShape.geometry[1];
-				bgmember.geometry.width = memberShape.geometry[2];
-				bgmember.geometry.height = memberShape.geometry[3];
-			}
-			else if (memberName.length > maxName)
-				maxName = memberName.length;
-		}
-
-		if (shape.geometry != null)
-		{
-			bg.geometry.x = shape.geometry[0];
-			bg.geometry.y = shape.geometry[1];
-			bg.geometry.width = shape.geometry[2];
-			bg.geometry.height = shape.geometry[3];
-		}
-		else
-			bg.geometry.width = bg.geometry.width + (maxName * 2);
-	}
-
 	Sidebar.prototype.GenerateIBMShapePalette = function(sidebarConfigFileURLs)
 	{
 		let shapesEditorExtensions = Sidebar.prototype.addIBMShapeEditorExtensions() || [];
@@ -168,7 +130,7 @@
 								var bg = Sidebar.prototype.addIBMShapeVertexTemplateFactory(shapeName, shape);
 
 								if (shape.members != null)
-									Sidebar.prototype.addIBMShapePaletteMembers(shapeName, shape, shapes, bg);
+									addIBMShapePaletteMembers(shapeName, shape, shapes, bg);
 
 								let showLabel = ((shape.format.type.startsWith('legend') || shape.format.type.startsWith('unit') ||
 										  (shape.format.layout.startsWith('expanded')) && (shape.format.layout != 'itemShape')));
@@ -183,14 +145,50 @@
 					this.addPaletteFunctions(sidebarID + sidebarKey, sidebarFullName, false, sbEntries);
 				}
 			}
-			catch (ex){
-				console.log(sidebarConfigFileURLs[filenameIndex]);	
-				console.log(ex);
+			catch (exception){
+				console.log(exception);
+			}
+		}
+		this.setCurrentSearchEntryLibrary();
+		return;
+
+		function addIBMShapePaletteMembers(shapeName, shape, shapes, bg)
+		{
+			let maxName = shapeName.length;
+			let memberList = shape.members;
+			for (var index = 0; index < memberList.length; index++)
+			{
+				let memberName = memberList[index];
+				let memberShape = shapes[memberName];
+
+				var bgmember = Sidebar.prototype.addIBMShapeVertexTemplateFactory(memberName, memberShape);
+
+				if (memberShape.members != null)
+					addIBMShapePaletteMembers(memberName, memberShape, shapes, bgmember);
+
+				bg.insert(bgmember);
+
+				if (memberShape.geometry != null)
+				{
+					bgmember.geometry.x = memberShape.geometry[0];
+					bgmember.geometry.y = memberShape.geometry[1];
+					bgmember.geometry.width = memberShape.geometry[2];
+					bgmember.geometry.height = memberShape.geometry[3];
+				}
+				else if (memberName.length > maxName)
+					maxName = memberName.length;
 			}
 
+			if (shape.geometry != null)
+			{
+				bg.geometry.x = shape.geometry[0];
+				bg.geometry.y = shape.geometry[1];
+				bg.geometry.width = shape.geometry[2];
+				bg.geometry.height = shape.geometry[3];
+			}
+			else
+				bg.geometry.width = bg.geometry.width + (maxName * 2);
 		}
-
-		this.setCurrentSearchEntryLibrary();
 	};
 
 	Sidebar.prototype.addIBMShapeVertexTemplateFactory = function(name, data)
@@ -279,8 +277,6 @@
 			coreProperties += "ibmMultiplicity=1;";
 
 		if (shapeType.startsWith('legend')) {
-			//shapeHeight = 56;
-			//shapeWidth = 136;
 			shapeWidth = ibmConfig.ibmShapeSizes.legend.defaultWidth;
 			shapeHeight = ibmConfig.ibmShapeSizes.legend.defaultHeight;
 
@@ -294,8 +290,6 @@
 				systemProperties += ibmConfig.ibmSystemProperties.container;
 		}
 		else if (shapeType.startsWith('unit')) {
-			//shapeHeight = 16;
-			//shapeWidth = 192;
 			shapeWidth = ibmConfig.ibmShapeSizes.unit.defaultWidth;
 			shapeHeight = ibmConfig.ibmShapeSizes.unit.defaultHeight;
 
@@ -305,8 +299,6 @@
 			coreProperties += ibmConfig.ibmSystemProperties.noImage;
 
 			if (shapeLayout === 'collapsed') {
-				//shapeHeight = 48;
-				//shapeWidth = (shapeType === 'target') ? 64 : 48;
 				if (shapeType === 'target') {
 					shapeWidth = ibmConfig.ibmShapeSizes.collapsedTarget.defaultWidth;
 					shapeHeight = ibmConfig.ibmShapeSizes.collapsedTarget.defaultHeight;
@@ -323,8 +315,6 @@
 				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel;
 			}
 			else if (shapeLayout.startsWith('expanded')) {
-				//shapeHeight = shapeType.startsWith('group') ? 152 : 48;
-				//shapeWidth = 240;
 				if (shapeType === 'target') {
 					shapeWidth = ibmConfig.ibmShapeSizes.expandedTarget.defaultWidth;
 					shapeHeight = ibmConfig.ibmShapeSizes.expandedTarget.defaultHeight;
@@ -347,9 +337,7 @@
 					systemProperties += ibmConfig.ibmSystemProperties.container;
 
 			}
-			else { //if (shapeLayout.startsWith('item'))
-				//shapeHeight = 16;
-				//shapeWidth = 240;
+			else { // item
 				if (shapeLayout === 'itemBadge') {
 					shapeWidth = ibmConfig.ibmShapeSizes.itemBadge.defaultWidth;
 					shapeHeight = ibmConfig.ibmShapeSizes.itemBadge.defaultHeight;
@@ -374,7 +362,7 @@
 					shapeWidth = ibmConfig.ibmShapeSizes.itemIcon.defaultWidth;
 					shapeHeight = ibmConfig.ibmShapeSizes.itemIcon.defaultHeight;
 				}
-				else { // (shapeLayout === 'itemShape')
+				else { // itemShape
 					shapeWidth = ibmConfig.ibmShapeSizes.itemShape.defaultWidth;
 					shapeHeight = ibmConfig.ibmShapeSizes.itemShape.defaultHeight;
 				}
