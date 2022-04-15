@@ -177,12 +177,8 @@ mxIBMShapeBase.prototype.getProperties = function (shape, shapeHeight, shapeWidt
  */
 mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 	if (properties.shapeLayout !== 'itemBadge') {
-		if (properties.styleDouble) {
-			drawDoubleShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
-			drawShapeContainer(properties.doubleAlign, properties.doubleAlign, properties.shapeWidth - properties.doubleAlign * 2, properties.shapeHeight - properties.doubleAlign * 2, properties.curveRadius - properties.doubleAlign);
-		} else {
-			drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
-		}
+		// draw shape container
+		drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);		
 
 		if (properties.shapeType.startsWith('group')) {
 			c.rect(0, 0, properties.sidebarWidth, properties.sidebarHeight);
@@ -215,7 +211,27 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 	}
 
 	function drawShapeContainer(x, y, w, h, curveRadius) {
+		// if shape is styleDouble
+		if (properties.styleDouble) {
+			drawBaseShape(x, y, w, h, curveRadius);
+			c.setStrokeColor(properties.lineColor);
+			c.fillAndStroke();
+			// reset x, y, w, h, curveRadius			
+			x = properties.doubleAlign;
+			y = properties.doubleAlign;
+			w = properties.shapeWidth - properties.doubleAlign * 2;
+			h = properties.shapeHeight - properties.doubleAlign * 2;
+			curveRadius = properties.curveRadius - properties.doubleAlign;
+		} 
+		// 	draw actual shape container
 		drawBaseShape(x, y, w, h, curveRadius);
+		// if shape is styleDashed
+		if (properties.styleDashed) {
+			c.setDashed(true, true);
+			c.setDashPattern('6 6');
+		} else {
+			c.setDashed(false);
+		}
 		if (properties.shapeLayout == 'itemIcon') {
 			c.setStrokeColor('none');
 			c.setFillColor(properties.fillColor);
@@ -227,20 +243,8 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 				c.setFillColor(properties.fillColor)
 			} else {
 				c.setFillColor(properties.iconAreaColor);
-			} 			
+			}
 		}
-		if (properties.styleDashed) {
-			c.setDashed(true, true);
-			c.setDashPattern('6 6');
-		} else {
-			c.setDashed(false);
-		}
-		c.fillAndStroke();
-	}
-
-	function drawDoubleShapeContainer(x, y, w, h, curveRadius) {
-		drawBaseShape(x, y, w, h, curveRadius);
-		c.setStrokeColor(properties.lineColor);
 		c.fillAndStroke();
 	}
 
@@ -261,8 +265,7 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 			c.lineTo(curveRadius, h);			
 			c.arcTo(curveRadius, curveRadius, 0, 0, 1, x, h - curveRadius);
 			c.close();
-		}
-		else {
+		} else {
 			c.rect(x, y, w, h);
 		}
 	}
