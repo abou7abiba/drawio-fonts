@@ -42,21 +42,48 @@ mxIBMShapeBase.prototype.cst = ibmConfig.ibmBaseConstants;
 
 mxIBMShapeBase.prototype.customProperties = ibmConfig.ibmBaseProperties;
 
+mxIBMShapeBase.prototype.customAttributes = ['Badge-Text', 'Icon-Name'];
+
 mxIBMShapeBase.prototype.init = function (container) {
 	if (this.node == null) {
 		this.node = this.create(container);
 		if (container != null) {
 			container.appendChild(this.node);
 		}
+		// Add shape custom attributes	
+		for (var key of this.customAttributes) {
+			if (!this.state.cell.hasAttribute(key)) {
+				this.state.cell.setAttribute(key, '');
+			}
+		}
 		// Define custom event handler
 		this.customEventsHandler = mxUtils.bind(this, function (sender, event) {
 			if (event.properties.change && event.properties.change.cell && event.properties.change.cell.id === this.state.cell.id) {
+				if ("mxValueChange" === event.properties.change.constructor.name) {
+					this.valueChangedEventsHandler(this.state.view.graph, event);
+				}
 				if ("mxStyleChange" === event.properties.change.constructor.name) {
 					this.styleChangedEventsHandler(this.state.view.graph, event);
 				}
 			}
 		})
 		this.state.view.graph.model.addListener('executed', this.customEventsHandler);
+	}
+}
+
+/**
+ * valueChangedEventsHandler
+ * @param {*} graph 
+ * @param {*} event 
+ */
+mxIBMShapeBase.prototype.valueChangedEventsHandler = function (graph, event) {	
+	var { current, previous } = { 
+		current: event.properties.change.value.attributes, 
+		previous: event.properties.change.previous.attributes 
+	};
+	var isChanged = this.customAttributes.some(item => (current.getNamedItem(item) && current.getNamedItem(item).value) !== (previous.getNamedItem(item) && previous.getNamedItem(item).value));
+	if (isChanged) {
+		this.redraw();
 	}
 }
 
@@ -104,24 +131,10 @@ mxIBMShapeBase.prototype.paintVertexShape = function (c, x, y, w, h) {
 	// console.log('mxIBMShapeBase.prototype.paintVertexShape', properties);
 
 	c.translate(x, y);
-	if (properties.shapeLayout.startsWith('item')) {
-		if (properties.shapeLayout == 'itemColor' || properties.shapeLayout == 'itemShape' || properties.shapeLayout == 'itemStyle' || properties.shapeLayout == 'itemIcon') {
-			this.drawShape(c, properties);
-		}
-
-		if (properties.shapeLayout == 'itemIcon') {
-			this.drawStencil(c, properties);
-		} else if (properties.shapeLayout == 'itemStyle') {
-			this.drawStyle(c, properties);
-		} else if (properties.shapeLayout == 'itemBadge') {
-			this.drawBadge(c, properties);
-		}
-	} else {
-		this.drawShape(c, properties);
-		this.drawStencil(c, properties);
-		this.drawStyle(c, properties);
-		this.drawBadge(c, properties);
-	}
+	this.drawShape(c, properties);
+	this.drawStencil(c, properties);
+	this.drawStyle(c, properties);
+	this.drawBadge(c, properties);
 }
 
 mxIBMShapeBase.prototype.getProperties = function (shape, shapeHeight, shapeWidth) {
@@ -163,35 +176,41 @@ mxIBMShapeBase.prototype.getProperties = function (shape, shapeHeight, shapeWidt
  * @param {*} properties 
  */
 mxIBMShapeBase.prototype.drawShape = function (c, properties) {
-	if (properties.styleDashed || properties.styleDouble) {
-		drawDoubleShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
-		drawShapeContainer(properties.doubleAlign, properties.doubleAlign, properties.shapeWidth - properties.doubleAlign * 2, properties.shapeHeight - properties.doubleAlign * 2, properties.curveRadius - properties.doubleAlign);
-	} else {
-		drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
-	}
+	if (properties.shapeLayout !== 'itemBadge') {
+		if (properties.styleDouble) {
+			drawDoubleShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
+			drawShapeContainer(properties.doubleAlign, properties.doubleAlign, properties.shapeWidth - properties.doubleAlign * 2, properties.shapeHeight - properties.doubleAlign * 2, properties.curveRadius - properties.doubleAlign);
+		} else {
+			drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
+		}
 
-	if (properties.shapeType.startsWith('group')) {
-		c.rect(0, 0, properties.sidebarWidth, properties.sidebarHeight);
-		c.setStrokeColor(properties.lineColor);
-		c.setFillColor(properties.styleColor);
-		c.fillAndStroke();
-	} else {
-		if (properties.shapeLayout.startsWith('expanded') && properties.shapeType !== 'target') {
-			if (!properties.hideIcon) {
-				drawIconArea(0, 0, properties.iconAreaWidth, properties.iconAreaHeight, properties.curveRadius);
+		if (properties.shapeType.startsWith('group')) {
+			c.rect(0, 0, properties.sidebarWidth, properties.sidebarHeight);
+			c.setStrokeColor(properties.lineColor);
+			c.setFillColor(properties.styleColor);
+			c.setDashed(false);
+			c.fillAndStroke();
+		} else {
+			if (properties.shapeLayout.startsWith('expanded') && properties.shapeType !== 'target') {
+				if (!properties.hideIcon) {
+					drawIconArea(0, 0, properties.iconAreaWidth, properties.iconAreaHeight, properties.curveRadius);
+					c.setStrokeColor(properties.lineColor);
+					c.setFillColor(properties.iconAreaColor);
+					c.setDashed(false);
+					c.fillAndStroke();
+				}
+			}
+			if (properties.shapeType.startsWith('comp')) {
+				c.rect(properties.sidetickAlign, properties.minHeight / 4, properties.sidetickWidth, properties.sidetickHeight);
 				c.setStrokeColor(properties.lineColor);
-				c.setFillColor(properties.iconAreaColor);
+				c.setFillColor(ibmConfig.ibmColors.white);
+				c.setDashed(false);
+				c.fillAndStroke();
+
+				c.rect(properties.sidetickAlign, properties.minHeight - properties.minHeight / 4 - properties.sidetickHeight, properties.sidetickWidth, properties.sidetickHeight);
+				c.setDashed(false);
 				c.fillAndStroke();
 			}
-		}
-		if (properties.shapeType.startsWith('comp')) {
-			c.rect(properties.sidetickAlign, properties.minHeight / 4, properties.sidetickWidth, properties.sidetickHeight);
-			c.setStrokeColor(properties.lineColor);
-			c.setFillColor(ibmConfig.ibmColors.white);
-			c.fillAndStroke();
-
-			c.rect(properties.sidetickAlign, properties.minHeight - properties.minHeight / 4 - properties.sidetickHeight, properties.sidetickWidth, properties.sidetickHeight);
-			c.fillAndStroke();
 		}
 	}
 
@@ -210,18 +229,17 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 				c.setFillColor(properties.iconAreaColor);
 			} 			
 		}
-		c.setDashed(false);
-		c.fillAndStroke();
-	}
-
-	function drawDoubleShapeContainer(x, y, w, h, curveRadius) {
-		drawBaseShape(x, y, w, h, curveRadius);
 		if (properties.styleDashed) {
 			c.setDashed(true, true);
 			c.setDashPattern('6 6');
 		} else {
 			c.setDashed(false);
 		}
+		c.fillAndStroke();
+	}
+
+	function drawDoubleShapeContainer(x, y, w, h, curveRadius) {
+		drawBaseShape(x, y, w, h, curveRadius);
 		c.setStrokeColor(properties.lineColor);
 		c.fillAndStroke();
 	}
@@ -272,39 +290,43 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
  * @param {*} properties 
  */
 mxIBMShapeBase.prototype.drawStencil = function (c, properties) {
-	if (!properties.hideIcon) {		
-		var x = properties.iconAreaWidth / 2 - properties.iconSize / 2;
-		var y = properties.iconAreaHeight / 2 - properties.iconSize / 2;
-		if (properties.shapeType.startsWith('group')) {
-			x = properties.iconAreaWidth - properties.iconSize;
-		}
-		if (properties.shapeLayout.startsWith('expanded') && properties.shapeType  === 'target') {
-			x = x + properties.curveRadius / 2;
-		}
-		if (properties.shapeLayout.startsWith('item')) {
-			x = 0;
-		}
-
-		c.save();
-		// rotate icon if set
-		if (properties.rotateIcon) {
-			c.rotate(properties.rotateIcon, false, false, x + properties.iconSize / 2, properties.iconAreaHeight / 2);
-		}
-		// draw image or stencil
-		if (this.image) { // if the shape style contains image attribute
-			c.image(x, y, properties.iconSize, properties.iconSize, this.image, true, false, false);
-		} else  {
-			var prIcon = this.state.cell.getAttribute('Icon-Name');
-			var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + prIcon);
-			if (prStencil) {
-				c.setFillColor(properties.iconColor)
-				c.setStrokeColor('none');
-				c.setDashed(false);
-				c.strokewidth = 1;
-				prStencil.drawShape(c, this, x, y, properties.iconSize, properties.iconSize);
+	if (properties.shapeLayout.startsWith('expanded') || properties.shapeLayout === 'collapsed' || properties.shapeLayout === 'itemIcon') {
+		if (!properties.hideIcon) {		
+			var x = properties.iconAreaWidth / 2 - properties.iconSize / 2;
+			var y = properties.iconAreaHeight / 2 - properties.iconSize / 2;
+			if (properties.shapeType.startsWith('group')) {
+				x = properties.iconAreaWidth - properties.iconSize;
 			}
+			if (properties.shapeLayout.startsWith('expanded') && properties.shapeType  === 'target') {
+				x = x + properties.curveRadius / 2;
+			}
+			if (properties.shapeLayout.startsWith('item')) {
+				x = 0;
+			}
+
+			c.save();
+			// rotate icon if set
+			if (properties.rotateIcon) {
+				c.rotate(properties.rotateIcon, false, false, x + properties.iconSize / 2, properties.iconAreaHeight / 2);
+			}
+			// draw image or stencil
+			if (this.image) { // if the shape style contains image attribute
+				c.image(x, y, properties.iconSize, properties.iconSize, this.image, true, false, false);
+			} else  {
+				var prIcon = this.state.cell.getAttribute('Icon-Name');
+				var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + prIcon);
+				if (prStencil == null) {
+					prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.undefined');
+				} else {
+					c.setFillColor(properties.iconColor)
+					c.setStrokeColor('none');
+					c.setDashed(false);
+					c.strokewidth = 1;
+					prStencil.drawShape(c, this, x, y, properties.iconSize, properties.iconSize);
+				}
+			}
+			c.restore();
 		}
-		c.restore();
 	}
 }
 
@@ -314,61 +336,63 @@ mxIBMShapeBase.prototype.drawStencil = function (c, properties) {
  * @param {*} properties 
  */
 mxIBMShapeBase.prototype.drawStyle = function (c, properties) {
-	if (properties.styleStrikethrough) {
-		c.begin();
-		if (properties.shapeLayout == 'collapsed' || properties.shapeLayout == 'itemStyle' || properties.shapeType.startsWith('group')) {
-			c.moveTo(0, 0);
-			c.lineTo(properties.shapeWidth, properties.shapeHeight);
-		} else if (properties.shapeLayout.startsWith('expanded')) {
-			if (properties.shapeType == 'target') {
-				c.moveTo(properties.iconSize, 0);
-				c.lineTo(properties.shapeWidth - properties.iconSize, properties.iconAreaHeight);
-			} else {
-				properties.hideIcon ? c.moveTo(0, 0) : c.moveTo(properties.iconAreaWidth, 0);
-				c.lineTo(properties.shapeWidth, properties.iconAreaHeight);
+	if (properties.shapeLayout.startsWith('expanded') || properties.shapeLayout === 'collapsed' || properties.shapeLayout === 'itemStyle') {
+		if (properties.styleStrikethrough) {
+			c.begin();
+			if (properties.shapeLayout == 'collapsed' || properties.shapeLayout == 'itemStyle' || properties.shapeType.startsWith('group')) {
+				c.moveTo(0, 0);
+				c.lineTo(properties.shapeWidth, properties.shapeHeight);
+			} else if (properties.shapeLayout.startsWith('expanded')) {
+				if (properties.shapeType == 'target') {
+					c.moveTo(properties.iconSize, 0);
+					c.lineTo(properties.shapeWidth - properties.iconSize, properties.iconAreaHeight);
+				} else {
+					properties.hideIcon ? c.moveTo(0, 0) : c.moveTo(properties.iconAreaWidth, 0);
+					c.lineTo(properties.shapeWidth, properties.iconAreaHeight);
+				}
 			}
+			c.setStrokeColor(properties.styleColor);
+			c.close();
+			c.stroke();
 		}
-		c.setStrokeColor(properties.styleColor);
-		c.close();
-		c.stroke();
-	}
 
-	if (properties.styleMultiplicity) {
-		c.begin();
-		for (var i = 1; i <= 2; i++) {
-			var offSet = properties.multiplicityAlign * i;
-			if (properties.shapeType == 'actor') {
-				c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
-				c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
-				c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
-			} else if (properties.shapeType == 'target') {
-				c.moveTo(properties.iconSize + offSet, - offSet);
-				c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
-				c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
-				c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
-				c.moveTo(properties.iconSize + offSet, - offSet);
-			} else if (properties.shapeType.endsWith('l')) {
-				c.moveTo(offSet, - offSet);
-				c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
-				c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
-				c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
-				c.moveTo(offSet, - offSet);
-			} else {
-				c.moveTo(offSet, - offSet);
-				c.lineTo(properties.shapeWidth + offSet, - offSet);
-				c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
-				c.moveTo(offSet, - offSet);
+		if (properties.styleMultiplicity) {
+			c.begin();
+			for (var i = 1; i <= 2; i++) {
+				var offSet = properties.multiplicityAlign * i;
+				if (properties.shapeType == 'actor') {
+					c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
+					c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
+					c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
+				} else if (properties.shapeType == 'target') {
+					c.moveTo(properties.iconSize + offSet, - offSet);
+					c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
+					c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
+					c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
+					c.moveTo(properties.iconSize + offSet, - offSet);
+				} else if (properties.shapeType.endsWith('l')) {
+					c.moveTo(offSet, - offSet);
+					c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
+					c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
+					c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
+					c.moveTo(offSet, - offSet);
+				} else {
+					c.moveTo(offSet, - offSet);
+					c.lineTo(properties.shapeWidth + offSet, - offSet);
+					c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
+					c.moveTo(offSet, - offSet);
+				}
 			}
+			if (properties.styleDashed) {
+				c.setDashed(true, true);
+				c.setDashPattern('6 6');
+			} else {
+				c.setDashed(false);
+			}
+			c.setStrokeColor(properties.lineColor);
+			c.close();
+			c.stroke();
 		}
-		if (properties.styleDashed) {
-			c.setDashed(true, true);
-			c.setDashPattern('6 6');
-		} else {
-			c.setDashed(false);
-		}
-		c.setStrokeColor(properties.lineColor);
-		c.close();
-		c.stroke();
 	}
 }
 
@@ -378,46 +402,72 @@ mxIBMShapeBase.prototype.drawStyle = function (c, properties) {
  * @param {*} properties 
  */
 mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
-	var bW = 14;
-	var bM = 1;
-	if (properties.shapeLayout == 'itemBadge') {
-		if (properties.ibmBadge == 'circle' || properties.ibmBadge == 'square') {
-			drawBadgeIcon(properties.badgeColor, 0, 1, bW, bW);
-		} else {
-			drawBadgeIcon(properties.badgeColor, bW / 2, 1, bW, bW);
+	if (properties.shapeLayout.startsWith('expanded') || properties.shapeLayout === 'collapsed' || properties.shapeLayout === 'itemBadge') {
+		var bW = 14;
+		var bM = 1;
+		var fontSize = 12;
+
+		let textLength = (properties.badgeText != null) ? properties.badgeText.length : 0;
+		let badgeTextOffset = (textLength > 1) ? fontSize * 0.6 * (textLength - 1) + 4 : 0;
+			
+		var offset = properties.shapeType == 'target' || properties.shapeType == 'actor' ? - bW / 2 - bM : 0;
+		if (properties.shapeLayout !== 'itemBadge') {			
+			drawBadgeIcon(properties.badgeFontColor, properties.shapeWidth + offset, - bW / 2 - bM, bW + bM * 2, bW + bM * 2, badgeTextOffset);
+			drawBadgeIcon(properties.badgeColor, properties.shapeWidth + offset, - bW / 2, bW, bW, badgeTextOffset);
+		} else {			
+			// drawBadgeIcon(properties.badgeColor, bW / 2, 1, bW, bW, badgeTextOffset);
+			drawBadgeIcon(properties.badgeColor, bW / 2, 1, bW, bW, 0);
 		}
-	} else {
-		var offset = properties.shapeType == 'target' || properties.shapeType == 'actor' ? 0 : bW / 2 + 1;
-		if (properties.ibmBadge == 'circle' || properties.ibmBadge == 'square') {
-			drawBadgeIcon(properties.badgeFontColor, properties.shapeWidth - bW - bM * 2 + offset, - bW / 2 - bM, bW + bM * 2, bW + bM * 2);
-			drawBadgeIcon(properties.badgeColor, properties.shapeWidth - bW - bM + offset, - bW / 2, bW, bW);
-		} else {
-			drawBadgeIcon(properties.badgeFontColor, properties.shapeWidth - bW / 2 - bM + offset, - bW / 2 - bM, bW + bM * 2, bW + bM * 2);
-			drawBadgeIcon(properties.badgeColor, properties.shapeWidth - bW / 2 - bM + offset, - bW / 2, bW, bW);
+
+		if (properties.badgeText != null) {
+			c.setFontSize(fontSize);
+			c.setFontColor(properties.badgeFontColor);
+			if (properties.shapeLayout !== 'itemBadge') {
+				c.text(properties.shapeWidth - badgeTextOffset / 2 + offset, - 1, 0, 14, properties.badgeText, mxConstants.ALIGN_CENTER, mxConstants.ALIGN_MIDDLE, 0, null, 0, 0, 0);
+			} 
+			// else {
+			// 	c.text((bW + badgeTextOffset) / 2, properties.shapeHeight / 2 - 1, 0, 14, properties.badgeText, mxConstants.ALIGN_CENTER, mxConstants.ALIGN_MIDDLE, 0, null, 0, 0, 0);
+			// }
 		}
 	}
 
-	function drawBadgeIcon(color, x, y, w, h) {
+	function drawBadgeIcon(color, x, y, w, h, offSet) {
 		switch (properties.ibmBadge) {
 			case 'circle':
-				c.ellipse(x, y, w, h);
+				c.begin();
+				c.moveTo(x , y);
+				c.lineTo(x - offSet, y);
+				c.arcTo(1, 1, 0, 0, 0, x - offSet, y + h);
+				c.lineTo(x, y + h);
+				c.arcTo(1, 1, 0, 0, 0, x, y);
+				c.close();
 				break;
 			case 'square':
-				c.rect(x, y, w, h);
+				c.begin();
+				c.moveTo(x, y);
+				c.lineTo(x - offSet - w / 2, y);
+				c.lineTo(x - offSet - w / 2, y + h);
+				c.lineTo(x + w / 2, y + h);
+				c.lineTo(x + w / 2, y);
+				c.close();
 				break;
 			case 'diamond':
 				c.begin();
 				c.moveTo(x, y);
-				c.lineTo(x - w / 2, y + h / 2);
+				c.lineTo(x - offSet, y);
+				c.lineTo(x - offSet - w / 2, y + h / 2);
+				c.lineTo(x - offSet, y + h);
 				c.lineTo(x, y + h);
 				c.lineTo(x + w / 2, y + h / 2);
+				c.lineTo(x, y);
 				c.close();
 				break;
 			case 'hexagon':
 				c.begin();
-				c.moveTo(x - w / 2 / 2, y);
-				c.lineTo(x - w / 2, y + h / 2);
-				c.lineTo(x - w / 2 / 2, y + h);
+				c.moveTo(x, y);
+				c.lineTo(x - w / 2 / 2 - offSet, y);
+				c.lineTo(x - w / 2 - offSet, y + h / 2);
+				c.lineTo(x - w / 2 / 2 - offSet, y + h);
 				c.lineTo(x + w / 2 / 2, y + h);
 				c.lineTo(x + w / 2, y + h / 2);
 				c.lineTo(x + w / 2 / 2, y);
@@ -425,10 +475,11 @@ mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
 				break;
 			case 'octagon':
 				c.begin();
-				c.moveTo(x - w / 2 / 2, y);
-				c.lineTo(x - w / 2, y + h / 2 / 2);
-				c.lineTo(x - w / 2, y + h / 2 / 2 + h / 2);
-				c.lineTo(x - w / 2 / 2, y + h);
+				c.moveTo(x, y);
+				c.lineTo(x - w / 2 / 2 - offSet, y);
+				c.lineTo(x - w / 2 - offSet, y + h / 2 / 2);
+				c.lineTo(x - w / 2 - offSet, y + h / 2 / 2 + h / 2);
+				c.lineTo(x - w / 2 / 2 - offSet, y + h);
 				c.lineTo(x + w / 2 / 2, y + h);
 				c.lineTo(x + w / 2, y + h / 2 / 2 + h / 2);
 				c.lineTo(x + w / 2, y + h / 2 / 2);
@@ -438,8 +489,10 @@ mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
 			case 'triangle':
 				c.begin();
 				c.moveTo(x, y);
-				c.lineTo(x - w / 2, y + h);
+				c.lineTo(x - offSet, y);
+				c.lineTo(x - w / 2 - offSet, y + h);
 				c.lineTo(x + w / 2, y + h);
+				c.lineTo(x, y);
 				c.close();
 				break;
 			default: ;
@@ -493,7 +546,8 @@ mxIBMShapeBase.prototype.getNewGeometryRect = function (style, rect, minSize) {
 		} else {
 			rect.height = Math.max(details.minHeight, rect.height);
 		}
-	} else {
+	} 
+	else {
 		rect.width = Math.max(details.minWidth, rect.width);
 		rect.height = details.minHeight;
 	}
@@ -569,11 +623,9 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 		details['shapeHeight'] = details.defaultHeight;
 	}
 
-	// Add shape colors.
-
 	if (shape) {
+		// Add shape colors.		
 		let colors = getColorDetails(shape, shapeType, shapeLayout);
-
 		details['lineColor'] = colors.lineColor;
 		details['fillColor'] = colors.fillColor;
 		details['fontColor'] = colors.fontColor;
@@ -582,6 +634,12 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 		details['iconColor'] = colors.iconColor;
 		details['iconAreaColor'] = colors.iconAreaColor;
 		details['styleColor'] = colors.styleColor;
+
+		// Add badge text	
+		let badgeStyle = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.BADGE, mxIBMShapeBase.prototype.cst.BADGE_DEFAULT);
+		let badgeVisible = (badgeStyle != 'none') && (shapeLayout === 'collapsed' || shapeLayout.startsWith('expanded') || shapeLayout === 'itemBadge');
+		details['badgeText'] = badgeVisible ? shape.state.cell.getAttribute('Badge-Text', null) : null;
+
 	}
 
 	return details;
