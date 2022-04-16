@@ -782,6 +782,18 @@ mxIBMShapeBase.prototype.changeIcon = function (shapeType) {
 	}
 }
 
+// Calculate spacingTop from number of lines in primary label and secondary text.
+mxIBMShapeBase.prototype.getTopSpacing = function () {
+	let primary = this.state.cell.getAttribute('Primary-Label', null);
+	let secondary = this.state.cell.getAttribute('Secondary-Text', null);
+	let lines = (primary ? 1 : 0) + (secondary ? 1 : 0)
+
+	lines += (primary.match(/\r|\n|<br>/gi) || []).length;
+	lines += (secondary.match(/\r|\n|<br>/gi) || []).length;
+
+	return (lines > 2) ? (lines * (lines + (lines-2))) : 0;
+}
+
 // Get properties corresponding to layout change.
 // Properties are kept minimal by nulling out unused properties when changing layouts.
 // Invalid layout changes revert to original layout.
@@ -818,15 +830,20 @@ mxIBMShapeBase.prototype.getLayoutProperties = function (shapeType, shapeLayout,
 			properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull +
 				ibmConfig.ibmSystemProperties.noFill;
 		}
-		else
+		else {
 			// Add expanded label properties, add container properties, remove expanded stack properties, add default fill.
 			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container +
 				ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
+			properties = properties.replace(/spacingTop=0/, 'spacingTop='+this.getTopSpacing());
+		}
 	}
 	else if (shapeLayout.current === "expandedStack")
+	{
 		// Add expanded label properties, expanded stack properties, add container properties, add default fill.
 		properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack +
 			ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
+		properties = properties.replace(/spacingTop=0/, 'spacingTop='+this.getTopSpacing());
+	}
 	else if (shapeLayout.current.startsWith('item'))
 		// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
 		properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull +
