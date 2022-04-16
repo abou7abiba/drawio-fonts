@@ -528,9 +528,10 @@ mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
 mxIBMShapeBase.prototype.getNewStyles = function (cStyleStr, pStyle, cStyle) {	
 	var style = this.getBaseStyle(cStyleStr, pStyle, cStyle);
 
-	var newStyle = this.getLayoutStyles(style.cStyleStr, style.pStyle, style.cStyle);
-	newStyle = this.getLineStyles(newStyle, style.pStyle, style.cStyle);
-	newStyle = this.getColorStyles(newStyle, style.pStyle, style.cStyle);
+	var newStyle = this.getLayoutStyle(style.cStyleStr, style.pStyle, style.cStyle);
+	newStyle = this.getLineStyle(newStyle, style.pStyle, style.cStyle);
+	newStyle = this.getColorStyle(newStyle, style.pStyle, style.cStyle);
+	newStyle = this.getFontStyle(newStyle, style.pStyle, style.cStyle);
 
 	return newStyle;
 }
@@ -751,8 +752,8 @@ mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {
 	return {cStyleStr, pStyle, cStyle}
 };
 
-// Get layout styles called by event handler.
-mxIBMShapeBase.prototype.getLayoutStyles = function (cStyleStr, pStyle, cStyle) {
+// Get layout style called by event handler.
+mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 	var shapeType = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);
 	var shapeLayout = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT,mxIBMShapeBase.prototype.cst.SHAPE_TYPE_LAYOUT);
 	var hideIcon = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.HIDE_ICON, mxIBMShapeBase.prototype.cst.HIDE_ICON_DEFAULT);
@@ -880,8 +881,8 @@ mxIBMShapeBase.prototype.getLayoutStyles = function (cStyleStr, pStyle, cStyle) 
 	}
 };
 
-// Get line styles (dashed, double, strikethrough) called by event handler.
-mxIBMShapeBase.prototype.getLineStyles = function (cStyleStr, pStyle, cStyle) {
+// Get line style (dashed, double, strikethrough) called by event handler.
+mxIBMShapeBase.prototype.getLineStyle = function (cStyleStr, pStyle, cStyle) {
 	var styleDashed = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.STYLE_DASHED, mxIBMShapeBase.prototype.cst.STYLE_DASHED_DEFAULT);
 	var styleDouble = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.STYLE_DOUBLE, mxIBMShapeBase.prototype.cst.STYLE_DOUBLE_DEFAULT);
 	var styleStrikethrough = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.STYLE_STRIKETHROUGH, mxIBMShapeBase.prototype.cst.STYLE_STRIKETHROUGH_DEFAULT);
@@ -923,9 +924,8 @@ mxIBMShapeBase.prototype.getLineStyles = function (cStyleStr, pStyle, cStyle) {
 	}
 }
 
-
-// Get color styles called by event handler.
-mxIBMShapeBase.prototype.getColorStyles = function (cStyleStr, pStyle, cStyle) {
+// Get color style called by event handler.
+mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
 	var shapeType = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);
 	var shapeLayout = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_LAYOUT);
 	var container = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.CONTAINER, mxIBMShapeBase.prototype.cst.CONTAINER_DEFAULT);
@@ -1039,6 +1039,60 @@ mxIBMShapeBase.prototype.getColorStyles = function (cStyleStr, pStyle, cStyle) {
 		var colorUpper = colorHex.toUpperCase();
 		var colorName = ibmConfig.colorNames[colorUpper === "NONE" ? "NONE" : colorUpper.substring(1)];
 		return colorName;
+	}
+}
+
+// Get font style called by event handler.
+mxIBMShapeBase.prototype.getFontStyle = function (cStyleStr, pStyle, cStyle) {
+	var fontFamily = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FONT_FAMILY, mxIBMShapeBase.prototype.cst.FONT_FAMILY_DEFAULT);
+	var fontStyle = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FONT_STYLE, mxIBMShapeBase.prototype.cst.FONT_STYLE_DEFAULT);
+
+	// Get property corresponding to font change.
+	var properties = getFontProperties(fontFamily, fontStyle);
+
+	// Build styles object from styles string.
+	var stylesObj = getStylesObj(properties);
+
+	// Update styles string from styles object.
+	cStyleStr = getStylesStr(stylesObj, cStyleStr);
+
+	return cStyleStr;
+
+	function getFontProperties(fontFamily, fontStyle)
+	{
+		let properties = '';
+		let font = ibmConfig.ibmFonts[ibmLanguage];
+		let family = fontFamily.isChanged ? fontFamily.current : fontFamily.previous;
+
+		if (fontFamily.isChanged && family.startsWith('IBM Plex Sans'))
+		{
+			// Handle the case where plex font family is updated directly.
+			switch (fontFamily.current) {
+				case font.regular: properties += "fontStyle=0;"; break; 
+				case font.semibold: properties += "fontStyle=1;"; break; 
+				case font.italic: properties += "fontStyle=2;"; break; 
+				case font.semibolditalic: properties += "fontStyle=3;"; break; 
+				default: break;
+			}
+		}
+
+		if (fontStyle.isChanged && family.startsWith('IBM Plex Sans'))
+		{
+			// Get plex font family corresonding to user language.
+			switch (fontStyle.current) {
+				case '0': properties += "fontFamily=" + font.regular + ';'; break;  // Regular
+				case '1':
+				case '5': properties += "fontFamily=" + font.semibold + ';'; break;  // 1=Bold, 5=Bold+Underline
+				case '2': 
+				case '6': properties += "fontFamily=" + font.italic + ';'; break;  // 2=Regular+Italic, 6=Regular+Italic+Underline
+				case '3': 
+				case '7': properties += "fontFamily=" + font.semibolditalic + ';'; break;  // 3=Bold+Italic, 7=Bold+Italic+Underline
+				case '4': break;  // Underline
+				default: properties += "fontFamily=" + font.regular + ';';  // Regular
+			}
+		}
+
+		return properties;
 	}
 }
 

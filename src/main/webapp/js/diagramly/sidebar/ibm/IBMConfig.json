@@ -5,12 +5,9 @@
         "@font-face {font-family: 'IBM Plex Sans Regular'; font-style: normal; font-weight: 400; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans/IBMPlexSans-Regular.woff2)} @font-face {font-family: 'IBM Plex Sans Italic'; font-style: italic; font-weight: 400; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans/IBMPlexSans-Italic.woff2)} @font-face {font-family: 'IBM Plex Sans Semi Bold'; font-style: normal; font-weight: 600; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans/IBMPlexSans-SemiBold.woff2)} @font-face {font-family: 'IBM Plex Sans Semi Bold Italic'; font-style: normal; font-weight: 600; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans/IBMPlexSans-SemiBoldItalic.woff2)} @font-face {font-family: 'IBM Plex Sans Arabic Regular'; font-style: normal; font-weight: 400; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans-Arabic/IBMPlexSansArabic-Regular.woff2)} @font-face {font-family: 'IBM Plex Sans Arabic Semi Bold'; font-style: normal; font-weight: 600; src: url(js/diagramly/sidebar/ibm/fonts/plex/IBM-Plex-Sans-Arabic/IBMPlexSansArabic-SemiBold.woff2)}",
 
     "defaultFonts":
-    	["IBM Plex Sans Regular",
-	 "IBM Plex Sans Italic", 
-	 "IBM Plex Sans Semi Bold",
-	 "IBM Plex Sans Semi Bold Italic",
-	 "IBM Plex Sans Arabic Regular",
-	 "IBM Plex Sans Arabic Semi Bold"],
+    	["IBM Plex Sans",
+	 "IBM Plex Sans Arabic", 
+	 "Arial"],
      
     "defaultColorSchemes": [
 	[{"stroke": "#0f62fe", "fill": "#ffffff"}, {"stroke": "#0f62fe", "fill": "#edf5ff"}, {"stroke": "#1192e8", "fill": "#ffffff"}, {"stroke": "#1192e8", "fill": "#e5f6ff"}, 
@@ -68,11 +65,11 @@
 	"es": {"regular": "IBM Plex Sans Regular", "italic": "IBM Plex Sans Italic", "semibold": "IBM Plex Sans Semi Bold", "semibolditalic": "IBM Plex Sans Semi Bold Italic"},
 	"fr": {"regular": "IBM Plex Sans Regular", "italic": "IBM Plex Sans Italic", "semibold": "IBM Plex Sans Semi Bold", "semibolditalic": "IBM Plex Sans Semi Bold Italic"},
 
-	"ar": {"regular": "IBM Plex Sans Arabic Regular", "semibold": "IBM Plex Sans Arabic Semi Bold"},
-	"ja": {"regular": "IBM Plex Sans JP Regular", "semibold": "IBM Plex Sans JP Semi Bold"},
-	"ko": {"regular": "IBM Plex Sans KR Regular", "semibold": "IBM Plex Sans KR Semi Bold"},
+	"ar": {"regular": "IBM Plex Sans Arabic Regular", "italic": "IBM Plex Sans Arabic Regular", "semibold": "IBM Plex Sans Arabic Semi Bold", "semibolditalic": "IBM Plex Sans Arabi Semi Bold"},
+	"ja": {"regular": "IBM Plex Sans JP Regular", "italic": "IBM Plex Sans JP Regular", "semibold": "IBM Plex Sans JP Semi Bold", "semibolditalic": "IBM Plex Sans JP Semi Bold"},
+	"ko": {"regular": "IBM Plex Sans KR Regular", "italic": "IBM Plex Sans KR Regular", "semibold": "IBM Plex Sans KR Semi Bold", "semibolditalic": "IBM Plex Sans KR Semi Bold"},
 
-        "fontProperty": "fontFamily=REGULAR;fontSize=14;",
+        "fontProperty": "fontFamily=REGULAR;fontSize=14;fontStyle=0;",
         "badgeLabel": "<font style='font-size: 12px' face='REGULAR'>%Badge-Text%</font>",
         "legendLabel": "<font style='font-size: 14px' face='SEMIBOLD'>%Legend-Title%</font>",
         "itemLabel": "<font style='font-size: 12px' face='REGULAR'>%Primary-Label%</font><BR><font style='font-size: 12px' face='REGULAR'>%Secondary-Text%</font>",
@@ -113,6 +110,10 @@
         "FILL_COLOR": "fillColor", "FILL_COLOR_DEFAULT": "none",
         "FONT_COLOR": "fontColor", "FONT_COLOR_DEFAULT": "black",
         "BADGE_COLOR": "ibmBadgeColor", "BADGE_COLOR_DEFAULT": "none",
+        "BADGE_COLOR": "ibmBadgeColor", "BADGE_COLOR_DEFAULT": "none",
+
+        "FONT_FAMILY": "fontFamily", "FONT_FAMILY_DEFAULT": "IBM Plex Sans Regular",
+        "FONT_STYLE": "fontStyle", "FONT_STYLE_DEFAULT": 0,
 
         "LABEL_POSITION": "labelPosition", "LABEL_POSITION_DEFAULT": "center",
         "VERTICAL_LABEL_POSITION": "verticalLabelPosition", "VERTICAL_LABEL_POSITION_DEFAULT": "bottom",
