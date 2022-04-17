@@ -961,19 +961,23 @@ mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
 		if (!changed)
 			return properties;
 
+		let lineColorValue = lineColor.isChanged ? lineColor.current : lineColor.previous;
+		let fillColorValue = fillColor.isChanged ? fillColor.current : fillColor.previous;
+
 		if (lineColor.isChanged && !fillColor.isChanged)
 		{
-			let lineColorValue = lineColor.current;
 			let lineColorName = getColorName(lineColorValue);
 
 			let validName = lineColorName.indexOf(LINE_COLOR_NAME) != -1;
 
 			if (validName) {
 				if (shapeLayout.current === "collapsed" || (shapeLayout.current === "expanded" && shapeType.current === 'target')) {
+					fillColorValue = "none";
 					properties += ibmConfig.ibmSystemProperties.noFill;
 					properties += 'fontColor=' + ibmConfig.ibmColors.white + ';';
 				}
 				else {
+					fillColorValue = "default";
 					properties += ibmConfig.ibmSystemProperties.defaultFill;
 					properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
 				}
@@ -983,12 +987,10 @@ mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
 
 		}
 		else {
-			let lineColorValue = lineColor.isChanged ? lineColor.current : lineColor.previous;
 			let lineColorName = getColorName(lineColorValue);
 			let lineColorSegments = lineColorName.split(' ');
 			let lineColorFamily = lineColorSegments[1] === "Gray" ? lineColorSegments[0] + lineColorSegments[1] : lineColorSegments[0];
 
-			let fillColorValue = fillColor.isChanged ? fillColor.current : fillColor.previous;
 			let fillColorName = getColorName(fillColorValue);
 			let fillColorSegments = fillColorName.split(' ');
 			let fillColorFamily = fillColorSegments[1] === "Gray" ? fillColorSegments[0] + fillColorSegments[1] : fillColorSegments[0];
