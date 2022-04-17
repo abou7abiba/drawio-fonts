@@ -950,56 +950,79 @@ mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
 	{
 		// Get properties for color change ensuring proper use of IBM Color Palette.
 		
+		const LINE_COLOR_NAME = ibmConfig.ibmBaseConstants.LINE_COLOR_NAME;
+		const FILL_COLOR_NAME = ibmConfig.ibmBaseConstants.FILL_COLOR_NAME;
+		const FONT_COLOR_NAME = ibmConfig.ibmBaseConstants.FONT_COLOR_NAME;
+		const LIGHT_COLOR_NAME = ibmConfig.ibmBaseConstants.LIGHT_COLOR_NAME;
+
 		let properties = '';
 
 		let changed = lineColor.isChanged || fillColor.isChanged || fontColor.isChanged || badgeColor.isChanged || shapeLayout.isChanged;
 		if (!changed)
 			return properties;
 
-		const LINE_COLOR_NAME = ibmConfig.ibmBaseConstants.LINE_COLOR_NAME;
-		const FILL_COLOR_NAME = ibmConfig.ibmBaseConstants.FILL_COLOR_NAME;
-		const FONT_COLOR_NAME = ibmConfig.ibmBaseConstants.FONT_COLOR_NAME;
-		const LIGHT_COLOR_NAME = ibmConfig.ibmBaseConstants.LIGHT_COLOR_NAME;
+		if (lineColor.isChanged && !fillColor.isChanged)
+		{
+			let lineColorValue = lineColor.current;
+			let lineColorName = getColorName(lineColorValue);
 
-		let colorReset = false;
+			let validName = lineColorName.indexOf(LINE_COLOR_NAME) != -1;
 
-		let lineColorValue = lineColor.isChanged ? lineColor.current : lineColor.previous;
-		let lineColorName = getColorName(lineColorValue);
-		let lineColorSegments = lineColorName.split(' ');
-		let lineColorFamily = lineColorSegments[1] === "Gray" ? lineColorSegments[0] + lineColorSegments[1] : lineColorSegments[0];
-
-		let fillColorValue = fillColor.isChanged ? fillColor.current : fillColor.previous;
-		let fillColorName = getColorName(fillColorValue);
-		let fillColorSegments = fillColorName.split(' ');
-		let fillColorFamily = fillColorSegments[1] === "Gray" ? fillColorSegments[0] + fillColorSegments[1] : fillColorSegments[0];
-
-		// Check that line color is valid and fill color is valid.
-		let validNames = lineColorName.indexOf(LINE_COLOR_NAME) != -1 && fillColorName.indexOf(FILL_COLOR_NAME) != -1;
-
-		// Check that line color and fill color are from the same family or fill color is transparent or white.
-		let validFill = validNames && (fillColorName.startsWith('Transparent') ||
-				fillColorName.startsWith('White') || fillColorFamily == lineColorFamily);
-
-		// If not valid line color and fill color combination then reset.
-		if (!validNames || !validFill) {
-			colorReset = true;
-
-			if (lineColor.isChanged)
+			if (validName) {
+				if (shapeLayout.current === "collapsed" || (shapeLayout.current === "expanded" && shapeType.current === 'target')) {
+					properties += ibmConfig.ibmSystemProperties.noFill;
+					properties += 'fontColor=' + ibmConfig.ibmColors.white + ';';
+				}
+				else {
+					properties += ibmConfig.ibmSystemProperties.defaultFill;
+					properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
+				}
+			}
+			else
 				properties += 'strokeColor=' + lineColor.previous + ';';
 
-			if (fillColor.isChanged)
-				properties += 'fillColor=' + fillColor.previous + ';';
-
-			if (fontColor.isChanged)
-				properties += 'fontColor=' + fontColor.previous + ';';
 		}
+		else {
+			let lineColorValue = lineColor.isChanged ? lineColor.current : lineColor.previous;
+			let lineColorName = getColorName(lineColorValue);
+			let lineColorSegments = lineColorName.split(' ');
+			let lineColorFamily = lineColorSegments[1] === "Gray" ? lineColorSegments[0] + lineColorSegments[1] : lineColorSegments[0];
 
-		// If not valid font color then reset.
-		if (fontColor.isChanged && !colorReset) {
-			let fontColorName = getColorName(fontColor.current);
+			let fillColorValue = fillColor.isChanged ? fillColor.current : fillColor.previous;
+			let fillColorName = getColorName(fillColorValue);
+			let fillColorSegments = fillColorName.split(' ');
+			let fillColorFamily = fillColorSegments[1] === "Gray" ? fillColorSegments[0] + fillColorSegments[1] : fillColorSegments[0];
 
-			if (!fontColorName || fontColorName.indexOf(FONT_COLOR_NAME) === -1)
-				properties += 'fontColor=' + fontColor.previous + ';';
+			// Check that line color is valid and fill color is valid.
+			let validNames = lineColorName.indexOf(LINE_COLOR_NAME) != -1 && fillColorName.indexOf(FILL_COLOR_NAME) != -1;
+
+			// Check that line color and fill color are from the same family or fill color is transparent or white.
+			let validFill = validNames && (fillColorName.startsWith('Transparent') ||
+					fillColorName.startsWith('White') || fillColorFamily == lineColorFamily);
+
+			let colorReset = false;
+
+			// If not valid line color and fill color combination then reset.
+			if (!validNames || !validFill) {
+				colorReset = true;
+
+				if (lineColor.isChanged)
+					properties += 'strokeColor=' + lineColor.previous + ';';
+
+				if (fillColor.isChanged)
+					properties += 'fillColor=' + fillColor.previous + ';';
+
+				if (fontColor.isChanged)
+					properties += 'fontColor=' + fontColor.previous + ';';
+			}
+
+			// If not valid font color then reset.
+			if (fontColor.isChanged && !colorReset) {
+				let fontColorName = getColorName(fontColor.current);
+
+				if (!fontColorName || fontColorName.indexOf(FONT_COLOR_NAME) === -1)
+					properties += 'fontColor=' + fontColor.previous + ';';
+			}
 		}
 
 		// If not valid badge color then reset (future use).
