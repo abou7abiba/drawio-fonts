@@ -762,10 +762,15 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 	let secondaryText = this.state.cell.getAttribute('Secondary-Text', null);
 	let iconName = this.state.cell.getAttribute('Icon-Name', null);
 
-	// Change icon if changing between logical and prescribed.
-	newIconName = changeIcon(shapeType, iconName);
+	// Change icon if switching between logical shape and prescribed shape.
+	let newIconName = changeIcon(shapeType, iconName);
 	if (newIconName)
 		this.state.cell.setAttribute('Icon-Name', newIconName);
+
+	// Change label if switching between regular shape and item shape.
+	let newShapeLabel = changeLabel(shapeLayout);
+	if (newShapeLabel)
+		this.state.cell.setAttribute('label', newShapeLabel);
 
 	// Get properties corresponding to layout change.
 	var properties = getLayoutProperties(shapeType, shapeLayout, hideIcon, primaryLabel, secondaryText);
@@ -778,12 +783,11 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 
 	return cStyleStr;
 	
+	// Get properties corresponding to layout change.
+	// Properties are kept minimal by nulling out unused properties when changing layouts.
+	// Invalid layout changes revert to original layout.
 	function getLayoutProperties(shapeType, shapeLayout, hideIcon, primaryLabel, secondaryText) 
 	{
-		// Get properties corresponding to layout change.
-		// Properties are kept minimal by nulling out unused properties when changing layouts.
-		// Invalid layout changes revert to original layout.
-		
 		let properties = '';
 
 		let changed = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged;
@@ -820,7 +824,7 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 				// Add expanded label properties, add container properties, remove expanded stack properties, add default fill.
 				properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container +
 					ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
-				properties = properties.replace(/spacingTop=0/, getTopSpacing(primaryLabel, secondaryText));
+				properties = properties.replace(/spacingTop=0;/, getSpacingTopProperty(primaryLabel, secondaryText));
 			}
 		}
 		else if (shapeLayout.current === "expandedStack")
@@ -828,7 +832,7 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 			// Add expanded label properties, expanded stack properties, add container properties, add default fill.
 			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack +
 				ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
-			properties = properties.replace(/spacingTop=0/, getTopSpacing(primaryLabel, secondaryText));
+			properties = properties.replace(/spacingTop=0;/, getSpacingTopProperty(primaryLabel, secondaryText));
 		}
 		else if (shapeLayout.current.startsWith('item'))
 			// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
@@ -842,24 +846,39 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 		return properties;
 	}
 
+	// Change icon to iconl or iconp if available when switching between logical shape and prescribed shape.
 	function changeIcon(shapeType, iconName)
 	{
-		// Change icon to iconl or iconp if available when changing between logical and prescribed shapes.
-		if (!shapeType.isChanged)
-			return null;
-
+		if (!shapeType.isChanged) return null;
 		let icons = flattenIcons(ibmIcons.Sidebars.Icons);
-
 		iconKey = 'icon' + shapeType.current.slice(-1);
-
 		icon = icons[iconName];
-
 		return icon[iconKey];
 	}
 
+	// Change label if switching between regular shape and item shape.
+	function changeLabel(shapeLayout)
+	{
+		const font = ibmConfig.ibmFonts[ibmLanguage];
+		let label = null;
+		if (!shapeLayout.isChanged) return label;
+		if (shapeLayout.current.startsWith('item') && 
+		    !shapeLayout.previous.startsWith('item')) {
+			label = ibmConfig.ibmFonts.itemLabel;
+			label = label.replace(/REGULAR/g, font.regular);
+		}
+		else if (shapeLayout.previous.startsWith('item') && 
+		         !shapeLayout.current.startsWith('item')) {
+			label = ibmConfig.ibmFonts.shapeLabel;
+			label = label.replace(/REGULAR/g, font.regular);
+			label = label.replace(/SEMIBOLD/g, font.semibold);
+		}
+		return label;
+	}
+
+	// Remove categories leaving only icons.
 	function flattenIcons(icons)
 	{
-		// Remove categories leaving only icons.
 		let flatIcons = {};
 		for (let categoryKey in icons) {
 			let category = icons[categoryKey];
@@ -869,15 +888,15 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 		return flatIcons;
 	}
 
-	function getTopSpacing(primaryLabel, secondaryText)
+	// Calculate spacingTop from number of lines in primary label and secondary text.
+	function getSpacingTopProperty(primaryLabel, secondaryText)
 	{
-		// Calculate spacingTop from number of lines in primary label and secondary text.
 		let lines = (primaryLabel ? 1 : 0) + (secondaryText ? 1 : 0)
 
 		lines += (primaryLabel.match(/\r|\n|<br>/gi) || []).length;
 		lines += (secondaryText.match(/\r|\n|<br>/gi) || []).length;
 
-		return 'spacingTop=' + (lines > 2 ? (lines * (lines + (lines-2))) : 0);
+		return 'spacingTop=' + (lines > 2 ? (lines * (lines + (lines-2))) : 0) + ';';
 	}
 };
 
@@ -898,11 +917,10 @@ mxIBMShapeBase.prototype.getLineStyle = function (cStyleStr, pStyle, cStyle) {
 
 	return cStyleStr;
 
+	// Get properties for line style change ensuring only one of dashed, double, or strikethrough is set at time,
+	// for example if user previously selected dashed and later selects double then dashed is auto-deselected.
 	function getLineProperties(styleDashed, styleDouble, styleStrikethrough) 
 	{
-		// Get properties for line style change ensuring only one of dashed, double, or strikethrough is set at time,
-		// for example if user previously selected dashed and later selects double then dashed is auto-deselected.
-		
 		let properties = '';
 
 		let changed = styleDashed.isChanged || styleDouble.isChanged || styleStrikethrough.isChanged;
@@ -946,10 +964,9 @@ mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
 
 	return cStyleStr;
 
+	// Get properties for color change ensuring proper use of IBM Color Palette.
 	function getColorProperties(shapeType, shapeLayout, lineColor, fillColor, fontColor, badgeColor, container) 
 	{
-		// Get properties for color change ensuring proper use of IBM Color Palette.
-		
 		const LINE_COLOR_NAME = ibmConfig.ibmBaseConstants.LINE_COLOR_NAME;
 		const FILL_COLOR_NAME = ibmConfig.ibmBaseConstants.FILL_COLOR_NAME;
 		const FONT_COLOR_NAME = ibmConfig.ibmBaseConstants.FONT_COLOR_NAME;
@@ -1057,9 +1074,9 @@ mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
 		return properties;
 	}
 
+	// Get name of color from rbg/hex value.
 	function getColorName(color)
 	{
-		// Get name of color from rbg/hex value.
 		var colorHex = rgb2hex(color);
 		var colorUpper = colorHex.toUpperCase();
 		var colorName = ibmConfig.colorNames[colorUpper === "NONE" ? "NONE" : colorUpper.substring(1)];
@@ -1083,6 +1100,7 @@ mxIBMShapeBase.prototype.getFontStyle = function (cStyleStr, pStyle, cStyle) {
 
 	return cStyleStr;
 
+	// Get properties for font change ensuring proper use of IBM Plex Fonts.
 	function getFontProperties(fontFamily, fontStyle)
 	{
 		let properties = '';
