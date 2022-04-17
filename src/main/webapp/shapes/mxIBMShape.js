@@ -739,7 +739,13 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 	}
 }
 
-// Get base style called by event handler to revert shape back to base for drop-in images.
+/**
+ * Get base style called by event handler to revert shape back to base for drop-in images.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
 mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {	
 	// if shape is image, change it to base shape
 	if (cStyle && cStyle.shape === 'image') {		
@@ -752,7 +758,13 @@ mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {
 	return {cStyleStr, pStyle, cStyle}
 };
 
-// Get layout style called by event handler.
+/**
+ * Get layout style called by event handler.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
 mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 	var shapeType = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);
 	var shapeLayout = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT,mxIBMShapeBase.prototype.cst.SHAPE_TYPE_LAYOUT);
@@ -900,7 +912,13 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 	}
 };
 
-// Get line style (dashed, double, strikethrough) called by event handler.
+/**
+ * Get line style (dashed, double, strikethrough) called by event handler.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
 mxIBMShapeBase.prototype.getLineStyle = function (cStyleStr, pStyle, cStyle) {
 	var styleDashed = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.STYLE_DASHED, mxIBMShapeBase.prototype.cst.STYLE_DASHED_DEFAULT);
 	var styleDouble = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.STYLE_DOUBLE, mxIBMShapeBase.prototype.cst.STYLE_DOUBLE_DEFAULT);
@@ -942,7 +960,13 @@ mxIBMShapeBase.prototype.getLineStyle = function (cStyleStr, pStyle, cStyle) {
 	}
 }
 
-// Get color style called by event handler.
+/**
+ * Get color style called by event handler.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
 mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
 	var shapeType = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);
 	var shapeLayout = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_LAYOUT);
@@ -1084,7 +1108,13 @@ mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
 	}
 }
 
-// Get font style called by event handler.
+/**
+ * Get font style called by event handler.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
 mxIBMShapeBase.prototype.getFontStyle = function (cStyleStr, pStyle, cStyle) {
 	var fontFamily = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FONT_FAMILY, mxIBMShapeBase.prototype.cst.FONT_FAMILY_DEFAULT);
 	var fontStyle = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FONT_STYLE, mxIBMShapeBase.prototype.cst.FONT_STYLE_DEFAULT);
