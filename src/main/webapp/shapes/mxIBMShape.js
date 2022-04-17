@@ -21,7 +21,7 @@
 	const ibmParams = new URLSearchParams(window.location.search);
 	const ibmLanguage = ibmParams.get('lang') ? ibmParams.get('lang') : 'en';
 	const ibmConfig = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMConfig.json').getText());
-	const ibmIcons = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMIcons.json').getText());
+	let ibmIcons;
 
 //**********************************************************************************************************************************************************
 // Base Shapes
@@ -862,10 +862,25 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 	function changeIcon(shapeType, iconName)
 	{
 		if (!shapeType.isChanged) return null;
-		let icons = flattenIcons(ibmIcons.Sidebars.Icons);
+		ibmIcons = ibmIcons || flattenIcons();
 		iconKey = 'icon' + shapeType.current.slice(-1);
-		icon = icons[iconName];
+		let icon = ibmIcons[iconName];
 		return icon[iconKey];
+	}
+
+	// Remove categories leaving only icons.
+	// Delayed loading of icons until needed and loaded only once.
+	function flattenIcons()
+	{
+		let sidebar = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMIcons.json').getText());
+		let icons = sidebar.Sidebars.Icons;
+		let flatIcons = {};
+		for (let categoryKey in icons) {
+			let category = icons[categoryKey];
+			for (let iconKey in category)
+				flatIcons[iconKey] = category[iconKey];
+		}
+		return flatIcons;
 	}
 
 	// Change label if switching between regular shape and item shape.
@@ -886,18 +901,6 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 			label = label.replace(/SEMIBOLD/g, font.semibold);
 		}
 		return label;
-	}
-
-	// Remove categories leaving only icons.
-	function flattenIcons(icons)
-	{
-		let flatIcons = {};
-		for (let categoryKey in icons) {
-			let category = icons[categoryKey];
-			for (let iconKey in category)
-				flatIcons[iconKey] = category[iconKey];
-		}
-		return flatIcons;
 	}
 
 	// Calculate spacingTop from number of lines in primary label and secondary text.
