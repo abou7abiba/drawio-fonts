@@ -50,12 +50,10 @@ mxIBMShapeBase.prototype.init = function (container) {
 		if (container != null) {
 			container.appendChild(this.node);
 		}
-		// Add shape custom attributes	
-		for (var key of this.customAttributes) {
-			if (!this.state.cell.hasAttribute(key)) {
-				this.state.cell.setAttribute(key, '');
-			}
-		}
+
+		// Add shape custom attributes
+		this.addCustomAttributes(this.state.cell);
+
 		// Define custom event handler
 		this.customEventsHandler = mxUtils.bind(this, function (sender, event) {
 			if (event.properties.change && event.properties.change.cell && event.properties.change.cell.id === this.state.cell.id) {
@@ -69,6 +67,23 @@ mxIBMShapeBase.prototype.init = function (container) {
 		})
 		this.state.view.graph.model.addListener('executed', this.customEventsHandler);
 	}
+}
+
+/**
+ * Add custom attributes to cell
+ * @param {*} cell 
+ */
+mxIBMShapeBase.prototype.addCustomAttributes = function(cell) {
+	if (!mxUtils.isNode(cell.value)) { 
+		let obj = mxUtils.createXmlDocument().createElement('UserObject');
+		obj.setAttribute('label', cell.value);
+		cell.value = obj;
+	}
+	for (var key of this.customAttributes) {
+		if (!cell.hasAttribute(key)) {
+			cell.setAttribute(key, '');
+		}
+	}	
 }
 
 /**
@@ -331,13 +346,12 @@ mxIBMShapeBase.prototype.drawStencil = function (c, properties) {
 				var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + prIcon);
 				if (prStencil == null) {
 					prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.undefined');
-				} else {
-					c.setFillColor(properties.iconColor)
-					c.setStrokeColor('none');
-					c.setDashed(false);
-					c.strokewidth = 1;
-					prStencil.drawShape(c, this, x, y, properties.iconSize, properties.iconSize);
 				}
+				c.setFillColor(properties.iconColor);
+				c.setStrokeColor('none');
+				c.setDashed(false);
+				c.strokewidth = 1;
+				prStencil.drawShape(c, this, x, y, properties.iconSize, properties.iconSize);				
 			}
 			c.restore();
 		}
@@ -754,7 +768,10 @@ mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {
 		cStyle = tempStyle;
 		cStyleStr = getStylesStr(cStyle);
 	}
-
+	if (pStyle && pStyle.shape === 'image') {
+		pStyle = cStyle;
+	}
+	
 	return {cStyleStr, pStyle, cStyle}
 };
 
