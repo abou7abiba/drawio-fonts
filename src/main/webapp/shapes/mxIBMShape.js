@@ -768,7 +768,10 @@ mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {
 		cStyle = tempStyle;
 		cStyleStr = getStylesStr(cStyle);
 	}
-
+	if (pStyle && pStyle.shape === 'image') {
+		pStyle = cStyle;
+	}
+	
 	return {cStyleStr, pStyle, cStyle}
 };
 
