@@ -1059,9 +1059,10 @@ mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
 			// Check that line color is valid and fill color is valid.
 			let validNames = lineColorName.indexOf(LINE_COLOR_NAME) != -1 && fillColorName.indexOf(FILL_COLOR_NAME) != -1;
 
-			// Check that line color and fill color are from the same family or fill color is transparent or white.
-			let validFill = validNames && (fillColorName.startsWith('Transparent') ||
-					fillColorName.startsWith('White') || fillColorFamily == lineColorFamily);
+			// Check that line color and fill color are from same family, or fill color is transparent or white, or black line with gray fill.
+			let validFill = validNames && 
+					(fillColorName.startsWith('Transparent') || fillColorName.startsWith('White') || 
+					 fillColorFamily == lineColorFamily || (lineColorFamily === 'Black' && fillColorFamily.indexOf('Gray') !== -1));
 
 			let colorReset = false;
 
