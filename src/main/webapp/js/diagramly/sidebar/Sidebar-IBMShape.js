@@ -132,8 +132,10 @@
 								if (shape.members != null)
 									addIBMShapePaletteMembers(shapeName, shape, shapes, bg);
 
-								let showLabel = ((shape.format.type.startsWith('legend') || shape.format.type.startsWith('unit') ||
-										  (shape.format.layout.startsWith('expanded')) && (shape.format.layout != 'itemShape')));
+								let showLabel = (shape.format.type.startsWith('legend') || 
+										 (!shape.format.type.startsWith('unit') && 
+											 shape.format.layout != 'itemShape' && 
+											 shape.format.layout.startsWith('expanded')));
 								
 								return sb.createVertexTemplateFromCells([bg], bg.geometry.width, bg.geometry.height, shapeName, showLabel);
 							}));

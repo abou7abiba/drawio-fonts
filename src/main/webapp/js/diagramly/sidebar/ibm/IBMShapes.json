@@ -35,6 +35,17 @@
 	"Technical Installation": {"format": "$UNIT_TI", "$UNIT_DEFAULT_PROPERTIES": null},
 	"Technical Presentation": {"format": "$UNIT_TP", "$UNIT_DEFAULT_PROPERTIES": null}
       },
+
+      "Deployment Unit Icons": {
+        "Data": {"icon": "deployment-unit--data", "format": "$ITEM_ICON", "color": "$UNIT_DEFAULT_COLOR", "$UNIT_DEFAULT_PROPERTIES": null},
+        "Execution": {"icon": "deployment-unit--execution", "format": "$ITEM_ICON", "color": "$UNIT_DEFAULT_COLOR", "$UNIT_DEFAULT_PROPERTIES": null},
+        "Installation": {"icon": "deployment-unit--installation", "format": "$ITEM_ICON", "color": "$UNIT_DEFAULT_COLOR", "$UNIT_DEFAULT_PROPERTIES": null},
+        "Presentation": {"icon": "deployment-unit--presentation", "format": "$ITEM_ICON", "color": "$UNIT_DEFAULT_COLOR", "$UNIT_DEFAULT_PROPERTIES": null},
+        "Technical Data": {"icon": "deployment-unit--technical--data", "format": "$ITEM_ICON", "color": "$UNIT_DEFAULT_COLOR", "$UNIT_DEFAULT_PROPERTIES": null},
+        "Technical Execution": {"icon": "deployment-unit--technical--execution", "format": "$ITEM_ICON", "color": "$UNIT_DEFAULT_COLOR", "$UNIT_DEFAULT_PROPERTIES": null},
+        "Technical Installation": {"icon": "deployment-unit--technical--installation", "format": "$ITEM_ICON", "color": "$UNIT_DEFAULT_COLOR", "$UNIT_DEFAULT_PROPERTIES": null},
+        "Technical Presentation": {"icon": "deployment-unit--technical--presentation", "format": "$ITEM_ICON", "color": "$UNIT_DEFAULT_COLOR", "$UNIT_DEFAULT_PROPERTIES": null}
+      },
       
       "Legends": {
  	"Horizontal Legend": {"format": "$LEGEND_HORIZONTAL", "$LEGEND_DEFAULT_PROPERTIES": null},
