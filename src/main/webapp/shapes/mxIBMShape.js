@@ -817,13 +817,18 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 	// Get properties corresponding to layout change.
 	// Properties are kept minimal by nulling out unused properties when changing layouts.
 	// Invalid layout changes revert to original layout.
-	// Fills for ibm icons to ensure consistency when changing layout: 
-	// 	collapsed none to expanded white to collapsed none
-	// 	collapsed white to expanded white to collapsed none
-	// 	collapsed light to expanded light to collapsed none
-	// Fills for dropin images to ensure consistency when changing layout: 
-	// 	collapsed white to expanded white to collapsed white
-	// 	collapsed light to expanded light to collapsed light
+	// For nodes and components,
+	// 1. Regular icons default to line-colored icon area for collapsed/expanded and white fill for expanded,
+	//    and if changed to a non-default fill color will follow these scenarios when changing layouts:
+	// 	collapsed none to expanded white to collapsed none,
+	// 	collapsed white to expanded white to collapsed none,
+	// 	collapsed light to expanded light to collapsed none,
+	// 	               and expanded none to collapsed none.
+	// 2. Dropin images default to white icon area for collapsed and white for icon area and fill for expanded,
+	//    and if changed to a non-default fill color will follow these scnearios when changing layouts:
+	// 	collapsed white to expanded white to collapsed white,
+	// 	collapsed light to expanded light to collapsed light,
+	// 	               and expanded none to collapsed white.
 	function getLayoutProperties(shapeType, shapeLayout, hideIcon, primaryLabel, secondaryText, fillColor, image) 
 	{
 		const LIGHT_COLOR_NAME = ibmConfig.ibmBaseConstants.LIGHT_COLOR_NAME;
