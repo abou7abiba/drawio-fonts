@@ -771,7 +771,7 @@ mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {
 	if (pStyle && pStyle.shape === 'image') {
 		pStyle = cStyle;
 	}
-	
+
 	return {cStyleStr, pStyle, cStyle}
 };
 
@@ -1402,27 +1402,17 @@ mxIBMShapeUnit.prototype.customProperties = ibmConfig.ibmUnitProperties;
 mxIBMShapeUnit.prototype.paintVertexShape = function (c, x, y, w, h) {
 	var properties = this.getProperties();
 	// console.log("mxIBMShapeUnit.prototype.paintVertexShape", properties);
-	var textStr = "";
-	switch (properties.shapeType) {
-		case "unite": textStr = "E"; break;
-		case "uniti": textStr = "I"; break;
-		case "unitp": textStr = "P"; break;
-		case "unittd": textStr = "TD"; break;
-		case "unitte": textStr = "TE"; break;
-		case "unitti": textStr = "TI"; break;
-		case "unittp": textStr = "TP"; break;
-		case "unitd": textStr = "D"; break;
-		default: textStr = "D";
-	}
+	
 	c.translate(x, y);
-	// background
-	c.rect(0, 0, w, h);
+
+	// draw container
+	c.setFillColor(properties.fillColor);
 	c.setStrokeColor('none');
-	c.setFillColor('none');
-	c.setFontColor(properties.fontColor);
+	c.rect(0, 0, w, h);
 	c.fillAndStroke();
-	// text
-	c.text(properties.iconSize / 2, properties.iconSize / 2, w, h, textStr, 'center', 'middle', 0, 0, 0, 0, 0, 0);
+
+	// draw stencil
+	this.drawStencil(c, properties);
 }
 
 mxIBMShapeUnit.prototype.getProperties = function () {
@@ -1433,6 +1423,35 @@ mxIBMShapeUnit.prototype.getProperties = function () {
 	properties.fontColor = mxUtils.getValue(this.state.style, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
 	// properties.strokeColor = mxUtils.getValue(this.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
 	return properties;
+}
+
+/**
+ * Draw stencil
+ * @param {*} c 
+ * @param {*} properties 
+ */
+ mxIBMShapeUnit.prototype.drawStencil = function (c, properties) {
+	var prIcon = "";
+	switch (properties.shapeType) {
+		case "unite": prIcon = "execution"; break;
+		case "uniti": prIcon = "installation"; break;
+		case "unitp": prIcon = "presentation"; break;
+		case "unittd": prIcon = "technical--data"; break;
+		case "unitte": prIcon = "technical--execution"; break;
+		case "unitti": prIcon = "technical--installation"; break;
+		case "unittp": prIcon = "technical--presentation"; break;
+		case "unitd": prIcon = "data"; break;
+		default: prIcon = "data";
+	}
+	var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.deployment-unit--' + prIcon);
+	if (prStencil == null) {
+		prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.undefined');
+	}
+	c.setFillColor(properties.fontColor);
+	c.setStrokeColor('none');
+	c.setDashed(false);
+	c.strokewidth = 1;
+	prStencil.drawShape(c, this, properties.iconAlign, properties.iconAlign, properties.iconSize, properties.iconSize);	
 }
 
 mxIBMShapeUnit.prototype.getLabelBounds = function (rect) {
