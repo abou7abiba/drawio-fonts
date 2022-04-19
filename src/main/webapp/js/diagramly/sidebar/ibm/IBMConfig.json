@@ -344,6 +344,6 @@
 
     	"legend":          {"defaultWidth": 132, "defaultHeight": 32, "minWidth": 132, "minHeight": 32},
 
-    	"unit":            {"defaultWidth": 192, "defaultHeight": 16, "minWidth": 192, "minHeight": 16, "labelHeight": 16, "labelAlign": 24, "iconSize": 16, "iconAlign": 0}
+    	"unit":            {"defaultWidth": 16, "defaultHeight": 16, "minWidth": 16, "minHeight": 16, "labelHeight": 16, "labelAlign": 24, "iconSize": 16, "iconAlign": 0}
     }    
 }
