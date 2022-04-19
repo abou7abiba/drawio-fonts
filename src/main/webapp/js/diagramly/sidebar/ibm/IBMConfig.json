@@ -119,6 +119,7 @@
         "VERTICAL_LABEL_POSITION": "verticalLabelPosition", "VERTICAL_LABEL_POSITION_DEFAULT": "bottom",
 
         "CONTAINER": "container", "CONTAINER_DEFAULT": true,
+        "IMAGE": "image", "IMAGE_DEFAULT": "",
 
 	"UNUSED_COLOR_NAME": "Not Used",
 	"LINE_COLOR_NAME": "Line",

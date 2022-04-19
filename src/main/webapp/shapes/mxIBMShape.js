@@ -787,6 +787,7 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 	var shapeLayout = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT,mxIBMShapeBase.prototype.cst.SHAPE_TYPE_LAYOUT);
 	var hideIcon = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.HIDE_ICON, mxIBMShapeBase.prototype.cst.HIDE_ICON_DEFAULT);
 	var fillColor = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FILL_COLOR, mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT);
+	var image = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.IMAGE, mxIBMShapeBase.prototype.cst.IMAGE_DEFAULT);
 
 	let primaryLabel = this.state.cell.getAttribute('Primary-Label', null);
 	let secondaryText = this.state.cell.getAttribute('Secondary-Text', null);
@@ -803,7 +804,7 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 		this.state.cell.setAttribute('label', newShapeLabel);
 
 	// Get properties corresponding to layout change.
-	var properties = getLayoutProperties(shapeType, shapeLayout, hideIcon, primaryLabel, secondaryText, fillColor);
+	var properties = getLayoutProperties(shapeType, shapeLayout, hideIcon, primaryLabel, secondaryText, fillColor, image);
 
 	// Build styles object from styles string.
 	var stylesObj = getStylesObj(properties);
@@ -816,16 +817,19 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 	// Get properties corresponding to layout change.
 	// Properties are kept minimal by nulling out unused properties when changing layouts.
 	// Invalid layout changes revert to original layout.
-	// Fills when changing layout to ensure consistency: 
+	// Fills for ibm icons to ensure consistency when changing layout: 
 	// 	collapsed none to expanded white to collapsed none
 	// 	collapsed white to expanded white to collapsed none
 	// 	collapsed light to expanded light to collapsed none
-	function getLayoutProperties(shapeType, shapeLayout, hideIcon, primaryLabel, secondaryText, fillColor) 
+	// Fills for dropin images to ensure consistency when changing layout: 
+	// 	collapsed white to expanded white to collapsed white
+	// 	collapsed light to expanded light to collapsed light
+	function getLayoutProperties(shapeType, shapeLayout, hideIcon, primaryLabel, secondaryText, fillColor, image) 
 	{
 		const LIGHT_COLOR_NAME = ibmConfig.ibmBaseConstants.LIGHT_COLOR_NAME;
 		let properties = '';
 
-		let changed = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged;
+		let changed = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged || image.isChanged;
 		if (!changed)
 			return properties;
 
@@ -838,15 +842,25 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 			return properties;
 		}
 
+		if (image.isChanged) {
+			if (image.current)	
+				properties += ibmConfig.ibmSystemProperties.defaultFill;
+			else if (shapeLayout.previous === 'collapsed' || (shapeLayout.previous === 'expanded' && shapeType.previous === 'target'))
+				properties += ibmConfig.ibmSystemProperties.noFill;
+			else
+				properties += ibmConfig.ibmSystemProperties.defaultFill;
+
+			return properties;
+		}
+
+
 		// Get shape-specific properties.
 
 		if (shapeLayout.current === "collapsed") {
 			// Add collapsed label properties, remove expanded stack properties, remove container properties, remove fill.
-			//SAVE properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull +
-			//SAVE	ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
 			properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull +
 				ibmConfig.ibmSystemProperties.containerNull;
-			if (shapeLayout.previous.startsWith('expanded') &&
+			if (shapeLayout.previous.startsWith('expanded') && image.previous === '' &&
 					(fillColor.previous === 'default' || getColorName(fillColor.previous).indexOf(LIGHT_COLOR_NAME) !== -1))
 				properties += ibmConfig.ibmSystemProperties.noFill;
 		}
@@ -858,28 +872,22 @@ mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
 				else
 					properties += ibmConfig.ibmSystemProperties.expandedTargetLabel;
 
-				//SAVE properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull +
-				//SAVE	ibmConfig.ibmSystemProperties.noFill;
 				properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull;
 			}
 			else {
 				// Add expanded label properties, add container properties, remove expanded stack properties, add default fill.
-				//SAVE properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container +
-				//SAVE	ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
 				properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container +
 					ibmConfig.ibmSystemProperties.expandedStackNull;
-				if (shapeLayout.previous === 'collapsed' && fillColor.previous === 'none')
+				if (shapeLayout.previous === 'collapsed' && image.previous === '' && fillColor.previous === 'none')
 					properties += ibmConfig.ibmSystemProperties.defaultFill;
 				properties = properties.replace(/spacingTop=0;/, getSpacingTopProperty(primaryLabel, secondaryText));
 			}
 		}
 		else if (shapeLayout.current === "expandedStack") {
 			// Add expanded label properties, expanded stack properties, add container properties, add default fill.
-			//SAVEproperties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack +
-			//SAVE	ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
 			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack +
 				ibmConfig.ibmSystemProperties.container;
-			if (shapeLayout.previous === 'collapsed' && fillColor.previous === 'none')
+			if (shapeLayout.previous === 'collapsed' && image.previous === '' && fillColor.previous === 'none')
 				properties += ibmConfig.ibmSystemProperties.defaultFill;
 			properties = properties.replace(/spacingTop=0;/, getSpacingTopProperty(primaryLabel, secondaryText));
 		}
