@@ -21,7 +21,7 @@
 	const ibmParams = new URLSearchParams(window.location.search);
 	const ibmLanguage = ibmParams.get('lang') ? ibmParams.get('lang') : 'en';
 	const ibmConfig = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMConfig.json').getText());
-	const ibmIcons = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMIcons.json').getText());
+	let ibmIcons;
 
 //**********************************************************************************************************************************************************
 // Base Shapes
@@ -42,21 +42,63 @@ mxIBMShapeBase.prototype.cst = ibmConfig.ibmBaseConstants;
 
 mxIBMShapeBase.prototype.customProperties = ibmConfig.ibmBaseProperties;
 
+mxIBMShapeBase.prototype.customAttributes = ['Badge-Text', 'Icon-Name'];
+
 mxIBMShapeBase.prototype.init = function (container) {
 	if (this.node == null) {
 		this.node = this.create(container);
 		if (container != null) {
 			container.appendChild(this.node);
 		}
+
+		// Add shape custom attributes
+		this.addCustomAttributes(this.state.cell);
+
 		// Define custom event handler
 		this.customEventsHandler = mxUtils.bind(this, function (sender, event) {
 			if (event.properties.change && event.properties.change.cell && event.properties.change.cell.id === this.state.cell.id) {
+				if ("mxValueChange" === event.properties.change.constructor.name) {
+					this.valueChangedEventsHandler(this.state.view.graph, event);
+				}
 				if ("mxStyleChange" === event.properties.change.constructor.name) {
 					this.styleChangedEventsHandler(this.state.view.graph, event);
 				}
 			}
 		})
 		this.state.view.graph.model.addListener('executed', this.customEventsHandler);
+	}
+}
+
+/**
+ * Add custom attributes to cell
+ * @param {*} cell 
+ */
+mxIBMShapeBase.prototype.addCustomAttributes = function(cell) {
+	if (!mxUtils.isNode(cell.value)) { 
+		let obj = mxUtils.createXmlDocument().createElement('UserObject');
+		obj.setAttribute('label', cell.value);
+		cell.value = obj;
+	}
+	for (var key of this.customAttributes) {
+		if (!cell.hasAttribute(key)) {
+			cell.setAttribute(key, '');
+		}
+	}	
+}
+
+/**
+ * valueChangedEventsHandler
+ * @param {*} graph 
+ * @param {*} event 
+ */
+mxIBMShapeBase.prototype.valueChangedEventsHandler = function (graph, event) {	
+	var { current, previous } = { 
+		current: event.properties.change.value.attributes, 
+		previous: event.properties.change.previous.attributes 
+	};
+	var isChanged = this.customAttributes.some(item => (current.getNamedItem(item) && current.getNamedItem(item).value) !== (previous.getNamedItem(item) && previous.getNamedItem(item).value));
+	if (isChanged) {
+		this.redraw();
 	}
 }
 
@@ -104,24 +146,10 @@ mxIBMShapeBase.prototype.paintVertexShape = function (c, x, y, w, h) {
 	// console.log('mxIBMShapeBase.prototype.paintVertexShape', properties);
 
 	c.translate(x, y);
-	if (properties.shapeLayout.startsWith('item')) {
-		if (properties.shapeLayout == 'itemColor' || properties.shapeLayout == 'itemShape' || properties.shapeLayout == 'itemStyle' || properties.shapeLayout == 'itemIcon') {
-			this.drawShape(c, properties);
-		}
-
-		if (properties.shapeLayout == 'itemIcon') {
-			this.drawStencil(c, properties);
-		} else if (properties.shapeLayout == 'itemStyle') {
-			this.drawStyle(c, properties);
-		} else if (properties.shapeLayout == 'itemBadge') {
-			this.drawBadge(c, properties);
-		}
-	} else {
-		this.drawShape(c, properties);
-		this.drawStencil(c, properties);
-		this.drawStyle(c, properties);
-		this.drawBadge(c, properties);
-	}
+	this.drawShape(c, properties);
+	this.drawStencil(c, properties);
+	this.drawStyle(c, properties);
+	this.drawBadge(c, properties);
 }
 
 mxIBMShapeBase.prototype.getProperties = function (shape, shapeHeight, shapeWidth) {
@@ -163,40 +191,62 @@ mxIBMShapeBase.prototype.getProperties = function (shape, shapeHeight, shapeWidt
  * @param {*} properties 
  */
 mxIBMShapeBase.prototype.drawShape = function (c, properties) {
-	if (properties.styleDashed || properties.styleDouble) {
-		drawDoubleShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
-		drawShapeContainer(properties.doubleAlign, properties.doubleAlign, properties.shapeWidth - properties.doubleAlign * 2, properties.shapeHeight - properties.doubleAlign * 2, properties.curveRadius - properties.doubleAlign);
-	} else {
-		drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);
-	}
+	if (properties.shapeLayout !== 'itemBadge') {
+		// draw shape container
+		drawShapeContainer(0, 0, properties.shapeWidth, properties.shapeHeight, properties.curveRadius);		
 
-	if (properties.shapeType.startsWith('group')) {
-		c.rect(0, 0, properties.sidebarWidth, properties.sidebarHeight);
-		c.setStrokeColor(properties.lineColor);
-		c.setFillColor(properties.lineColor);
-		c.fillAndStroke();
-	} else {
-		if (properties.shapeLayout.startsWith('expanded') && properties.shapeType !== 'target') {
-			if (!properties.hideIcon) {
-				drawIconArea(0, 0, properties.iconAreaWidth, properties.iconAreaHeight, properties.curveRadius);
+		if (properties.shapeType.startsWith('group')) {
+			c.rect(0, 0, properties.sidebarWidth, properties.sidebarHeight);
+			c.setStrokeColor(properties.lineColor);
+			c.setFillColor(properties.styleColor);
+			c.setDashed(false);
+			c.fillAndStroke();
+		} else {
+			if (properties.shapeLayout.startsWith('expanded') && properties.shapeType !== 'target') {
+				if (!properties.hideIcon) {
+					drawIconArea(0, 0, properties.iconAreaWidth, properties.iconAreaHeight, properties.curveRadius);
+					c.setStrokeColor(properties.lineColor);
+					c.setFillColor(properties.iconAreaColor);
+					c.setDashed(false);
+					c.fillAndStroke();
+				}
+			}
+			if (properties.shapeType.startsWith('comp')) {
+				c.rect(properties.sidetickAlign, properties.minHeight / 4, properties.sidetickWidth, properties.sidetickHeight);
 				c.setStrokeColor(properties.lineColor);
-				c.setFillColor(properties.lineColor);
+				c.setFillColor(ibmConfig.ibmColors.white);
+				c.setDashed(false);
+				c.fillAndStroke();
+
+				c.rect(properties.sidetickAlign, properties.minHeight - properties.minHeight / 4 - properties.sidetickHeight, properties.sidetickWidth, properties.sidetickHeight);
+				c.setDashed(false);
 				c.fillAndStroke();
 			}
-		}
-		if (properties.shapeType.startsWith('comp')) {
-			c.rect(properties.sidetickAlign, properties.minHeight / 4, properties.sidetickWidth, properties.sidetickHeight);
-			c.setStrokeColor(properties.lineColor);
-			c.setFillColor(ibmConfig.ibmColors.white);
-			c.fillAndStroke();
-
-			c.rect(properties.sidetickAlign, properties.minHeight - properties.minHeight / 4 - properties.sidetickHeight, properties.sidetickWidth, properties.sidetickHeight);
-			c.fillAndStroke();
 		}
 	}
 
 	function drawShapeContainer(x, y, w, h, curveRadius) {
+		// if shape is styleDouble
+		if (properties.styleDouble) {
+			drawBaseShape(x, y, w, h, curveRadius);
+			c.setStrokeColor(properties.lineColor);
+			c.fillAndStroke();
+			// reset x, y, w, h, curveRadius			
+			x = properties.doubleAlign;
+			y = properties.doubleAlign;
+			w = properties.shapeWidth - properties.doubleAlign * 2;
+			h = properties.shapeHeight - properties.doubleAlign * 2;
+			curveRadius = properties.curveRadius - properties.doubleAlign;
+		} 
+		// 	draw actual shape container
 		drawBaseShape(x, y, w, h, curveRadius);
+		// if shape is styleDashed
+		if (properties.styleDashed) {
+			c.setDashed(true, true);
+			c.setDashPattern('6 6');
+		} else {
+			c.setDashed(false);
+		}
 		if (properties.shapeLayout == 'itemIcon') {
 			c.setStrokeColor('none');
 			c.setFillColor(properties.fillColor);
@@ -207,22 +257,9 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 			if (properties.shapeLayout.startsWith('expanded') && properties.shapeType !== 'target') {
 				c.setFillColor(properties.fillColor)
 			} else {
-				c.setFillColor(properties.lineColor);
+				c.setFillColor(properties.iconAreaColor);
 			}
 		}
-		c.setDashed(false);
-		c.fillAndStroke();
-	}
-
-	function drawDoubleShapeContainer(x, y, w, h, curveRadius) {
-		drawBaseShape(x, y, w, h, curveRadius);
-		if (properties.styleDashed) {
-			c.setDashed(true, true);
-			c.setDashPattern('6 6');
-		} else {
-			c.setDashed(false);
-		}
-		c.setStrokeColor(properties.lineColor);
 		c.fillAndStroke();
 	}
 
@@ -231,8 +268,18 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
 			c.ellipse(x, y, w, h);
 		} else if (properties.shapeType == 'target') {
 			c.roundrect(x, y, w, h, curveRadius, curveRadius);
-		} else if (properties.shapeType.endsWith('l')) { // nodel, compl, groupl 
+		} else if (properties.shapeType == 'nodel' || properties.shapeType == 'compl') {
 			c.roundrect(x, y, w, h, curveRadius, curveRadius);
+		} else if (properties.shapeType == 'groupl') {
+			c.begin()
+			c.moveTo(x, y);
+			c.lineTo(x + w - curveRadius, y);
+			c.arcTo(curveRadius, curveRadius, 0, 0, 1, x + w, curveRadius);
+			c.lineTo(x + w, h - curveRadius);
+			c.arcTo(curveRadius, curveRadius, 0, 0, 1, x + w - curveRadius, h);
+			c.lineTo(curveRadius, h);			
+			c.arcTo(curveRadius, curveRadius, 0, 0, 1, x, h - curveRadius);
+			c.close();
 		} else {
 			c.rect(x, y, w, h);
 		}
@@ -272,39 +319,42 @@ mxIBMShapeBase.prototype.drawShape = function (c, properties) {
  * @param {*} properties 
  */
 mxIBMShapeBase.prototype.drawStencil = function (c, properties) {
-	if (!properties.hideIcon) {		
-		var x = properties.iconAreaWidth / 2 - properties.iconSize / 2;
-		var y = properties.iconAreaHeight / 2 - properties.iconSize / 2;
-		if (properties.shapeType.startsWith('group')) {
-			x = properties.iconAreaWidth - properties.iconSize;
-		}
-		if (properties.shapeLayout.startsWith('expanded') && properties.shapeType  === 'target') {
-			x = x + properties.curveRadius / 2;
-		}
-		if (properties.shapeLayout.startsWith('item')) {
-			x = 0;
-		}
+	if (properties.shapeLayout.startsWith('expanded') || properties.shapeLayout === 'collapsed' || properties.shapeLayout === 'itemIcon') {
+		if (!properties.hideIcon) {		
+			var x = properties.iconAreaWidth / 2 - properties.iconSize / 2;
+			var y = properties.iconAreaHeight / 2 - properties.iconSize / 2;
+			if (properties.shapeType.startsWith('group')) {
+				x = properties.iconAreaWidth - properties.iconSize;
+			}
+			if (properties.shapeLayout.startsWith('expanded') && properties.shapeType  === 'target') {
+				x = x + properties.curveRadius / 2;
+			}
+			if (properties.shapeLayout.startsWith('item')) {
+				x = 0;
+			}
 
-		c.save();
-		// rotate icon if set
-		if (properties.rotateIcon) {
-			c.rotate(properties.rotateIcon, false, false, x + properties.iconSize / 2, properties.iconAreaHeight / 2);
-		}
-		// draw image or stencil
-		if (this.image) { // if the shape style contains image attribute
-			c.image(x, y, properties.iconSize, properties.iconSize, this.image, true, false, false);
-		} else  {
-			var prIcon = this.state.cell.getAttribute('Icon-Name');
-			var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + prIcon);
-			if (prStencil) {
-				c.setFillColor(properties.iconColor)
+			c.save();
+			// rotate icon if set
+			if (properties.rotateIcon) {
+				c.rotate(properties.rotateIcon, false, false, x + properties.iconSize / 2, properties.iconAreaHeight / 2);
+			}
+			// draw image or stencil
+			if (this.image) { // if the shape style contains image attribute
+				c.image(x, y, properties.iconSize, properties.iconSize, this.image, true, false, false);
+			} else  {
+				var prIcon = this.state.cell.getAttribute('Icon-Name');
+				var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + prIcon);
+				if (prStencil == null) {
+					prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.undefined');
+				}
+				c.setFillColor(properties.iconColor);
 				c.setStrokeColor('none');
 				c.setDashed(false);
 				c.strokewidth = 1;
-				prStencil.drawShape(c, this, x, y, properties.iconSize, properties.iconSize);
+				prStencil.drawShape(c, this, x, y, properties.iconSize, properties.iconSize);				
 			}
+			c.restore();
 		}
-		c.restore();
 	}
 }
 
@@ -314,61 +364,63 @@ mxIBMShapeBase.prototype.drawStencil = function (c, properties) {
  * @param {*} properties 
  */
 mxIBMShapeBase.prototype.drawStyle = function (c, properties) {
-	if (properties.styleStrikethrough) {
-		c.begin();
-		if (properties.shapeLayout == 'collapsed' || properties.shapeLayout == 'itemStyle' || properties.shapeType.startsWith('group')) {
-			c.moveTo(0, 0);
-			c.lineTo(properties.shapeWidth, properties.shapeHeight);
-		} else if (properties.shapeLayout.startsWith('expanded')) {
-			if (properties.shapeType == 'target') {
-				c.moveTo(properties.iconSize, 0);
-				c.lineTo(properties.shapeWidth - properties.iconSize, properties.iconAreaHeight);
-			} else {
-				properties.hideIcon ? c.moveTo(0, 0) : c.moveTo(properties.iconAreaWidth, 0);
-				c.lineTo(properties.shapeWidth, properties.iconAreaHeight);
+	if (properties.shapeLayout.startsWith('expanded') || properties.shapeLayout === 'collapsed' || properties.shapeLayout === 'itemStyle') {
+		if (properties.styleStrikethrough) {
+			c.begin();
+			if (properties.shapeLayout == 'collapsed' || properties.shapeLayout == 'itemStyle' || properties.shapeType.startsWith('group')) {
+				c.moveTo(0, 0);
+				c.lineTo(properties.shapeWidth, properties.shapeHeight);
+			} else if (properties.shapeLayout.startsWith('expanded')) {
+				if (properties.shapeType == 'target') {
+					c.moveTo(properties.iconSize, 0);
+					c.lineTo(properties.shapeWidth - properties.iconSize, properties.iconAreaHeight);
+				} else {
+					properties.hideIcon ? c.moveTo(0, 0) : c.moveTo(properties.iconAreaWidth, 0);
+					c.lineTo(properties.shapeWidth, properties.iconAreaHeight);
+				}
 			}
+			c.setStrokeColor(properties.styleColor);
+			c.close();
+			c.stroke();
 		}
-		c.setStrokeColor(properties.styleColor);
-		c.close();
-		c.stroke();
-	}
 
-	if (properties.styleMultiplicity) {
-		c.begin();
-		for (var i = 1; i <= 2; i++) {
-			var offSet = properties.multiplicityAlign * i;
-			if (properties.shapeType == 'actor') {
-				c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
-				c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
-				c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
-			} else if (properties.shapeType == 'target') {
-				c.moveTo(properties.iconSize + offSet, - offSet);
-				c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
-				c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
-				c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
-				c.moveTo(properties.iconSize + offSet, - offSet);
-			} else if (properties.shapeType.endsWith('l')) {
-				c.moveTo(offSet, - offSet);
-				c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
-				c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
-				c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
-				c.moveTo(offSet, - offSet);
-			} else {
-				c.moveTo(offSet, - offSet);
-				c.lineTo(properties.shapeWidth + offSet, - offSet);
-				c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
-				c.moveTo(offSet, - offSet);
+		if (properties.styleMultiplicity) {
+			c.begin();
+			for (var i = 1; i <= 2; i++) {
+				var offSet = properties.multiplicityAlign * i;
+				if (properties.shapeType == 'actor') {
+					c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
+					c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
+					c.moveTo(properties.shapeWidth / 2 + offSet, - offSet);
+				} else if (properties.shapeType == 'target') {
+					c.moveTo(properties.iconSize + offSet, - offSet);
+					c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
+					c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
+					c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight / 2 - offSet);
+					c.moveTo(properties.iconSize + offSet, - offSet);
+				} else if (properties.shapeType.endsWith('l')) {
+					c.moveTo(offSet, - offSet);
+					c.lineTo(properties.shapeWidth + offSet - properties.curveRadius, - offSet);
+					c.arcTo(properties.curveRadius, properties.curveRadius, 0, 0, 1, properties.shapeWidth + offSet, properties.curveRadius - offSet);
+					c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
+					c.moveTo(offSet, - offSet);
+				} else {
+					c.moveTo(offSet, - offSet);
+					c.lineTo(properties.shapeWidth + offSet, - offSet);
+					c.lineTo(properties.shapeWidth + offSet, properties.shapeHeight - offSet);
+					c.moveTo(offSet, - offSet);
+				}
 			}
+			if (properties.styleDashed) {
+				c.setDashed(true, true);
+				c.setDashPattern('6 6');
+			} else {
+				c.setDashed(false);
+			}
+			c.setStrokeColor(properties.lineColor);
+			c.close();
+			c.stroke();
 		}
-		if (properties.styleDashed) {
-			c.setDashed(true, true);
-			c.setDashPattern('6 6');
-		} else {
-			c.setDashed(false);
-		}
-		c.setStrokeColor(properties.lineColor);
-		c.close();
-		c.stroke();
 	}
 }
 
@@ -378,46 +430,72 @@ mxIBMShapeBase.prototype.drawStyle = function (c, properties) {
  * @param {*} properties 
  */
 mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
-	var bW = 14;
-	var bM = 1;
-	if (properties.shapeLayout == 'itemBadge') {
-		if (properties.ibmBadge == 'circle' || properties.ibmBadge == 'square') {
-			drawBadgeIcon(properties.badgeColor, 0, 1, bW, bW);
-		} else {
-			drawBadgeIcon(properties.badgeColor, bW / 2, 1, bW, bW);
+	if (properties.shapeLayout.startsWith('expanded') || properties.shapeLayout === 'collapsed' || properties.shapeLayout === 'itemBadge') {
+		var bW = 14;
+		var bM = 1;
+		var fontSize = 12;
+
+		let textLength = (properties.badgeText != null) ? properties.badgeText.length : 0;
+		let badgeTextOffset = (textLength > 1) ? fontSize * 0.6 * (textLength - 1) + 4 : 0;
+			
+		var offset = properties.shapeType == 'target' || properties.shapeType == 'actor' ? - bW / 2 - bM : 0;
+		if (properties.shapeLayout !== 'itemBadge') {			
+			drawBadgeIcon(properties.badgeFontColor, properties.shapeWidth + offset, - bW / 2 - bM, bW + bM * 2, bW + bM * 2, badgeTextOffset);
+			drawBadgeIcon(properties.badgeColor, properties.shapeWidth + offset, - bW / 2, bW, bW, badgeTextOffset);
+		} else {			
+			// drawBadgeIcon(properties.badgeColor, bW / 2, 1, bW, bW, badgeTextOffset);
+			drawBadgeIcon(properties.badgeColor, bW / 2, 1, bW, bW, 0);
 		}
-	} else {
-		var offset = properties.shapeType == 'target' || properties.shapeType == 'actor' ? 0 : bW / 2 + 1;
-		if (properties.ibmBadge == 'circle' || properties.ibmBadge == 'square') {
-			drawBadgeIcon(properties.badgeFontColor, properties.shapeWidth - bW - bM * 2 + offset, - bW / 2 - bM, bW + bM * 2, bW + bM * 2);
-			drawBadgeIcon(properties.badgeColor, properties.shapeWidth - bW - bM + offset, - bW / 2, bW, bW);
-		} else {
-			drawBadgeIcon(properties.badgeFontColor, properties.shapeWidth - bW / 2 - bM + offset, - bW / 2 - bM, bW + bM * 2, bW + bM * 2);
-			drawBadgeIcon(properties.badgeColor, properties.shapeWidth - bW / 2 - bM + offset, - bW / 2, bW, bW);
+
+		if (properties.badgeText != null) {
+			c.setFontSize(fontSize);
+			c.setFontColor(properties.badgeFontColor);
+			if (properties.shapeLayout !== 'itemBadge') {
+				c.text(properties.shapeWidth - badgeTextOffset / 2 + offset, - 1, 0, 14, properties.badgeText, mxConstants.ALIGN_CENTER, mxConstants.ALIGN_MIDDLE, 0, null, 0, 0, 0);
+			} 
+			// else {
+			// 	c.text((bW + badgeTextOffset) / 2, properties.shapeHeight / 2 - 1, 0, 14, properties.badgeText, mxConstants.ALIGN_CENTER, mxConstants.ALIGN_MIDDLE, 0, null, 0, 0, 0);
+			// }
 		}
 	}
 
-	function drawBadgeIcon(color, x, y, w, h) {
+	function drawBadgeIcon(color, x, y, w, h, offSet) {
 		switch (properties.ibmBadge) {
 			case 'circle':
-				c.ellipse(x, y, w, h);
+				c.begin();
+				c.moveTo(x , y);
+				c.lineTo(x - offSet, y);
+				c.arcTo(1, 1, 0, 0, 0, x - offSet, y + h);
+				c.lineTo(x, y + h);
+				c.arcTo(1, 1, 0, 0, 0, x, y);
+				c.close();
 				break;
 			case 'square':
-				c.rect(x, y, w, h);
+				c.begin();
+				c.moveTo(x, y);
+				c.lineTo(x - offSet - w / 2, y);
+				c.lineTo(x - offSet - w / 2, y + h);
+				c.lineTo(x + w / 2, y + h);
+				c.lineTo(x + w / 2, y);
+				c.close();
 				break;
 			case 'diamond':
 				c.begin();
 				c.moveTo(x, y);
-				c.lineTo(x - w / 2, y + h / 2);
+				c.lineTo(x - offSet, y);
+				c.lineTo(x - offSet - w / 2, y + h / 2);
+				c.lineTo(x - offSet, y + h);
 				c.lineTo(x, y + h);
 				c.lineTo(x + w / 2, y + h / 2);
+				c.lineTo(x, y);
 				c.close();
 				break;
 			case 'hexagon':
 				c.begin();
-				c.moveTo(x - w / 2 / 2, y);
-				c.lineTo(x - w / 2, y + h / 2);
-				c.lineTo(x - w / 2 / 2, y + h);
+				c.moveTo(x, y);
+				c.lineTo(x - w / 2 / 2 - offSet, y);
+				c.lineTo(x - w / 2 - offSet, y + h / 2);
+				c.lineTo(x - w / 2 / 2 - offSet, y + h);
 				c.lineTo(x + w / 2 / 2, y + h);
 				c.lineTo(x + w / 2, y + h / 2);
 				c.lineTo(x + w / 2 / 2, y);
@@ -425,10 +503,11 @@ mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
 				break;
 			case 'octagon':
 				c.begin();
-				c.moveTo(x - w / 2 / 2, y);
-				c.lineTo(x - w / 2, y + h / 2 / 2);
-				c.lineTo(x - w / 2, y + h / 2 / 2 + h / 2);
-				c.lineTo(x - w / 2 / 2, y + h);
+				c.moveTo(x, y);
+				c.lineTo(x - w / 2 / 2 - offSet, y);
+				c.lineTo(x - w / 2 - offSet, y + h / 2 / 2);
+				c.lineTo(x - w / 2 - offSet, y + h / 2 / 2 + h / 2);
+				c.lineTo(x - w / 2 / 2 - offSet, y + h);
 				c.lineTo(x + w / 2 / 2, y + h);
 				c.lineTo(x + w / 2, y + h / 2 / 2 + h / 2);
 				c.lineTo(x + w / 2, y + h / 2 / 2);
@@ -438,8 +517,10 @@ mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
 			case 'triangle':
 				c.begin();
 				c.moveTo(x, y);
-				c.lineTo(x - w / 2, y + h);
+				c.lineTo(x - offSet, y);
+				c.lineTo(x - w / 2 - offSet, y + h);
 				c.lineTo(x + w / 2, y + h);
+				c.lineTo(x, y);
 				c.close();
 				break;
 			default: ;
@@ -461,9 +542,10 @@ mxIBMShapeBase.prototype.drawBadge = function (c, properties) {
 mxIBMShapeBase.prototype.getNewStyles = function (cStyleStr, pStyle, cStyle) {	
 	var style = this.getBaseStyle(cStyleStr, pStyle, cStyle);
 
-	var newStyle = this.getLayoutStyles(style.cStyleStr, style.pStyle, style.cStyle);
-	newStyle = this.getLineStyles(newStyle, style.pStyle, style.cStyle);
-	newStyle = this.getColorStyles(newStyle, style.pStyle, style.cStyle);
+	var newStyle = this.getLayoutStyle(style.cStyleStr, style.pStyle, style.cStyle);
+	newStyle = this.getLineStyle(newStyle, style.pStyle, style.cStyle);
+	newStyle = this.getColorStyle(newStyle, style.pStyle, style.cStyle);
+	newStyle = this.getFontStyle(newStyle, style.pStyle, style.cStyle);
 
 	return newStyle;
 }
@@ -493,7 +575,8 @@ mxIBMShapeBase.prototype.getNewGeometryRect = function (style, rect, minSize) {
 		} else {
 			rect.height = Math.max(details.minHeight, rect.height);
 		}
-	} else {
+	} 
+	else {
 		rect.width = Math.max(details.minWidth, rect.width);
 		rect.height = details.minHeight;
 	}
@@ -522,7 +605,6 @@ mxIBMShapeBase.prototype.getLabelBounds = function (rect) {
  * @returns 
  */
 mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, shapeWidth, shapeHeight) {
-	const cst = this.cst;
 	let details = {};
 
 	// Get defined shape sizes.
@@ -569,11 +651,9 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 		details['shapeHeight'] = details.defaultHeight;
 	}
 
-	// Add shape colors.
-
 	if (shape) {
+		// Add shape colors.		
 		let colors = getColorDetails(shape, shapeType, shapeLayout);
-
 		details['lineColor'] = colors.lineColor;
 		details['fillColor'] = colors.fillColor;
 		details['fontColor'] = colors.fontColor;
@@ -582,6 +662,12 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 		details['iconColor'] = colors.iconColor;
 		details['iconAreaColor'] = colors.iconAreaColor;
 		details['styleColor'] = colors.styleColor;
+
+		// Add badge text	
+		let badgeStyle = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.BADGE, mxIBMShapeBase.prototype.cst.BADGE_DEFAULT);
+		let badgeVisible = (badgeStyle != 'none') && (shapeLayout === 'collapsed' || shapeLayout.startsWith('expanded') || shapeLayout === 'itemBadge');
+		details['badgeText'] = badgeVisible ? shape.state.cell.getAttribute('Badge-Text', null) : null;
+
 	}
 
 	return details;
@@ -589,10 +675,10 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 	// Retrieve color settings.
 	function getColorDetails (shape, shapeType, shapeLayout) {
 		// Retrieve color settings.
-		let lineColor = mxUtils.getValue(shape.state.style, cst.LINE_COLOR, cst.LINE_COLOR_DEFAULT);
-		let fillColor = mxUtils.getValue(shape.state.style, cst.FILL_COLOR, cst.FILL_COLOR_DEFAULT);
-		let fontColor = mxUtils.getValue(shape.state.style, cst.FONT_COLOR, cst.FONT_COLOR_DEFAULT);
-		let badgeColor = mxUtils.getValue(shape.state.style, cst.BADGE_COLOR, cst.BADGE_COLOR_DEFAULT);
+		let lineColor = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.LINE_COLOR, mxIBMShapeBase.prototype.cst.LINE_COLOR_DEFAULT);
+		let fillColor = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.FILL_COLOR, mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT);
+		let fontColor = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.FONT_COLOR, mxIBMShapeBase.prototype.cst.FONT_COLOR_DEFAULT);
+		let badgeColor = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.BADGE_COLOR, mxIBMShapeBase.prototype.cst.BADGE_COLOR_DEFAULT);
 
 		let badgeFontColor = fontColor;
 		let iconColor = ibmConfig.ibmColors.black;
@@ -600,22 +686,22 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 		let styleColor = lineColor;
 
 		// Set line color to black if not set otherwise use line color.
-		lineColor = (lineColor === cst.LINE_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : rgb2hex(lineColor);
+		lineColor = (lineColor === mxIBMShapeBase.prototype.cst.LINE_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : rgb2hex(lineColor);
 
 		// Set fill color to transparent if not set otherwise use fill color.
-		fillColor = (fillColor === cst.FILL_COLOR_DEFAULT) ? ibmConfig.ibmColors.none : rgb2hex(fillColor);
+		fillColor = (fillColor === mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT) ? ibmConfig.ibmColors.none : rgb2hex(fillColor);
 
 		// Set fill color to same as line color for legend color items.
 		fillColor = (shapeLayout === 'itemColor') ? lineColor : fillColor;
 
 		// Set icon area color to fill color for collapsed shapes.
-		iconAreaColor = (shapeLayout === 'collapsed' && fillColor != cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
+		iconAreaColor = (shapeLayout === 'collapsed' && fillColor != mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
 
 		// Set icon area color to fill color for expanded target shapes.
-		iconAreaColor = (shapeLayout === 'expanded' && shapeType === 'target' && fillColor != cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
+		iconAreaColor = (shapeLayout === 'expanded' && shapeType === 'target' && fillColor != mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
 
 		// Set badge color to line color if not set otherwise use badge color.
-		badgeColor = (badgeColor === cst.BADGE_COLOR_DEFAULT) ? lineColor : rgb2hex(badgeColor);
+		badgeColor = (badgeColor === mxIBMShapeBase.prototype.cst.BADGE_COLOR_DEFAULT) ? lineColor : rgb2hex(badgeColor);
 
 		// Normalize badge font color to be visible if badge color is too dark.
 		badgeFontColor = normalizeElementColor(badgeFontColor, badgeColor);
@@ -667,7 +753,13 @@ mxIBMShapeBase.prototype.getDetails = function (shape, shapeType, shapeLayout, s
 	}
 }
 
-// Get base style called by event handler to revert shape back to base for drop-in images.
+/**
+ * Get base style called by event handler to revert shape back to base for drop-in images.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
 mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {	
 	// if shape is image, change it to base shape
 	if (cStyle && cStyle.shape === 'image') {		
@@ -676,30 +768,162 @@ mxIBMShapeBase.prototype.getBaseStyle = function (cStyleStr, pStyle, cStyle) {
 		cStyle = tempStyle;
 		cStyleStr = getStylesStr(cStyle);
 	}
+	if (pStyle && pStyle.shape === 'image') {
+		pStyle = cStyle;
+	}
 
 	return {cStyleStr, pStyle, cStyle}
 };
 
-// Change icon to iconl or iconp if available when changing between logical and prescribed shapes.
-mxIBMShapeBase.prototype.changeIcon = function (shapeType) {
-	let changed = shapeType.isChanged;
-	if (!changed)
-		return;
+/**
+ * Get layout style called by event handler.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
+mxIBMShapeBase.prototype.getLayoutStyle = function (cStyleStr, pStyle, cStyle) {
+	var shapeType = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);
+	var shapeLayout = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT,mxIBMShapeBase.prototype.cst.SHAPE_TYPE_LAYOUT);
+	var hideIcon = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.HIDE_ICON, mxIBMShapeBase.prototype.cst.HIDE_ICON_DEFAULT);
+	var fillColor = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FILL_COLOR, mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT);
+	var image = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.IMAGE, mxIBMShapeBase.prototype.cst.IMAGE_DEFAULT);
 
-	let icons = flattenIcons(ibmIcons.Sidebars.Icons);
+	let primaryLabel = this.state.cell.getAttribute('Primary-Label', null);
+	let secondaryText = this.state.cell.getAttribute('Secondary-Text', null);
+	let iconName = this.state.cell.getAttribute('Icon-Name', null);
 
-	iconKey = 'icon' + shapeType.current.slice(-1);
+	// Change icon if switching between logical shape and prescribed shape.
+	let newIconName = changeIcon(shapeType, iconName);
+	if (newIconName)
+		this.state.cell.setAttribute('Icon-Name', newIconName);
 
-	iconName = this.state.cell.getAttribute('Icon-Name', null);
-	icon = icons[iconName];
+	// Change label if switching between regular shape and item shape.
+	let newShapeLabel = changeLabel(shapeLayout);
+	if (newShapeLabel)
+		this.state.cell.setAttribute('label', newShapeLabel);
 
-	if (icon[iconKey])
-		this.state.cell.setAttribute('Icon-Name', icon[iconKey]);
+	// Get properties corresponding to layout change.
+	var properties = getLayoutProperties(shapeType, shapeLayout, hideIcon, primaryLabel, secondaryText, fillColor, image);
 
-	return;
+	// Build styles object from styles string.
+	var stylesObj = getStylesObj(properties);
+
+	// Update styles string from styles object.
+	cStyleStr = getStylesStr(stylesObj, cStyleStr);
+
+	return cStyleStr;
+	
+	// Get properties corresponding to layout change.
+	// Properties are kept minimal by nulling out unused properties when changing layouts.
+	// Invalid layout changes revert to original layout.
+	// For nodes and components,
+	// 1. Regular icons default to line-colored icon area for collapsed/expanded and white fill for expanded,
+	//    and if changed to a non-default fill color will follow these scenarios when changing layouts:
+	// 	collapsed none to expanded white to collapsed none,
+	// 	collapsed white to expanded white to collapsed none,
+	// 	collapsed light to expanded light to collapsed none,
+	// 	               and expanded none to collapsed none.
+	// 2. Dropin images default to white icon area for collapsed and white for icon area and fill for expanded,
+	//    and if changed to a non-default fill color will follow these scnearios when changing layouts:
+	// 	collapsed white to expanded white to collapsed white,
+	// 	collapsed light to expanded light to collapsed light,
+	// 	               and expanded none to collapsed white.
+	function getLayoutProperties(shapeType, shapeLayout, hideIcon, primaryLabel, secondaryText, fillColor, image) 
+	{
+		const LIGHT_COLOR_NAME = ibmConfig.ibmBaseConstants.LIGHT_COLOR_NAME;
+		let properties = '';
+
+		let changed = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged || image.isChanged;
+		if (!changed)
+			return properties;
+
+		// Prevent invalid changes.
+
+		if ((shapeType.previous.startsWith('group') && shapeLayout.current === 'collapsed') ||
+			(shapeType.previous === 'actor' && shapeLayout.current.startsWith('expanded')) ||
+			(shapeType.previous === 'target' && shapeLayout.current === 'expandedStack')) {
+			properties += 'ibmLayout=' + shapeLayout.previous + ';';
+			return properties;
+		}
+
+		if (image.isChanged) {
+			if (image.current)	
+				properties += ibmConfig.ibmSystemProperties.defaultFill;
+			else if (shapeLayout.previous === 'collapsed' || (shapeLayout.previous === 'expanded' && shapeType.previous === 'target'))
+				properties += ibmConfig.ibmSystemProperties.noFill;
+			else
+				properties += ibmConfig.ibmSystemProperties.defaultFill;
+
+			return properties;
+		}
+
+
+		// Get shape-specific properties.
+
+		if (shapeLayout.current === "collapsed") {
+			// Add collapsed label properties, remove expanded stack properties, remove container properties, remove fill.
+			properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull +
+				ibmConfig.ibmSystemProperties.containerNull;
+			if (shapeLayout.previous.startsWith('expanded') && image.previous === '' &&
+					(fillColor.previous === 'default' || getColorName(fillColor.previous).indexOf(LIGHT_COLOR_NAME) !== -1))
+				properties += ibmConfig.ibmSystemProperties.noFill;
+		}
+		else if (shapeLayout.current === "expanded") {
+			if (shapeType.current === 'target') {
+				// Add expanded label properties, remove container properties, remove expanded stack properties, remove fill.
+				if (hideIcon.current === '1')
+					properties += ibmConfig.ibmSystemProperties.expandedTargetLabelNoIcon;
+				else
+					properties += ibmConfig.ibmSystemProperties.expandedTargetLabel;
+
+				properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull;
+			}
+			else {
+				// Add expanded label properties, add container properties, remove expanded stack properties, add default fill.
+				properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container +
+					ibmConfig.ibmSystemProperties.expandedStackNull;
+				if (shapeLayout.previous === 'collapsed' && image.previous === '' && fillColor.previous === 'none')
+					properties += ibmConfig.ibmSystemProperties.defaultFill;
+				properties = properties.replace(/spacingTop=0;/, getSpacingTopProperty(primaryLabel, secondaryText));
+			}
+		}
+		else if (shapeLayout.current === "expandedStack") {
+			// Add expanded label properties, expanded stack properties, add container properties, add default fill.
+			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack +
+				ibmConfig.ibmSystemProperties.container;
+			if (shapeLayout.previous === 'collapsed' && image.previous === '' && fillColor.previous === 'none')
+				properties += ibmConfig.ibmSystemProperties.defaultFill;
+			properties = properties.replace(/spacingTop=0;/, getSpacingTopProperty(primaryLabel, secondaryText));
+		}
+		else if (shapeLayout.current.startsWith('item'))
+			// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
+			properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull +
+				ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
+		else
+			// Remove expanded stack properties, remove container properties, remove fill.
+			properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull +
+				ibmConfig.ibmSystemProperties.noFill;
+
+		return properties;
+	}
+
+	// Change icon to iconl or iconp if available when switching between logical shape and prescribed shape.
+	function changeIcon(shapeType, iconName)
+	{
+		if (!shapeType.isChanged) return null;
+		ibmIcons = ibmIcons || flattenIcons();
+		iconKey = 'icon' + shapeType.current.slice(-1);
+		let icon = ibmIcons[iconName];
+		return icon[iconKey];
+	}
 
 	// Remove categories leaving only icons.
-	function flattenIcons(icons) {
+	// Delayed loading of icons until needed and loaded only once.
+	function flattenIcons()
+	{
+		let sidebar = JSON.parse(mxUtils.load(ibmURL + 'js/diagramly/sidebar/ibm/IBMIcons.json').getText());
+		let icons = sidebar.Sidebars.Icons;
 		let flatIcons = {};
 		for (let categoryKey in icons) {
 			let category = icons[categoryKey];
@@ -708,117 +932,53 @@ mxIBMShapeBase.prototype.changeIcon = function (shapeType) {
 		}
 		return flatIcons;
 	}
-}
 
-// Get properties corresponding to layout change.
-// Properties are kept minimal by nulling out unused properties when changing layouts.
-// Invalid layout changes revert to original layout.
-mxIBMShapeBase.prototype.getLayoutProperties = function (shapeType, shapeLayout, hideIcon) {
-	let properties = '';
-
-	let changed = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged;
-	if (!changed)
-		return properties;
-
-	// Prevent invalid changes.
-
-	if ((shapeType.previous.startsWith('group') && shapeLayout.current === 'collapsed') ||
-		(shapeType.previous === 'actor' && shapeLayout.current.startsWith('expanded')) ||
-		(shapeType.previous === 'target' && shapeLayout.current === 'expandedStack')) {
-		properties += 'ibmLayout=' + shapeLayout.previous + ';';
-		return properties;
-	}
-
-	// Get shape-specific properties.
-
-	if (shapeLayout.current === "collapsed")
-		// Add collapsed label properties, remove expanded stack properties, remove container properties, remove fill.
-		properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull +
-			ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
-	else if (shapeLayout.current === "expanded") {
-		if (shapeType.current === 'target') {
-			// Add expanded label properties, remove container properties, remove expanded stack properties, remove fill.
-			if (hideIcon.current === '1')
-				properties += ibmConfig.ibmSystemProperties.expandedTargetLabelNoIcon;
-			else
-				properties += ibmConfig.ibmSystemProperties.expandedTargetLabel;
-
-			properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull +
-				ibmConfig.ibmSystemProperties.noFill;
+	// Change label if switching between regular shape and item shape.
+	function changeLabel(shapeLayout)
+	{
+		const font = ibmConfig.ibmFonts[ibmLanguage];
+		let label = null;
+		if (!shapeLayout.isChanged) return label;
+		if (shapeLayout.current.startsWith('item') && 
+		    !shapeLayout.previous.startsWith('item')) {
+			label = ibmConfig.ibmFonts.itemLabel;
+			label = label.replace(/REGULAR/g, font.regular);
 		}
-		else
-			// Add expanded label properties, add container properties, remove expanded stack properties, add default fill.
-			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container +
-				ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
+		else if (shapeLayout.previous.startsWith('item') && 
+		         !shapeLayout.current.startsWith('item')) {
+			label = ibmConfig.ibmFonts.shapeLabel;
+			label = label.replace(/REGULAR/g, font.regular);
+			label = label.replace(/SEMIBOLD/g, font.semibold);
+		}
+		return label;
 	}
-	else if (shapeLayout.current === "expandedStack")
-		// Add expanded label properties, expanded stack properties, add container properties, add default fill.
-		properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack +
-			ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
-	else if (shapeLayout.current.startsWith('item'))
-		// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
-		properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull +
-			ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
-	else
-		// Remove expanded stack properties, remove container properties, remove fill.
-		properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull +
-			ibmConfig.ibmSystemProperties.noFill;
 
-	return properties;
-}
+	// Calculate spacingTop from number of lines in primary label and secondary text.
+	function getSpacingTopProperty(primaryLabel, secondaryText)
+	{
+		let lines = (primaryLabel ? 1 : 0) + (secondaryText ? 1 : 0)
 
-// Get layout styles called by event handler.
-mxIBMShapeBase.prototype.getLayoutStyles = function (cStyleStr, pStyle, cStyle) {
-	var shapeType = getStyleValues(pStyle, cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
-	var shapeLayout = getStyleValues(pStyle, cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_TYPE_LAYOUT);
-	var hideIcon = getStyleValues(pStyle, cStyle, this.cst.HIDE_ICON, this.cst.HIDE_ICON_DEFAULT);
+		lines += (primaryLabel.match(/\r|\n|<br>/gi) || []).length;
+		lines += (secondaryText.match(/\r|\n|<br>/gi) || []).length;
 
-	// Change icon if changing between logical and prescribed.
-	this.changeIcon(shapeType);
-
-	// Get properties corresponding to layout change.
-	var properties = this.getLayoutProperties(shapeType, shapeLayout, hideIcon);
-
-	// Build styles object from styles string.
-	var stylesObj = getStylesObj(properties);
-
-	// Update styles string from styles object.
-	cStyleStr = getStylesStr(stylesObj, cStyleStr);
-
-	return cStyleStr;
+		return 'spacingTop=' + (lines > 2 ? (lines * (lines + (lines-2))) : 0) + ';';
+	}
 };
 
-// Get properties for line style change ensuring only one of dashed, double, or strikethrough is set at time,
-// for example if user previously selected dashed and later selects double then dashed is auto-deselected.
-mxIBMShapeBase.prototype.getLineProperties = function (styleDashed, styleDouble, styleStrikethrough) {
-	let properties = '';
-
-	let changed = styleDashed.isChanged || styleDouble.isChanged || styleStrikethrough.isChanged;
-	if (!changed)
-		return properties;
-
-	// Set properties to the desired change for dashed, double, or strikethrough.
-
-	if (styleDashed.isChanged)
-		properties = (styleDashed.current === '1') ? ibmConfig.ibmSystemProperties.styleDashedOn : ibmConfig.ibmSystemProperties.styleDashedOff;
-
-	if (styleDouble.isChanged)
-		properties = (styleDouble.current === '1') ? ibmConfig.ibmSystemProperties.styleDoubleOn : ibmConfig.ibmSystemProperties.styleDoubleOff;
-
-	if (styleStrikethrough.isChanged)
-		properties = (styleStrikethrough.current === '1') ? ibmConfig.ibmSystemProperties.styleStrikethroughOn : ibmConfig.ibmSystemProperties.styleStrikethroughOff;
-
-	return properties;
-}
-
-// Get line styles (dashed, double, strikethrough) called by event handler.
-mxIBMShapeBase.prototype.getLineStyles = function (cStyleStr, pStyle, cStyle) {
-	var styleDashed = getStyleValues(pStyle, cStyle, this.cst.STYLE_DASHED, this.cst.STYLE_DASHED_DEFAULT);
-	var styleDouble = getStyleValues(pStyle, cStyle, this.cst.STYLE_DOUBLE, this.cst.STYLE_DOUBLE_DEFAULT);
-	var styleStrikethrough = getStyleValues(pStyle, cStyle, this.cst.STYLE_STRIKETHROUGH, this.cst.STYLE_STRIKETHROUGH_DEFAULT);
+/**
+ * Get line style (dashed, double, strikethrough) called by event handler.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
+mxIBMShapeBase.prototype.getLineStyle = function (cStyleStr, pStyle, cStyle) {
+	var styleDashed = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.STYLE_DASHED, mxIBMShapeBase.prototype.cst.STYLE_DASHED_DEFAULT);
+	var styleDouble = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.STYLE_DOUBLE, mxIBMShapeBase.prototype.cst.STYLE_DOUBLE_DEFAULT);
+	var styleStrikethrough = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.STYLE_STRIKETHROUGH, mxIBMShapeBase.prototype.cst.STYLE_STRIKETHROUGH_DEFAULT);
 
 	// Get properties corresponding to line style change.
-	var properties = this.getLineProperties(styleDashed, styleDouble, styleStrikethrough);
+	var properties = getLineProperties(styleDashed, styleDouble, styleStrikethrough);
 
 	// Build styles object from styles string.
 	var stylesObj = getStylesObj(properties);
@@ -827,115 +987,51 @@ mxIBMShapeBase.prototype.getLineStyles = function (cStyleStr, pStyle, cStyle) {
 	cStyleStr = getStylesStr(stylesObj, cStyleStr);
 
 	return cStyleStr;
-}
 
-// Get properties for color change ensuring proper use of IBM Color Palette.
-mxIBMShapeBase.prototype.getColorProperties = function (shapeType, shapeLayout, lineColor, fillColor, fontColor, badgeColor, container) {
-	let properties = '';
+	// Get properties for line style change ensuring only one of dashed, double, or strikethrough is set at time,
+	// for example if user previously selected dashed and later selects double then dashed is auto-deselected.
+	function getLineProperties(styleDashed, styleDouble, styleStrikethrough) 
+	{
+		let properties = '';
 
-	let changed = lineColor.isChanged || fillColor.isChanged || fontColor.isChanged || badgeColor.isChanged || shapeLayout.isChanged;
-	if (!changed)
+		let changed = styleDashed.isChanged || styleDouble.isChanged || styleStrikethrough.isChanged;
+		if (!changed)
+			return properties;
+
+		// Set properties to the desired change for dashed, double, or strikethrough.
+
+		if (styleDashed.isChanged)
+			properties = (styleDashed.current === '1') ? ibmConfig.ibmSystemProperties.styleDashedOn : ibmConfig.ibmSystemProperties.styleDashedOff;
+
+		if (styleDouble.isChanged)
+			properties = (styleDouble.current === '1') ? ibmConfig.ibmSystemProperties.styleDoubleOn : ibmConfig.ibmSystemProperties.styleDoubleOff;
+
+		if (styleStrikethrough.isChanged)
+			properties = (styleStrikethrough.current === '1') ? ibmConfig.ibmSystemProperties.styleStrikethroughOn : ibmConfig.ibmSystemProperties.styleStrikethroughOff;
+
 		return properties;
-
-	let LINE_COLOR_NAME = ibmConfig.ibmBaseConstants.LINE_COLOR_NAME;
-	let FILL_COLOR_NAME = ibmConfig.ibmBaseConstants.FILL_COLOR_NAME;
-	let FONT_COLOR_NAME = ibmConfig.ibmBaseConstants.FONT_COLOR_NAME;
-	let LIGHT_COLOR_NAME = ibmConfig.ibmBaseConstants.LIGHT_COLOR_NAME;
-
-	let colorReset = false;
-
-	let lineColorValue = lineColor.isChanged ? lineColor.current : lineColor.previous;
-	let lineColorName = getColorName(lineColorValue);
-	let lineColorSegments = lineColorName.split(' ');
-	let lineColorFamily = lineColorSegments[1] === "Gray" ? lineColorSegments[0] + lineColorSegments[1] : lineColorSegments[0];
-
-	let fillColorValue = fillColor.isChanged ? fillColor.current : fillColor.previous;
-	let fillColorName = getColorName(fillColorValue);
-	let fillColorSegments = fillColorName.split(' ');
-	let fillColorFamily = fillColorSegments[1] === "Gray" ? fillColorSegments[0] + fillColorSegments[1] : fillColorSegments[0];
-
-	// Check that line color is valid and fill color is valid.
-	let validNames = lineColorName.indexOf(LINE_COLOR_NAME) != -1 && fillColorName.indexOf(FILL_COLOR_NAME) != -1;
-
-	// Check that line color and fill color are from the same family or fill color is transparent or white.
-	let validFill = validNames && (fillColorName.startsWith('Transparent') ||
-		fillColorName.startsWith('White') ||
-		fillColorFamily == lineColorFamily);
-
-	// If not valid line color and fill color combination then reset.
-	if (!validNames || !validFill) {
-		colorReset = true;
-
-		if (lineColor.isChanged)
-			properties += 'strokeColor=' + lineColor.previous + ';';
-
-		if (fillColor.isChanged)
-			properties += 'fillColor=' + fillColor.previous + ';';
-
-		if (fontColor.isChanged)
-			properties += 'fontColor=' + fontColor.previous + ';';
-	}
-
-	// If not valid font color then reset.
-	if (fontColor.isChanged && !colorReset) {
-		let fontColorName = getColorName(fontColor.current);
-
-		if (!fontColorName || fontColorName.indexOf(FONT_COLOR_NAME) === -1)
-			properties += 'fontColor=' + fontColor.previous + ';';
-	}
-
-	// If not valid badge color then reset (future use).
-	if (badgeColor.isChanged) {
-		let badgeColorName = getColorName(badgeColor.current);
-
-		if (!badgeColorName || badgeColorName.indexOf(LINE_COLOR_NAME) === -1)
-			properties += 'ibmBadgeColor=' + badgeColor.previous + ';';
-	}
-
-	// If shape layout changed then normalize font color for target system shape.
-	if (shapeLayout.isChanged) {
-		let shapeTypeValue = shapeType.isChanged ? shapeType.current : shapeType.previous;
-		let shapeLayoutValue = shapeLayout.current;
-
-		if (shapeTypeValue === 'target') {
-			if (shapeLayoutValue === 'collapsed')
-				properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
-			else if (shapeLayoutValue === 'expanded') {
-
-				let fillColorName = getColorName(fillColorValue);
-
-				if (!fillColorName || fillColorName.indexOf(LIGHT_COLOR_NAME) === -1)
-					properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
-				else
-					properties += 'fontColor=' + ibmConfig.ibmColors.white + ';';
-			}
-		}
-	}
-
-	return properties;
-
-	// Get name of color from rbg/hex value.
-	function getColorName(color) {
-		var colorHex = rgb2hex(color);
-		var colorUpper = colorHex.toUpperCase();
-		var colorName = ibmConfig.colorNames[colorUpper === "NONE" ? "NONE" : colorUpper.substring(1)];
-		return colorName;
 	}
 }
 
-// Get color styles called by event handler.
-mxIBMShapeBase.prototype.getColorStyles = function (cStyleStr, pStyle, cStyle) {
-	var shapeType = getStyleValues(pStyle, cStyle, this.cst.SHAPE_TYPE, this.cst.SHAPE_TYPE_DEFAULT);
-	var shapeLayout = getStyleValues(pStyle, cStyle, this.cst.SHAPE_LAYOUT, this.cst.SHAPE_TYPE_LAYOUT);
-	var container = getStyleValues(pStyle, cStyle, this.cst.CONTAINER, this.cst.CONTAINER_DEFAULT);
+/**
+ * Get color style called by event handler.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
+mxIBMShapeBase.prototype.getColorStyle = function (cStyleStr, pStyle, cStyle) {
+	var shapeType = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);
+	var shapeLayout = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_LAYOUT);
+	var container = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.CONTAINER, mxIBMShapeBase.prototype.cst.CONTAINER_DEFAULT);
 
-	var lineColor = getStyleValues(pStyle, cStyle, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
-	var fillColor = getStyleValues(pStyle, cStyle, this.cst.FILL_COLOR, this.cst.FILL_COLOR_DEFAULT);
-	var fontColor = getStyleValues(pStyle, cStyle, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
-	var badgeColor = getStyleValues(pStyle, cStyle, this.cst.BADGE_COLOR, this.cst.BADGE_COLOR_DEFAULT);
+	var lineColor = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.LINE_COLOR, mxIBMShapeBase.prototype.cst.LINE_COLOR_DEFAULT);
+	var fillColor = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FILL_COLOR, mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT);
+	var fontColor = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FONT_COLOR, mxIBMShapeBase.prototype.cst.FONT_COLOR_DEFAULT);
+	var badgeColor = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.BADGE_COLOR, mxIBMShapeBase.prototype.cst.BADGE_COLOR_DEFAULT);
 
 	// Get properties corresponding to color change.
-	var properties = this.getColorProperties(shapeType, shapeLayout, lineColor, fillColor, fontColor, badgeColor, container);
+	var properties = getColorProperties(shapeType, shapeLayout, lineColor, fillColor, fontColor, badgeColor, container);
 
 	// Build styles object from styles string.
 	var stylesObj = getStylesObj(properties);
@@ -944,6 +1040,178 @@ mxIBMShapeBase.prototype.getColorStyles = function (cStyleStr, pStyle, cStyle) {
 	cStyleStr = getStylesStr(stylesObj, cStyleStr);
 
 	return cStyleStr;
+
+	// Get properties for color change ensuring proper use of IBM Color Palette.
+	function getColorProperties(shapeType, shapeLayout, lineColor, fillColor, fontColor, badgeColor, container) 
+	{
+		const LINE_COLOR_NAME = ibmConfig.ibmBaseConstants.LINE_COLOR_NAME;
+		const FILL_COLOR_NAME = ibmConfig.ibmBaseConstants.FILL_COLOR_NAME;
+		const FONT_COLOR_NAME = ibmConfig.ibmBaseConstants.FONT_COLOR_NAME;
+		const LIGHT_COLOR_NAME = ibmConfig.ibmBaseConstants.LIGHT_COLOR_NAME;
+
+		let properties = '';
+
+		let changed = lineColor.isChanged || fillColor.isChanged || fontColor.isChanged || badgeColor.isChanged || shapeLayout.isChanged;
+		if (!changed)
+			return properties;
+
+		let lineColorValue = lineColor.isChanged ? lineColor.current : lineColor.previous;
+		let fillColorValue = fillColor.isChanged ? fillColor.current : fillColor.previous;
+
+		if (lineColor.isChanged && !fillColor.isChanged)
+		{
+			let lineColorName = getColorName(lineColorValue);
+
+			let validName = lineColorName.indexOf(LINE_COLOR_NAME) != -1;
+
+			if (validName) {
+				if (shapeLayout.current === "collapsed" || (shapeLayout.current === "expanded" && shapeType.current === 'target')) {
+					fillColorValue = "none";
+					properties += ibmConfig.ibmSystemProperties.noFill;
+					properties += 'fontColor=' + ibmConfig.ibmColors.white + ';';
+				}
+				else {
+					fillColorValue = "default";
+					properties += ibmConfig.ibmSystemProperties.defaultFill;
+					properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
+				}
+			}
+			else
+				properties += 'strokeColor=' + lineColor.previous + ';';
+
+		}
+		else {
+			let lineColorName = getColorName(lineColorValue);
+			let lineColorSegments = lineColorName.split(' ');
+			let lineColorFamily = lineColorSegments[1] === "Gray" ? lineColorSegments[0] + lineColorSegments[1] : lineColorSegments[0];
+
+			let fillColorName = getColorName(fillColorValue);
+			let fillColorSegments = fillColorName.split(' ');
+			let fillColorFamily = fillColorSegments[1] === "Gray" ? fillColorSegments[0] + fillColorSegments[1] : fillColorSegments[0];
+
+			// Check that line color is valid and fill color is valid.
+			let validNames = lineColorName.indexOf(LINE_COLOR_NAME) != -1 && fillColorName.indexOf(FILL_COLOR_NAME) != -1;
+
+			// Check that line color and fill color are from same family, or fill color is transparent or white, or black line with gray fill.
+			let validFill = validNames && 
+					(fillColorName.startsWith('Transparent') || fillColorName.startsWith('White') || 
+					 fillColorFamily == lineColorFamily || (lineColorFamily === 'Black' && fillColorFamily.indexOf('Gray') !== -1));
+
+			let colorReset = false;
+
+			// If not valid line color and fill color combination then reset.
+			if (!validNames || !validFill) {
+				colorReset = true;
+
+				if (lineColor.isChanged)
+					properties += 'strokeColor=' + lineColor.previous + ';';
+
+				if (fillColor.isChanged)
+					properties += 'fillColor=' + fillColor.previous + ';';
+
+				if (fontColor.isChanged)
+					properties += 'fontColor=' + fontColor.previous + ';';
+			}
+
+			// If not valid font color then reset.
+			if (fontColor.isChanged && !colorReset) {
+				let fontColorName = getColorName(fontColor.current);
+
+				if (!fontColorName || fontColorName.indexOf(FONT_COLOR_NAME) === -1)
+					properties += 'fontColor=' + fontColor.previous + ';';
+			}
+		}
+
+		// If not valid badge color then reset (future use).
+		if (badgeColor.isChanged) {
+			let badgeColorName = getColorName(badgeColor.current);
+
+			if (!badgeColorName || badgeColorName.indexOf(LINE_COLOR_NAME) === -1)
+				properties += 'ibmBadgeColor=' + badgeColor.previous + ';';
+		}
+
+		// If shape layout changed then normalize font color for target system shape.
+		if (shapeLayout.isChanged || fillColor.isChanged) {
+			let shapeTypeValue = shapeType.isChanged ? shapeType.current : shapeType.previous;
+			let shapeLayoutValue = shapeLayout.current;
+
+			if (shapeTypeValue === 'target') {
+				if (shapeLayoutValue === 'collapsed')
+					properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
+				else if (shapeLayoutValue === 'expanded') {
+					let fillColorName = getColorName(fillColorValue);
+
+					if (!fillColorName || fillColorName.indexOf(LIGHT_COLOR_NAME) === -1 || fillColorName.indexOf('Transparent') !== -1)
+						properties += 'fontColor=' + ibmConfig.ibmColors.white + ';';
+					else
+						properties += 'fontColor=' + ibmConfig.ibmColors.black + ';';
+				}
+			}
+		}
+
+		return properties;
+	}
+}
+
+/**
+ * Get font style called by event handler.
+ * @param {*} cStyleStr
+ * @param {*} pStyle
+ * @param {*} cStyle
+ * @returns 
+ */
+mxIBMShapeBase.prototype.getFontStyle = function (cStyleStr, pStyle, cStyle) {
+	var fontFamily = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FONT_FAMILY, mxIBMShapeBase.prototype.cst.FONT_FAMILY_DEFAULT);
+	var fontStyle = getStyleValues(pStyle, cStyle, mxIBMShapeBase.prototype.cst.FONT_STYLE, mxIBMShapeBase.prototype.cst.FONT_STYLE_DEFAULT);
+
+	// Get property corresponding to font change.
+	var properties = getFontProperties(fontFamily, fontStyle);
+
+	// Build styles object from styles string.
+	var stylesObj = getStylesObj(properties);
+
+	// Update styles string from styles object.
+	cStyleStr = getStylesStr(stylesObj, cStyleStr);
+
+	return cStyleStr;
+
+	// Get properties for font change ensuring proper use of IBM Plex Fonts.
+	function getFontProperties(fontFamily, fontStyle)
+	{
+		let properties = '';
+		let font = ibmConfig.ibmFonts[ibmLanguage];
+		let family = fontFamily.isChanged ? fontFamily.current : fontFamily.previous;
+
+		if (fontFamily.isChanged && family.startsWith('IBM Plex Sans'))
+		{
+			// Handle the case where plex font family is updated directly.
+			switch (fontFamily.current) {
+				case font.regular: properties += "fontStyle=0;"; break; 
+				case font.semibold: properties += "fontStyle=1;"; break; 
+				case font.italic: properties += "fontStyle=2;"; break; 
+				case font.semibolditalic: properties += "fontStyle=3;"; break; 
+				default: break;
+			}
+		}
+
+		if (fontStyle.isChanged && family.startsWith('IBM Plex Sans'))
+		{
+			// Get plex font family corresonding to user language.
+			switch (fontStyle.current) {
+				case '0': properties += "fontFamily=" + font.regular + ';'; break;  // Regular
+				case '1':
+				case '5': properties += "fontFamily=" + font.semibold + ';'; break;  // 1=Bold, 5=Bold+Underline
+				case '2': 
+				case '6': properties += "fontFamily=" + font.italic + ';'; break;  // 2=Regular+Italic, 6=Regular+Italic+Underline
+				case '3': 
+				case '7': properties += "fontFamily=" + font.semibolditalic + ';'; break;  // 3=Bold+Italic, 7=Bold+Italic+Underline
+				case '4': break;  // Underline
+				default: properties += "fontFamily=" + font.regular + ';';  // Regular
+			}
+		}
+
+		return properties;
+	}
 }
 
 // https://jgraph.github.io/mxgraph/docs/js-api/files/handler/mxVertexHandler-js.html#mxVertexHandler.union
@@ -1158,27 +1426,17 @@ mxIBMShapeUnit.prototype.customProperties = ibmConfig.ibmUnitProperties;
 mxIBMShapeUnit.prototype.paintVertexShape = function (c, x, y, w, h) {
 	var properties = this.getProperties();
 	// console.log("mxIBMShapeUnit.prototype.paintVertexShape", properties);
-	var textStr = "";
-	switch (properties.shapeType) {
-		case "unite": textStr = "E"; break;
-		case "uniti": textStr = "I"; break;
-		case "unitp": textStr = "P"; break;
-		case "unittd": textStr = "TD"; break;
-		case "unitte": textStr = "TE"; break;
-		case "unitti": textStr = "TI"; break;
-		case "unittp": textStr = "TP"; break;
-		case "unitd": textStr = "D"; break;
-		default: textStr = "D";
-	}
+	
 	c.translate(x, y);
-	// background
-	c.rect(0, 0, w, h);
+
+	// draw container
+	c.setFillColor(properties.fillColor);
 	c.setStrokeColor('none');
-	c.setFillColor('none');
-	c.setFontColor(properties.fontColor);
+	c.rect(0, 0, w, h);
 	c.fillAndStroke();
-	// text
-	c.text(properties.iconSize / 2, properties.iconSize / 2, w, h, textStr, 'center', 'middle', 0, 0, 0, 0, 0, 0);
+
+	// draw stencil
+	this.drawStencil(c, properties);
 }
 
 mxIBMShapeUnit.prototype.getProperties = function () {
@@ -1189,6 +1447,35 @@ mxIBMShapeUnit.prototype.getProperties = function () {
 	properties.fontColor = mxUtils.getValue(this.state.style, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
 	// properties.strokeColor = mxUtils.getValue(this.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
 	return properties;
+}
+
+/**
+ * Draw stencil
+ * @param {*} c 
+ * @param {*} properties 
+ */
+ mxIBMShapeUnit.prototype.drawStencil = function (c, properties) {
+	var prIcon = "";
+	switch (properties.shapeType) {
+		case "unite": prIcon = "execution"; break;
+		case "uniti": prIcon = "installation"; break;
+		case "unitp": prIcon = "presentation"; break;
+		case "unittd": prIcon = "technical--data"; break;
+		case "unitte": prIcon = "technical--execution"; break;
+		case "unitti": prIcon = "technical--installation"; break;
+		case "unittp": prIcon = "technical--presentation"; break;
+		case "unitd": prIcon = "data"; break;
+		default: prIcon = "data";
+	}
+	var prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.deployment-unit--' + prIcon);
+	if (prStencil == null) {
+		prStencil = mxStencilRegistry.getStencil('mxgraph.ibm.undefined');
+	}
+	c.setFillColor(properties.fontColor);
+	c.setStrokeColor('none');
+	c.setDashed(false);
+	c.strokewidth = 1;
+	prStencil.drawShape(c, this, properties.iconAlign, properties.iconAlign, properties.iconSize, properties.iconSize);	
 }
 
 mxIBMShapeUnit.prototype.getLabelBounds = function (rect) {
@@ -1242,6 +1529,15 @@ function getStyleValues (pStyle, cStyle, key, keyDefault) {
 	var current = mxUtils.getValue(cStyle, key, keyDefault);
 	var previous = mxUtils.getValue(pStyle, key, keyDefault);
 	return { current, previous, isChanged: current !== previous };
+}
+
+// Get name of color from rbg/hex value.
+function getColorName(color)
+{
+	var colorHex = rgb2hex(color);
+	var colorUpper = colorHex.toUpperCase();
+	var colorName = ibmConfig.colorNames[colorUpper === "NONE" ? "NONE" : colorUpper.substring(1)];
+	return colorName;
 }
 
 // Convert RGB values to hex values.

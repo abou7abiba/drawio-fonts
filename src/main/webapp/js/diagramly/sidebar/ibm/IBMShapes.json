@@ -35,7 +35,7 @@
 	"Technical Installation": {"format": "$UNIT_TI", "$UNIT_DEFAULT_PROPERTIES": null},
 	"Technical Presentation": {"format": "$UNIT_TP", "$UNIT_DEFAULT_PROPERTIES": null}
       },
-      
+
       "Legends": {
  	"Horizontal Legend": {"format": "$LEGEND_HORIZONTAL", "$LEGEND_DEFAULT_PROPERTIES": null},
  	"Vertical Legend": {"format": "$LEGEND_VERTICAL", "$LEGEND_DEFAULT_PROPERTIES": null},
